@@ -1,0 +1,9 @@
+1. Generate the code by executing the main_motor.py script.
+2. Compile the generated code by typing make
+3. Execute the compiled program
+
+For example, in a terminal type:
+python main_motor.py
+make
+./motor
+

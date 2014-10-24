@@ -1,0 +1,25 @@
+Matlab Example
+--------------
+
+1. Execute the matlab m file main_motor.m
+
+For example, in a matlab console switch to this directory and type:
+main_motor
+
+Simulink Example
+----------------
+
+The example system "simulink_example.mdl" is included with library and located
+in folder "examples/ltidt/matlab_interface". It shows the sample use of
+controller. To run the example follow the next steps:
+
+1. Change the current MATLAB folder to "examples/ltidt/matlab_interface".
+2. Type "open_simulink_example" in the MATLAB console.
+3. Press "Build" button in the block properties window which will appear on the
+screen.
+4. Run the simulation.
+
+The example includes the functionality of solving the control problem and
+prediction of the next state of the plant. The model can operate using
+closed-loop and open-loop mode. Also the model shows how to check the speed of
+execution on device.

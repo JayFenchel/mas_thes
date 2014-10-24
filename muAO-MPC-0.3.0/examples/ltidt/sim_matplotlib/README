@@ -1,0 +1,5 @@
+This example shows how to perform a simple simulation
+using muaompc and (optionally) plot the results.
+1. An optional preparation step is to install matplotlib (matplolib.org)
+2. Execute the python script main_aircraft.py
+

@@ -1,0 +1,15 @@
+1. Download qpOASES (http://www.kuleuven.be/optec/software/qpOASES) and
+install it. 
+2. Copy this folder into the qpOASES directory, and change to that folder.
+3. Execute the python script main_aircraft.py
+4. compile the code by typing make
+5. run the compiled code 
+
+For example, assuming the qpOASES folder is called qpOASES-3.0beta, 
+type in a terminal:
+cp -r examples/ltidt/solver_qpOASES/ qpOASES-3.0beta
+cd qpOASES-3.0beta/solver_qpOASES
+python main_aircraft.py
+make
+./main_aircraft
+

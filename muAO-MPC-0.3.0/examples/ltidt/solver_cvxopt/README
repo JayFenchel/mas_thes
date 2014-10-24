@@ -1,0 +1,5 @@
+This example shows how to use a differente QP solver
+together with muaompc.
+1. A preparation step is to install CVXOPT (cvxopt.org)
+2. Execute the python script main_aircraft.py
+
