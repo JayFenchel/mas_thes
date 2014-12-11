@@ -28,24 +28,31 @@ def function_parameter():
 
 
 G, c, A, b = function_parameter()
+m = np.shape(A)[0]
 #Startwerte für x(2), y(3), lambda(3)
+#Compute (x0, y0, lambda_0) with (y0,lambda_0) >0
 x0 = np.matrix([0.5, 0.5]).T
-y0 = [1., 1., 0.]
-Y0 = np.diag(y0)
-y0 = np.matrix(y0).T
-lambda0 = [1., 1., 1.]
-Lambda0 = np.diag(lambda0)
-lambda0 = np.matrix(lambda0).T
+y0 = np.matrix([1., 1., 0.]).T
+lambda_0 = np.matrix([1., 1., 1.]).T
 
+#zum besseren Anwenden des Algorithmus
+xk = x0
+yk = y0
+lambda_k = lambda_0
 
-x = x0
-y = y0
-lambda_ = lambda0
-Y = Y0
-Lambda = Lambda0
-#alpha  = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-for i in range(0, 10):
-    my=y.T*lambda_/3.
+for k in range(0, 10):
+    
+    #Set (x, y, lambda_) = ((xk, yk, lambda_k))
+    x, y, lambda_ = xk, yk, lambda_k
+    
+    #Calculate my = y.T*lambda_/m
+    my = y.T*lambda_/m
+    
+    #Solve (...) with sigma = 0 for (delta_x_aff, delta_y_aff, delta_lambda__aff)
+    #
+    #
+    #
+    #...........................
     
     V = np.hstack([np.vstack([G, A, np.zeros_like(A)]),
                    np.vstack([np.zeros_like(A.T), -np.matrix(np.eye(3)), Lambda]),
@@ -83,3 +90,7 @@ for i in range(0, 10):
 print(delta)
 print(iter_)
 input()
+
+def matrix_diag(a):
+    
+    return np.diag([a.flat[0],a.flat[1],a.flat[2]])
