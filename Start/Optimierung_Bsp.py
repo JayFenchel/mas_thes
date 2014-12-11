@@ -44,7 +44,7 @@ lambda_ = lambda0
 Y = Y0
 Lambda = Lambda0
 #alpha  = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-for i in range(0, 20):
+for i in range(0, 10):
     my=y.T*lambda_/3.
     
     V = np.hstack([np.vstack([G, A, np.zeros_like(A)]),
@@ -60,19 +60,20 @@ for i in range(0, 20):
     
     #und (x+, y+, lambda+) = (x, y, lambda) + delta(x, y, lambda)
     
-    alpha = 0.5
+    alpha = 0.9
     
     x += alpha*delta[0:2]
     y += alpha*delta[2:5]
     lambda_ += alpha*delta[5:8]
     
-    
-    while np.vstack([y[0:2],lambda_]).min() <= 0:
-        alpha *= 0.5
-        x += alpha*delta[0:2]
-        y += alpha*delta[2:5]
-        lambda_ += alpha*delta[5:8]
-        
+    print(np.vstack([y[0:2],lambda_]).min())
+#    while np.vstack([y[0:2],lambda_]).min() <= 0:
+#        print(np.vstack([y[0:2],lambda_]).min())
+#        alpha *= 0.9
+#        x -= alpha*delta[0:2]
+#        y -= alpha*delta[2:5]
+#        lambda_ -= alpha*delta[5:8]
+#        
     Y = np.diag([y.flat[0],y.flat[1],y.flat[2]])
     Lambda = np.diag([lambda_.flat[0],lambda_.flat[1],lambda_.flat[2]])
     print(alpha)
