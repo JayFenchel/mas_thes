@@ -38,7 +38,7 @@ class GS:
                     -(G*x - A.T*lambda_ + c),
                     -(A*x - y - b),
                     -Lambda*Y*np.matrix([1., 1., 0. ]).T 
-                    + sigma*my.flat[0]*np.matrix([1., 1., 1. ]).T])
+                    + sigma*my.flat[0]*np.matrix([1., 1., 0. ]).T])
                            
         if self.gleichung == 2:
             delta_aff_Y = matrix_diag(delta_aff[2:5])
@@ -49,7 +49,7 @@ class GS:
                     -(A*x - y - b),
                     -Lambda*Y*np.matrix([1., 1., 0. ]).T 
                         - delta_aff_Lambda*delta_aff_Y*np.matrix([1., 1., 0. ]).T 
-                        + sigma.flat[0]*my.flat[0]*np.matrix([1., 1., 1. ]).T])
+                        + sigma.flat[0]*my.flat[0]*np.matrix([1., 1., 0. ]).T])
         
         return np.linalg.solve(V, H)    # lin GS lösen
 
@@ -122,9 +122,9 @@ for k in range(0, 10):
     
     # Set (x+, y+, lambda+) = (x, y, lambda) + alpha_dach
     # * delta(x, y, lambda)    
-    xk = x + alpha_dach*delta_aff[0:2]
-    yk = y + alpha_dach*delta_aff[2:5]
-    lambda_k = lambda_ + alpha_dach*delta_aff[5:8]
+    xk = x + alpha_dach*delta[0:2]
+    yk = y + alpha_dach*delta[2:5]
+    lambda_k = lambda_ + alpha_dach*delta[5:8]
     
     print(np.vstack([x, y, lambda_]).T)
 
