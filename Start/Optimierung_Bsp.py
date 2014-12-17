@@ -27,70 +27,68 @@ class GS:
         
         Y = matrix_diag(y)
         Lambda = matrix_diag(lambda_)
-        
+
         V = np.hstack([
                 np.vstack([G, A, np.zeros_like(A)]),
-                np.vstack([np.zeros_like(A.T), -np.matrix(np.eye(3)), Lambda]),
+                np.vstack([np.zeros_like(A.T), -np.array(np.eye(3)), Lambda]),
                 np.vstack([-A.T, np.zeros_like(Y), Y])])
         
         if self.gleichung == 1:           
             H = np.vstack([
-                    -(G*x - A.T*lambda_ + c),
-                    -(A*x - y - b),
-                    -Lambda*Y*np.matrix([1., 1., 0. ]).T 
-                    + sigma*my.flat[0]*np.matrix([1., 1., 0. ]).T])
+                    -(np.dot(G, x) - np.dot(A.T, lambda_) + c),
+                    -(np.dot(A, x) - y - b),
+                    -np.dot(np.dot(Lambda, Y), np.array([[1.], [1.], [0.] ])) 
+                        + sigma*my*np.array([[1.], [1.], [0.] ])])
                            
         if self.gleichung == 2:
             delta_aff_Y = matrix_diag(delta_aff[2:5])
             delta_aff_Lambda = matrix_diag(delta_aff[5:8])
             
             H = np.vstack([
-                    -(G*x - A.T*lambda_ + c),
-                    -(A*x - y - b),
-                    -Lambda*Y*np.matrix([1., 1., 0. ]).T 
-                        - delta_aff_Lambda*delta_aff_Y*np.matrix([1., 1., 0. ]).T 
-                        + sigma.flat[0]*my.flat[0]*np.matrix([1., 1., 0. ]).T])
+                    -(np.dot(G, x) - np.dot(A.T, lambda_) + c),
+                    -(np.dot(A, x) - y - b),
+                    -np.dot(np.dot(Lambda, Y), np.array([[1.], [1.], [0.] ])) 
+                        - np.dot(np.dot(delta_aff_Lambda, delta_aff_Y), np.array([[1.], [1.], [0.] ])) 
+                        + sigma*my*np.array([[1.], [1.], [0.] ])])
         
         return np.linalg.solve(V, H)    # lin GS lösen
 
 def matrix_diag(a):
     
-    return np.diag([a.flat[0], a.flat[1], a.flat[2]])
+    return np.diag(a.T[0])
 
 def function_parameter():
     
-    #~ Q = 2*matrix([ [2, .5], [.5, 1] ])  # KF
-    #~ p = matrix([1.0, 1.0])              # KF
+    #~ Q = 2*matrix([ [2, .5], [.5, 1] ])   # KF
+    #~ p = matrix([1.0, 1.0])               # KF
     #~ G = matrix([[-1.0, 0.0],[0.0,-1.0]]) # UN
     #~ h = matrix([0.0, 0.0])               # UN
-    #~ A = matrix([1.0, 1.0], (1,2))       # GN
-    #~ b = matrix(1.0)                     # GN
+    #~ A = matrix([1.0, 1.0], (1,2))        # GN
+    #~ b = matrix(1.0)                      # GN
     
-    Q = [ [4., 1.], [1., 2.] ]          # KF
-    p = [1.0, 1.0]                      # KF
-    p = np.matrix(p).T
-    G = [[-1.0,0.0],[0.0,-1.0]]         # UN
-    h = [0.0, 0.0]                      # UN
-    h = np.matrix(h).T
-    A = [1.0, 1.0]                      # GN
-    b = 1.0                             # GN
+    Q = [ [4., 1.], [1., 2.] ]              # KF
+    p = [[1.0], [1.0]]                      # KF
+    G = [[-1.0,0.0],[0.0,-1.0]]             # UN
+    h = [[0.0], [0.0]]                      # UN
+    A = [[1.0, 1.0]]                        # GN
+    b = 1.0                                 # GN
 
     # Notation Buch
-    G_ip = np.matrix(Q)
-    c_ip = np.matrix(p)
-    A_ip = np.vstack([-np.matrix(G), np.matrix(A)])
-    b_ip = np.vstack([np.matrix(h), np.matrix(b)])
+    G_ip = np.array(Q)
+    c_ip = np.array(p)
+    A_ip = np.vstack([-np.array(G), np.array(A)])
+    b_ip = np.vstack([np.array(h), np.array(b)])
     
     return G_ip, c_ip, A_ip, b_ip
 
 
 G, c, A, b = function_parameter()
-m = np.shape(A)[0]
+m = np.shape(A)[0] # Number of Zeilen
 # Startwerte für x(2), y(3), lambda(3)
 # Compute (x0, y0, lambda_0) with (y0,lambda_0) >0
-x0 = np.matrix([0.5, 0.5]).T
-y0 = np.matrix([1., 1., 0.]).T
-lambda_0 = np.matrix([1., 1., 1.]).T
+x0 = np.array([[0.5], [0.5]])
+y0 = np.array([[1.], [1.], [0.]])
+lambda_0 = np.array([[1.], [1.], [1.]])
 
 # zum besseren Anwenden des Algorithmus
 xk = x0
@@ -106,7 +104,7 @@ for k in range(0, 10):
     x, y, lambda_ = xk, yk, lambda_k
     
     # Calculate my = y.T*lambda_/m
-    my = y.T*lambda_/m
+    my = np.dot(y.T, lambda_)/m
     
     # Solve (...) with sigma = 0 for (delta_x_aff, delta_y_aff,
     # delta_lambda__aff)
@@ -117,8 +115,8 @@ for k in range(0, 10):
     alpha_aff_dach = 0.9 # TODO
     
     # Calculate my_dach = ...
-    my_aff = ((y + alpha_aff_dach*delta_aff[2:5]).T * 
-             (lambda_ + alpha_aff_dach*delta_aff[5:8]) / m)
+    my_aff = (np.dot((y + alpha_aff_dach*delta_aff[2:5]).T, 
+             (lambda_ + alpha_aff_dach*delta_aff[5:8])) / m)
 
     # Set centering parameter to sigma = ...
     sigma = np.power(my_aff/my, 3)
