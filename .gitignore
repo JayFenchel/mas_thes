@@ -5,6 +5,7 @@ Dropbox/
 ##### Python #####
 
 *.py~
+*.nfs0000000005b0*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
