@@ -6,7 +6,7 @@ Created on Thu Dec 11 11:46:04 2014
 @author: jayf
 """
 
-from cvxopt import matrix
+#~ from cvxopt import matrix
 import numpy as np
 from pprint import pprint
 
@@ -59,12 +59,21 @@ def matrix_diag(a):
 
 def function_parameter():
     
-    Q = 2*matrix([ [2, .5], [.5, 1] ])  # KF
-    p = matrix([1.0, 1.0])              # KF
-    G = matrix([[-1.0,0.0],[0.0,-1.0]]) # UN
-    h = matrix([0.0,0.0])               # UN
-    A = matrix([1.0, 1.0], (1,2))       # GN
-    b = matrix(1.0)                     # GN
+    #~ Q = 2*matrix([ [2, .5], [.5, 1] ])  # KF
+    #~ p = matrix([1.0, 1.0])              # KF
+    #~ G = matrix([[-1.0, 0.0],[0.0,-1.0]]) # UN
+    #~ h = matrix([0.0, 0.0])               # UN
+    #~ A = matrix([1.0, 1.0], (1,2))       # GN
+    #~ b = matrix(1.0)                     # GN
+    
+    Q = [ [4., 1.], [1., 2.] ]          # KF
+    p = [1.0, 1.0]                      # KF
+    p = np.matrix(p).T
+    G = [[-1.0,0.0],[0.0,-1.0]]         # UN
+    h = [0.0, 0.0]                      # UN
+    h = np.matrix(h).T
+    A = [1.0, 1.0]                      # GN
+    b = 1.0                             # GN
 
     # Notation Buch
     G_ip = np.matrix(Q)
