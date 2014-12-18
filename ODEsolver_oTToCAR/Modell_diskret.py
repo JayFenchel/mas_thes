@@ -6,7 +6,7 @@ Created on Tue Dec  9 16:00:24 2014
 @author: jayf
 """
 import numpy as np
-import matplotlib.pyplot as plt
+#~ import matplotlib.pyplot as plt
 from scipy.integrate import ode
 
 from time import time
@@ -33,21 +33,23 @@ def f(x):
     
 time0 = time()   
 
-t1 = .1
-dt = .1
+t1 = 1
+dt = .01
+x0, t0 = [0, 0, 0, 0.1, 1], 0
 
-for i in range(500):  
-    x0, t0 = [0, 0, 0, 0.1, 1], 0
-#    xlsg=np.array(x0)
-#    tlsg=np.array(t0)
+for i in range(50):  
+    xlsg=np.zeros((101, 5))
+    tlsg=np.zeros(101)
+    xlsg[0] = x0
+    tlsg[0] = t0
     
-    while t0 < t1:
-        x = f(x0)
-        t = t0
+    k = 1
+    while (t0 + k*dt) <= t1:
+        xlsg[k] = f(xlsg[k-1])
+        tlsg[k] = t0 + k*dt
+        k += 1
 #        xlsg = np.vstack([xlsg, x])
 #        tlsg = np.vstack([tlsg, t])
-        x0 = x
-        t0 = t0 + dt
 #    xlsg = xlsg.T
 
 print(time()-time0)
