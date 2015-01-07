@@ -6,6 +6,7 @@ Created on Mon Dec  8 10:48:23 2014
 @author: jayf
 """
 import math
+import threading
 import numpy as np
 
 import rospy
@@ -45,13 +46,15 @@ class Node(object):
         
     def spin(self):
         rospy.loginfo("lane_controller_mpc started")
-        while(not rospy.is_shutdown() and self.run_status):
-            
-            
-    def optimal_control
-        
+        while(not rospy.is_shutdown() and True):  # and self.run_status
+            print("Test klappt.")
+
+            self.r.sleep()
+
+    def optimal_control(self):
         #SOLL OPTIMAL CONTROL PROBLEM LÖSEN
-    
+        a=0
+        return a
     
     def callback_lanestatepoly(self,msg):
         if(not self.run_status):
