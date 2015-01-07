@@ -30,14 +30,14 @@ class OptimalControlProblem:
 def cost_function(u1, s):
     us = [u1, 30]
     solution = odeint(myDGL.f, x0, t, args=(us,), rtol=s, atol=s)
-    return np.square(solution.T[2][n_sample-1]).sum() + .01*np.square(u1)
+    return np.square(solution.T[2][n_sample-1]-0).sum() + .01*np.square(u1)
 
 def cost_function_diskret(u1, xzero):
     us = [u1, 30]
     for i in range(1,5,1):
         solution = np.array(myDiskret.f(xzero, t1/5, us))
         xzero = solution
-    return np.square(solution.T[2]).sum() + .01*np.square(u1)
+    return np.square(solution.T[2]-0).sum() + .01*np.square(u1)
 
 if __name__ == '__main__':
     x0, t0 = np.array([0, 0, 0.2, 0, 0, 1, 0]), 0
