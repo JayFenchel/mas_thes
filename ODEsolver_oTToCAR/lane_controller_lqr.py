@@ -43,6 +43,8 @@ class Node(object):
         
         self.r = rospy.Rate(self.rate)
 
+        self.spin_restarter()
+
     def init_params(self):
         self.lanestate = None
         self.pos = None
@@ -55,28 +57,36 @@ class Node(object):
 
 
         self.gradeaus = - 30  # geschaetzt am 08.01.2015
-        self.glaettung = 0.6  # 1 - nur neuen Wert verwenden
+        self.glaettung = 0.8  # 1 - nur neuen Wert verwenden
+        self.decrease = 150  # Dämpfung der Lenkstellgröße aus dem LQR
         self.rate = 100
+
+    def spin_restarter(self):
+        print "waiting for button"
+        while(not rospy.is_shutdown()):
+            if(self.run_status):
+                print("Button gedrückt - LaneController läuft")
+                self.spin()
+                print("Button gedrückt - LaneController gestoppt")
+            self.r.sleep()
 
     def spin(self):
         rospy.loginfo("lane_controller_lqr started")
         # Startwerte für Stellgrößen
         u = np.array([0., 1.])
-        while(not rospy.is_shutdown() and True):  # and self.run_status
+        while(not rospy.is_shutdown() and self.run_status):  # and self.run_status
             # print("Test klappt.")
 
-            if (self.pos != None) and (self.angle != None) and (self.yaw_rate != None) and (self.velocity != None):
+            if (self.pos != None) and (self.angle != None) and\
+                    (self.yaw_rate != None) and (self.velocity != None):
 
-
-                # TO DO Winkelgeschwindigkeit, Geschwindigkeit, Lenkeinschlag fehlen
+                # TO DO Lenkeinschlag fehlt, überhaupt nötig?
                 x = np.array([0., self.pos, self.angle, self.yaw_rate, 0., self.velocity, 0.])
 
                 L_R, L_G = self.modell_matrizen(x, u)
 
-                # print str(L_R) + "\n\n" + str(L_G)
-
                 u[0] = np.dot(-L_R, np.matrix(([20 - x[1]], [x[2]], [x[3]], [x[6]])))
-                u[0] /= -100  # falsches Vorzeichen
+                u[0] /= -self.decrease  # "-", um falsches Vorzeichen zu korrigieren
                 u[1] = np.dot(L_G, np.matrix(([abs(x[3])], [1 - x[5]])))
                 u[1] = 1
 
@@ -84,12 +94,8 @@ class Node(object):
 
                 u[0] = min(max(u[0], -127), 127)
                 angle_cmd = min(max(u[0] + self.gradeaus, -127), 127)
-                print(self.pos)
-                print(self.angle)
-                print(self.yaw_rate)
 
                 print "\n\n" + str(angle_cmd)
-
 
                 angle_cmd = (self.glaettung*self.lane_confidence*angle_cmd
                                  + (1-self.glaettung)*self.lane_confidence_last*self.angle_cmd_last)
@@ -97,6 +103,8 @@ class Node(object):
                     angle_cmd /= (self.glaettung*self.lane_confidence
                                       + (1-self.glaettung)*self.lane_confidence_last)
 
+                # velocity_cmd oder speed_cmd erstmal noch mit joystick
+                # publishen. Dazu 'roslaunch ottocar_launch NUC...' launchen.
                 self.pub_angle_cmd.publish(angle_cmd)
                 self.angle_cmd_last = angle_cmd
 
@@ -214,7 +222,6 @@ class Node(object):
         
     def callback_button(self, msg):
         self.run_status = not self.run_status
-        self.start_zeit = rospy.get_time()
     
     
     def joy_callback(self, joy):
@@ -229,4 +236,3 @@ class Node(object):
         
 if __name__ == '__main__':
     process = Node()
-    process.spin()
