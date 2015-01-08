@@ -38,6 +38,7 @@ class Node(object):
         rospy.Subscriber('/functions/ottocar_perception/laneState', Float64MultiArray, self.callback_lanestate)
         rospy.Subscriber('/GPIO_button2', Bool, self.callback_button)
         rospy.Subscriber('/functions/yaw_rate', StampedFloat32, self.callback_yaw_rate)
+        rospy.Subscriber('/functions/velocity', StampedFloat32, self.callback_velocity)
 
         self.run_status = False
         self.disable = False
@@ -49,9 +50,14 @@ class Node(object):
         self.lanestate = None
         self.pos = None
         self.angle = None
+        self.lane_confidence = None
+        self.lane_confidence_last = 0
         self.yaw_rate = None
+        self.angle_cmd_last = 0
+
 
         self.gradeaus = - 30  # geschaetzt am 08.01.2015
+        self.glaettung = 0.6  # 1 - nur neuen Wert verwenden
         self.rate = 100
         
         
@@ -68,7 +74,7 @@ class Node(object):
                 # TO DO Winkelgeschwindigkeit, Geschwindigkeit, Lenkeinschlag fehlen
                 x = np.array([0., self.pos, self.angle, self.yaw_rate, 0., 1, 0.])
 
-                L_R, L_G = self.modell_matrizen(x ,u - self.gradeaus)
+                L_R, L_G = self.modell_matrizen(x, u)
 
                 # print str(L_R) + "\n\n" + str(L_G)
 
@@ -79,13 +85,23 @@ class Node(object):
 
                 # Stellgroessenbeschraenkung
 
-                u[0] = min(max(u[0] + self.gradeaus, -127), 127)
+                u[0] = min(max(u[0], -127), 127)
+                angle_cmd = min(max(u[0] + self.gradeaus, -127), 127)
                 print(self.pos)
                 print(self.angle)
                 print(self.yaw_rate)
 
-                print "\n\n" + str(u[0])
-                self.pub_angle_cmd.publish(u[0])
+                print "\n\n" + str(angle_cmd)
+
+
+                angle_cmd = (self.glaettung*self.lane_confidence*angle_cmd
+                                 + (1-self.glaettung)*self.lane_confidence_last*self.angle_cmd_last)
+                if abs(self.lane_confidence) + abs(self.lane_confidence_last) != 0:
+                    angle_cmd /= (self.glaettung*self.lane_confidence
+                                      + (1-self.glaettung)*self.lane_confidence_last)
+
+                self.pub_angle_cmd.publish(angle_cmd)
+                self.angle_cmd_last = angle_cmd
 
 
             self.r.sleep()
@@ -231,9 +247,14 @@ class Node(object):
         self.lanestate = msg.data
         self.pos = self.lanestate[1]                # in cm
         self.angle = self.lanestate[2]*2*np.pi/360  # in rad
+        self.lane_confidence_last = self.lane_confidence
+        self.lane_confidence = self.lanestate[3]
 
     def callback_yaw_rate(self, msg):
-        self.yaw_rate = msg.float32.data
+        self.yaw_rate = msg.float32.data            # in rad
+
+    def callback_velocity(self, msg):
+        self.velocity = msg.float32.data            # in m/s
         
         
     def callback_button(self, msg):
