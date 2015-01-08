@@ -7,17 +7,18 @@ Created on Mon Dec  8 10:48:23 2014
 """
 from __future__ import division
 import math
-import threading
 import numpy as np
 import scipy.linalg
 
 import rospy
 
-from std_msgs.msg import *
+from std_msgs.msg import Bool
+from std_msgs.msg import Int8
+from std_msgs.msg import Float32
+from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import Joy
 from ottocar_msgs.msg import perception_laneStatePoly
 from ottocar_msgs.msg import StampedFloat32
-from scipy.interpolate import interp1d
 
 class Node(object):
     
@@ -25,8 +26,6 @@ class Node(object):
         super(Node, self).__init__()
 
         rospy.init_node('lane_controller')
-        
-        self.lock = threading.Lock()
 
         self.init_params()
 
@@ -34,7 +33,6 @@ class Node(object):
         self.pub_vel_cmd = rospy.Publisher('/functions/velocity_cmd', Float32, tcp_nodelay=True,queue_size=1)
         
         rospy.Subscriber('/joy', Joy, self.joy_callback)
-        rospy.Subscriber('/functions/ottocar_perception/laneStatePoly', perception_laneStatePoly, self.callback_lanestatepoly)
         rospy.Subscriber('/functions/ottocar_perception/laneState', Float64MultiArray, self.callback_lanestate)
         rospy.Subscriber('/GPIO_button2', Bool, self.callback_button)
         rospy.Subscriber('/functions/yaw_rate', StampedFloat32, self.callback_yaw_rate)
@@ -44,8 +42,7 @@ class Node(object):
         self.disable = False
         
         self.r = rospy.Rate(self.rate)
-        
-        
+
     def init_params(self):
         self.lanestate = None
         self.pos = None
@@ -53,14 +50,14 @@ class Node(object):
         self.lane_confidence = None
         self.lane_confidence_last = 0
         self.yaw_rate = None
+        self.velocity = None
         self.angle_cmd_last = 0
 
 
         self.gradeaus = - 30  # geschaetzt am 08.01.2015
         self.glaettung = 0.6  # 1 - nur neuen Wert verwenden
         self.rate = 100
-        
-        
+
     def spin(self):
         rospy.loginfo("lane_controller_lqr started")
         # Startwerte für Stellgrößen
@@ -68,11 +65,11 @@ class Node(object):
         while(not rospy.is_shutdown() and True):  # and self.run_status
             # print("Test klappt.")
 
-            if (self.pos != None) and (self.angle != None) and (self.yaw_rate != None):
+            if (self.pos != None) and (self.angle != None) and (self.yaw_rate != None) and (self.velocity != None):
 
 
                 # TO DO Winkelgeschwindigkeit, Geschwindigkeit, Lenkeinschlag fehlen
-                x = np.array([0., self.pos, self.angle, self.yaw_rate, 0., 1, 0.])
+                x = np.array([0., self.pos, self.angle, self.yaw_rate, 0., self.velocity, 0.])
 
                 L_R, L_G = self.modell_matrizen(x, u)
 
@@ -194,48 +191,6 @@ class Node(object):
         xx = scipy.linalg.solve_discrete_are(a, b, q, rr)
         ll = np.dot(scipy.linalg.inv(np.dot(np.dot(b.T, xx), b)+rr), (np.dot(np.dot(b.T, xx), a)))
         return ll
-
-    def callback_lanestatepoly(self,msg):
-        if(not self.run_status):
-            return
-
-        self.lock.acquire()
-        
-        self.time_alt = self.time
-        self.time = rospy.get_time() ####msg.header.ZEIT
-        self.poly_confidence_last = self.poly_confidence
-        self.poly_confidence = msg.confidence.data
-
-        if self.poly_confidence >= 0.5:
-            self.poly_last_time = self.time
-
-        xs = np.array(msg.targetPolyXArray_VRF.data)
-        ys = np.array(msg.targetPolyYArray_VRF.data)
-        
-        if xs.shape[0]>=2:
-            s=np.zeros_like(xs)
-            for i in range(1, size(xs)):
-                s[i] = s[i-1] + np.sqrt(np.square(xs[i]-xs[i-1]) + np.square(ys[i]-ys[i-1]))
-            
-            if xs.shape[0]<3:
-                print "linear (<3)"
-                fx=interp1d(s, xs, kind='linear')
-                fy=interp1d(s, ys, kind='linear')
-            else:
-                try:
-                    fx=interp1d(s, xs, kind='linear')
-                    fy=interp1d(s, ys, kind='linear')
-                    print "cubic possible"
-                except:
-                    print "linear"
-                    fx=interp1d(s, xs, kind='linear')
-                    fy=interp1d(s, ys, kind='linear')
-                    
-        else:
-            rospy.loginfo("Keine verwendbare neue Polyline")
-                        
-
-        self.lock.release()
 
     def callback_lanestate(self, msg):
         # example msg
