@@ -16,6 +16,7 @@ import rospy
 from std_msgs.msg import *
 from sensor_msgs.msg import Joy
 from ottocar_msgs.msg import perception_laneStatePoly
+from ottocar_msgs.msg import StampedFloat32
 from scipy.interpolate import interp1d
 
 class Node(object):
@@ -36,7 +37,8 @@ class Node(object):
         rospy.Subscriber('/functions/ottocar_perception/laneStatePoly', perception_laneStatePoly, self.callback_lanestatepoly)
         rospy.Subscriber('/functions/ottocar_perception/laneState', Float64MultiArray, self.callback_lanestate)
         rospy.Subscriber('/GPIO_button2', Bool, self.callback_button)
-        
+        rospy.Subscriber('/functions/yaw_rate', StampedFloat32, self.callback_yaw_rate)
+
         self.run_status = False
         self.disable = False
         
@@ -47,41 +49,43 @@ class Node(object):
         self.lanestate = None
         self.pos = None
         self.angle = None
+        self.yaw_rate = None
+
+        self.gradeaus = - 30  # geschaetzt am 08.01.2015
         self.rate = 100
         
         
     def spin(self):
         rospy.loginfo("lane_controller_lqr started")
+        # Startwerte für Stellgrößen
+        u = np.array([0., 1.])
         while(not rospy.is_shutdown() and True):  # and self.run_status
             # print("Test klappt.")
 
-            if (self.pos!=None) and (self.angle!=None):
+            if (self.pos != None) and (self.angle != None) and (self.yaw_rate != None):
 
-                # Startwerte TO DO aktuelle Werte verwenden
-                u = np.array([0., 0.])
+
                 # TO DO Winkelgeschwindigkeit, Geschwindigkeit, Lenkeinschlag fehlen
-                x = np.array([0., self.pos, self.angle, 0., 0., 1, 0.])
+                x = np.array([0., self.pos, self.angle, self.yaw_rate, 0., 1, 0.])
 
-                L_R, L_G = self.modell_matrizen(x ,u)
+                L_R, L_G = self.modell_matrizen(x ,u - self.gradeaus)
 
                 # print str(L_R) + "\n\n" + str(L_G)
 
-                u[0] = np.dot(-L_R, np.matrix(([x[1]], [x[2]], [x[3]], [x[6]])))
+                u[0] = np.dot(-L_R, np.matrix(([20 - x[1]], [x[2]], [x[3]], [x[6]])))
+                u[0] /= -100  # falsches Vorzeichen
                 u[1] = np.dot(L_G, np.matrix(([abs(x[3])], [1 - x[5]])))
+                u[1] = 1
 
                 # Stellgroessenbeschraenkung
-                if u[0] > 0.35:
-                    u[0] = 0.35
-                    # print "positiv"
-                elif u[0] < -0.35:
-                    u[0] = float(-0.35)
 
-                if u[1] > 2:
-                    u[1] = 2
-                elif u[1] < 0:
-                    u[1] = 0
+                u[0] = min(max(u[0] + self.gradeaus, -127), 127)
+                print(self.pos)
+                print(self.angle)
+                print(self.yaw_rate)
 
-                print "\n\n" + str(u)
+                print "\n\n" + str(u[0])
+                self.pub_angle_cmd.publish(u[0])
 
 
             self.r.sleep()
@@ -217,7 +221,7 @@ class Node(object):
 
         self.lock.release()
 
-    def callback_lanestate(self,msg):
+    def callback_lanestate(self, msg):
         # example msg
         # layout:
         #   dim: []
@@ -225,11 +229,14 @@ class Node(object):
         # data: [946685062.8521258, 120.0, -0.0, 0.5]
 
         self.lanestate = msg.data
-        self.pos = self.lanestate[1]            # in cm
-        self.angle = self.lanestate[2]          # in grad
+        self.pos = self.lanestate[1]                # in cm
+        self.angle = self.lanestate[2]*2*np.pi/360  # in rad
+
+    def callback_yaw_rate(self, msg):
+        self.yaw_rate = msg.float32.data
         
         
-    def callback_button(self,msg):
+    def callback_button(self, msg):
         self.run_status = not self.run_status
         self.start_zeit = rospy.get_time()
     
