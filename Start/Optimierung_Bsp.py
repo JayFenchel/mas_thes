@@ -9,6 +9,7 @@ Created on Thu Dec 11 11:46:04 2014
 #~ from cvxopt import matrix
 import numpy as np
 from pprint import pprint
+from time import time
 
 class GS:
     
@@ -51,9 +52,18 @@ class GS:
         c = np.dot(Q, b)
         # print(c)
         Rtilde = R[0:npe, 0:npe]
-        # print Rtilde
+        print Rtilde
         ctilde = c[0:npe]
+        time0 = time()
         x = np.dot(np.linalg.inv(Rtilde), ctilde)
+        print(time()-time0)
+
+        return x
+
+    def solve_anders(self, A, b):
+        time0 = time()
+        x = np.dot(np.linalg.inv(A), b)
+        print(time()-time0)
 
         return x
 
@@ -84,8 +94,11 @@ class GS:
                     -np.dot(np.dot(Lambda, Y), np.array([[1.], [1.], [0.] ])) 
                         - np.dot(np.dot(delta_aff_Lambda, delta_aff_Y), np.array([[1.], [1.], [0.] ])) 
                         + sigma*my*np.array([[1.], [1.], [0.] ])])
-        
-        return self.solve_lin_gs(V, H)    # lin GS lösen
+
+        # return np.linalg.solve(V, H)    # lin GS lösen
+        # return self.solve_lin_gs(V, H)    # lin GS lösen
+        return self.solve_anders(V, H)    # lin GS lösen
+
 
 def matrix_diag(a):
     
