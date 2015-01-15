@@ -21,8 +21,42 @@ class GS:
             self.gleichung = get_gleichung
         else:
             self.gleichung = 1
-        
-        
+
+    def solve_lin_gs(self,A, b):
+        # Householdertransformation (nach Vorlage von Sager)
+        # neta = # number of Zeilen in A
+        # np = # number of Spalten in A
+        neta, npe = A.shape
+        Q = np.array(np.eye(neta))
+        R = A
+
+        for i in range(0, npe-1): # -1 nur wegen der GNB sonst gibts irgendwo ne division durch 0
+            y = np.array([R[i:neta,i]]).T
+            # print(y)
+            alpha = np.linalg.norm(y)
+            # print(alpha)
+            v = (y - alpha*np.array(np.eye(neta-i,1)))
+            # print(np.linalg.norm(v))
+            v = v / np.linalg.norm(v)
+            # print(v)
+
+            H = np.array(np.eye(neta,neta))
+            # print(H)
+            H[i:neta,i:neta] = np.array(np.eye(neta-i)) - 2*np.dot(v, v.T)
+            Q = np.dot(H, Q)
+            # print(Q)
+            R = np.dot(H, R)
+            # print(R)
+
+        c = np.dot(Q, b)
+        # print(c)
+        Rtilde = R[0:npe, 0:npe]
+        # print Rtilde
+        ctilde = c[0:npe]
+        x = np.dot(np.linalg.inv(Rtilde), ctilde)
+
+        return x
+
     def solve(self, x, y, lambda_, sigma, my, delta_aff):
         
         Y = matrix_diag(y)
@@ -51,7 +85,7 @@ class GS:
                         - np.dot(np.dot(delta_aff_Lambda, delta_aff_Y), np.array([[1.], [1.], [0.] ])) 
                         + sigma*my*np.array([[1.], [1.], [0.] ])])
         
-        return np.linalg.solve(V, H)    # lin GS lösen
+        return self.solve_lin_gs(V, H)    # lin GS lösen
 
 def matrix_diag(a):
     
@@ -112,6 +146,11 @@ for k in range(0, 10):
     delta_aff = GS1.solve(x, y, lambda_, sigma, my, 0)
     
     # Calculate alpha_aff_Dach = max(...)
+#    alpha_test = 1
+#    y_test = y + alpha_test*delta_aff[2:5]
+#    lambda_test = alpha_test*delta_aff[5:8]
+#    if np.vstack([y[0:2],lambda_]).min() <= 0:    
+    
     alpha_aff_dach = 0.9 # TODO
     
     # Calculate my_dach = ...
