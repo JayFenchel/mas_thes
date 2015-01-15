@@ -11,8 +11,9 @@ import numpy as np
 from pprint import pprint
 from time import time
 
-class GS:
-    
+
+class LinearSystem:
+
     def __init__(self, get_gleichung, get_G, get_c, get_A, get_b):
         G = get_G
         c = get_c
@@ -24,31 +25,9 @@ class GS:
             self.gleichung = 1
 
     def solve_lin_gs(self,A, b):
-        # Householdertransformation (nach Vorlage von Sager)
-        # neta = # number of Zeilen in A
-        # np = # number of Spalten in A
-        neta, npe = A.shape
-        Q = np.array(np.eye(neta))
-        R = A
 
-        for i in range(0, npe-1): # -1 nur wegen der GNB sonst gibts irgendwo ne division durch 0
-            y = np.array([R[i:neta,i]]).T
-            # print(y)
-            alpha = np.linalg.norm(y)
-            # print(alpha)
-            v = (y - alpha*np.array(np.eye(neta-i,1)))
-            # print(np.linalg.norm(v))
-            v = v / np.linalg.norm(v)
-            # print(v)
-
-            H = np.array(np.eye(neta,neta))
-            # print(H)
-            H[i:neta,i:neta] = np.array(np.eye(neta-i)) - 2*np.dot(v, v.T)
-            Q = np.dot(H, Q)
-            # print(Q)
-            R = np.dot(H, R)
-            # print(R)
-
+        neta, npe = A.shape  # neta - # of Zeilen, npe - # of Spalten in A
+        Q, R = householder(A, b)
         c = np.dot(Q, b)
         # print(c)
         Rtilde = R[0:npe, 0:npe]
@@ -80,7 +59,7 @@ class GS:
                 np.vstack([np.zeros_like(A.T), -np.array(np.eye(3)), Lambda]),
                 np.vstack([-A.T, np.zeros_like(Y), Y])])
         
-        if self.gleichung == 1:           
+        if self.gleichung == 1:
             H = np.vstack([
                     -(np.dot(G, x) - np.dot(A.T, lambda_) + c),
                     -(np.dot(A, x) - y - b),
@@ -102,6 +81,32 @@ class GS:
         return self.solve_lin_gs(V, H)    # lin GS lösen
         # return self.solve_anders(V, H)    # lin GS lösen
 
+
+def householder(a, b):
+    # Q-R-Zerlegung via Householdertransformation (nach Vorlage von Sager)
+    neta, npe = a.shape  # neta - # of Zeilen, npe - # of Spalten in A
+    Q = np.array(np.eye(neta))
+    R = a
+
+    for i in range(0, npe-1): # -1 nur wegen der GNB sonst gibts irgendwo ne division durch 0
+        y = np.array([R[i:neta,i]]).T
+        # print(y)
+        alpha = np.linalg.norm(y)
+        # print(alpha)
+        v = (y - alpha*np.array(np.eye(neta-i,1)))
+        # print(np.linalg.norm(v))
+        v = v / np.linalg.norm(v)
+        # print(v)
+
+        H = np.array(np.eye(neta,neta))
+        # print(H)
+        H[i:neta,i:neta] = np.array(np.eye(neta-i)) - 2*np.dot(v, v.T)
+        Q = np.dot(H, Q)
+        # print(Q)
+        R = np.dot(H, R)
+        # print(R)
+
+    return Q, R
 
 def matrix_diag(a):
     
@@ -145,8 +150,8 @@ xk = x0
 yk = y0
 lambda_k = lambda_0
 
-GS1 = GS(1, G, c, A, b)
-GS2 = GS(2, G, c, A, b)
+GS1 = LinearSystem(1, G, c, A, b)
+GS2 = LinearSystem(2, G, c, A, b)
 
 for k in range(0, 10):
     
