@@ -52,11 +52,14 @@ class GS:
         c = np.dot(Q, b)
         # print(c)
         Rtilde = R[0:npe, 0:npe]
-        print Rtilde
+        # print Rtilde
         ctilde = c[0:npe]
         time0 = time()
-        x = np.dot(np.linalg.inv(Rtilde), ctilde)
-        print(time()-time0)
+        # x = np.dot(np.linalg.inv(Rtilde), ctilde)
+        x=np.array(np.eye(npe,1))
+        for k in range(npe-1, 0-1, -1):
+            x[k] = (ctilde[k] - np.dot(Rtilde[k,k+1:npe], x[k+1:npe]))/Rtilde[k,k]
+        # print(time()-time0)
 
         return x
 
@@ -96,8 +99,8 @@ class GS:
                         + sigma*my*np.array([[1.], [1.], [0.] ])])
 
         # return np.linalg.solve(V, H)    # lin GS lösen
-        # return self.solve_lin_gs(V, H)    # lin GS lösen
-        return self.solve_anders(V, H)    # lin GS lösen
+        return self.solve_lin_gs(V, H)    # lin GS lösen
+        # return self.solve_anders(V, H)    # lin GS lösen
 
 
 def matrix_diag(a):
