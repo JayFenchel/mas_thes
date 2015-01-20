@@ -6,10 +6,7 @@ Created on Thu Dec 11 11:46:04 2014
 @author: jayf
 """
 
-#~ from cvxopt import matrix
 import numpy as np
-from pprint import pprint
-from time import time
 
 
 class LinearSystem:
@@ -29,23 +26,11 @@ class LinearSystem:
         neta, npe = A.shape  # neta - # of Zeilen, npe - # of Spalten in A
         Q, R = householder(A, b)
         c = np.dot(Q, b)
-        # print(c)
         Rtilde = R[0:npe, 0:npe]
-        # print Rtilde
         ctilde = c[0:npe]
-        time0 = time()
-        # x = np.dot(np.linalg.inv(Rtilde), ctilde)
-        x=np.array(np.eye(npe,1))
+        x=np.array(np.eye(npe, 1))
         for k in range(npe-1, 0-1, -1):
-            x[k] = (ctilde[k] - np.dot(Rtilde[k,k+1:npe], x[k+1:npe]))/Rtilde[k,k]
-        # print(time()-time0)
-
-        return x
-
-    def solve_anders(self, A, b):
-        time0 = time()
-        x = np.dot(np.linalg.inv(A), b)
-        print(time()-time0)
+            x[k] = (ctilde[k] - np.dot(Rtilde[k, k+1:npe], x[k+1:npe]))/Rtilde[k, k]
 
         return x
 
@@ -88,42 +73,39 @@ def householder(a, b):
     Q = np.array(np.eye(neta))
     R = a
 
-    for i in range(0, npe-1): # -1 nur wegen der GNB sonst gibts irgendwo ne division durch 0
-        y = np.array([R[i:neta,i]]).T
-        # print(y)
-        alpha = np.linalg.norm(y)
-        # print(alpha)
-        v = (y - alpha*np.array(np.eye(neta-i,1)))
-        # print(np.linalg.norm(v))
+    for i in range(0, npe-1):
+        # -1 nur wegen der GNB sonst gibts irgendwo ne division durch 0
+        # Division durch 0 Abfragen TODO
+        w = np.array([R[i:neta, i]]).T
+        alpha = np.linalg.norm(w)
+        v = (w - alpha*np.array(np.eye(neta-i, 1)))
         v = v / np.linalg.norm(v)
-        # print(v)
 
-        H = np.array(np.eye(neta,neta))
-        # print(H)
-        H[i:neta,i:neta] = np.array(np.eye(neta-i)) - 2*np.dot(v, v.T)
+        H = np.array(np.eye(neta, neta))
+        H[i:neta, i:neta] = np.array(np.eye(neta-i)) - 2*np.dot(v, v.T)
         Q = np.dot(H, Q)
-        # print(Q)
         R = np.dot(H, R)
-        # print(R)
 
     return Q, R
+
 
 def matrix_diag(a):
     
     return np.diag(a.T[0])
 
+
 def function_parameter():
     
-    #~ Q = 2*matrix([ [2, .5], [.5, 1] ])   # KF
-    #~ p = matrix([1.0, 1.0])               # KF
-    #~ G = matrix([[-1.0, 0.0],[0.0,-1.0]]) # UN
-    #~ h = matrix([0.0, 0.0])               # UN
-    #~ A = matrix([1.0, 1.0], (1,2))        # GN
-    #~ b = matrix(1.0)                      # GN
+    # Q = 2*matrix([ [2, .5], [.5, 1] ])   # KF
+    # p = matrix([1.0, 1.0])               # KF
+    # G = matrix([[-1.0, 0.0],[0.0,-1.0]]) # UN
+    # h = matrix([0.0, 0.0])               # UN
+    # A = matrix([1.0, 1.0], (1,2))        # GN
+    # b = matrix(1.0)                      # GN
     
-    Q = [ [4., 1.], [1., 2.] ]              # KF
+    Q = [[4., 1.], [1., 2.]]              # KF
     p = [[1.0], [1.0]]                      # KF
-    G = [[-1.0,0.0],[0.0,-1.0]]             # UN
+    G = [[-1.0, 0.0], [0.0, -1.0]]             # UN
     h = [[0.0], [0.0]]                      # UN
     A = [[1.0, 1.0]]                        # GN
     b = 1.0                                 # GN
@@ -138,7 +120,7 @@ def function_parameter():
 
 
 G, c, A, b = function_parameter()
-m = np.shape(A)[0] # Number of Zeilen
+m = np.shape(A)[0]  # Number of Zeilen
 # Startwerte für x(2), y(3), lambda(3)
 # Compute (x0, y0, lambda_0) with (y0,lambda_0) >0
 x0 = np.array([[0.5], [0.5]])
