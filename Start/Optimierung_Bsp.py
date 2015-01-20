@@ -21,10 +21,10 @@ class LinearSystem:
         else:
             self.gleichung = 1
 
-    def solve_lin_gs(self,A, b):
+    def solve_lin_gs(self, A, b):
 
         neta, npe = A.shape  # neta - # of Zeilen, npe - # of Spalten in A
-        Q, R = householder(A, b)
+        Q, R = householder(A)
         c = np.dot(Q, b)
         Rtilde = R[0:npe, 0:npe]
         ctilde = c[0:npe]
@@ -64,22 +64,22 @@ class LinearSystem:
 
         # return np.linalg.solve(V, H)    # lin GS lösen
         return self.solve_lin_gs(V, H)    # lin GS lösen
-        # return self.solve_anders(V, H)    # lin GS lösen
 
 
-def householder(a, b):
+def householder(a):
     # Q-R-Zerlegung via Householdertransformation (nach Vorlage von Sager)
     neta, npe = a.shape  # neta - # of Zeilen, npe - # of Spalten in A
     Q = np.array(np.eye(neta))
     R = a
 
-    for i in range(0, npe-1):
-        # -1 nur wegen der GNB sonst gibts irgendwo ne division durch 0
-        # Division durch 0 Abfragen TODO
+    for i in range(0, npe):
         w = np.array([R[i:neta, i]]).T
-        alpha = np.linalg.norm(w)
+        alpha = vector_norm(w)
         v = (w - alpha*np.array(np.eye(neta-i, 1)))
-        v = v / np.linalg.norm(v)
+        if vector_norm(v) != 0:
+            v = v / np.linalg.norm(v)
+        # else:
+        #     print("Division durch 0 aufgetreten")
 
         H = np.array(np.eye(neta, neta))
         H[i:neta, i:neta] = np.array(np.eye(neta-i)) - 2*np.dot(v, v.T)
@@ -88,6 +88,18 @@ def householder(a, b):
 
     return Q, R
 
+def cholesky(a):
+    # TODO
+    # Vergleich mit Housholder Transformation
+    G = None
+    return(G)
+
+
+def vector_norm(a):
+    n = 0
+    for i in range (0, a.shape[0]):
+        n += a[i]**2
+    return np.sqrt(n)
 
 def matrix_diag(a):
     
