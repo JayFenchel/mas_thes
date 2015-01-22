@@ -14,7 +14,9 @@ import rospy
 from std_msgs.msg import *
 from sensor_msgs.msg import Joy
 from ottocar_msgs.msg import perception_laneStatePoly
+from ottocar_controller import DiscreteOdeModel
 from scipy.interpolate import interp1d
+from scipy.optimize import fmin
 
 class Node(object):
     
@@ -42,17 +44,38 @@ class Node(object):
         
     def init_params(self):
         self.rate = 100
-        
+
+    def spin_restarter(self):
+        print "waiting for button"
+        while(not rospy.is_shutdown()):
+            if(self.run_status):
+                print("Button gedrückt - LaneController läuft")
+                self.spin()
+                print("Button gedrückt - LaneController gestoppt")
+            self.r.sleep()
         
     def spin(self):
         rospy.loginfo("lane_controller_mpc started")
-        while(not rospy.is_shutdown() and True):  # and self.run_status
+        while(not rospy.is_shutdown() and self.run_status):
             print("Test klappt.")
 
             self.r.sleep()
 
+    def cost_function_diskret(self, u1, xzero):
+        # TODO Sollwerte aus Polyline übergeben
+        discrete_model = DiscreteOdeModel()  # TODO Nicht jedes Mal neu initiieren
+        dt = 0.1  # TODO global definieren
+        us = [u1, 30]
+        for i in range(1,5,1):
+            solution = np.array(discrete_model.f(xzero, dt/5, us))
+            xzero = solution
+        return np.square(solution.T[2]-0).sum() + .01*np.square(u1)
+
     def optimal_control(self):
+        x0 = np.array([0, 0, 0.2, 0, 0, 1, 0])  # TODO Alte Werte als Startwerte verwenden
+        u0 = [0.1, 30]
         #SOLL OPTIMAL CONTROL PROBLEM LÖSEN
+        uopt = fmin(self.cost_function_diskret, u0[0], args=(x0,))
         a=0
         return a
     
@@ -94,15 +117,12 @@ class Node(object):
                     
         else:
             rospy.loginfo("Keine verwendbare neue Polyline")
-                        
 
         self.lock.release()
         
         
     def callback_button(self,msg):
         self.run_status = not self.run_status
-        self.start_zeit = rospy.get_time()
-    
     
     def joy_callback(self, joy):
         if(not self.run_status):
