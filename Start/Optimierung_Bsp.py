@@ -25,6 +25,7 @@ class LinearSystem:
 
         neta, npe = A.shape  # neta - # of Zeilen, npe - # of Spalten in A
         Q, R = householder(A)
+        # hhhh = cholesky(A)
         c = np.dot(Q, b)
         Rtilde = R[0:npe, 0:npe]
         ctilde = c[0:npe]
@@ -37,6 +38,7 @@ class LinearSystem:
     def solve(self, x, y, lambda_, sigma, my, delta_aff):
         
         Y = matrix_diag(y)
+        print(Y)
         Y_inv = np.linalg.pinv(Y)
         Lambda = matrix_diag(lambda_)
 
@@ -60,7 +62,7 @@ class LinearSystem:
                     -(np.dot(G, x) - np.dot(A.T, lambda_) + c),
                     -np.dot(np.dot(np.dot(Y_inv,Lambda), Y), np.array([[1.], [1.], [1.] ]))
                         - np.dot(np.dot(np.dot(Y_inv, delta_aff_Lambda), delta_aff_Y), np.array([[1.], [1.], [1.] ]))
-                        + np.dot(Y_inv,sigma*my*np.array([[1.], [1.], [0.] ])),
+                        + np.dot(Y_inv,sigma*my*np.array([[1.], [1.], [1.] ])),
                     +(np.dot(A, x) - y - b)])
 
         # return np.linalg.solve(V, H)    # lin GS lösen
@@ -91,8 +93,21 @@ def householder(a):
 
 def cholesky(a):
     # TODO
+    for i in range(0, 8):
+        for j in range(0, i):
+            sum = a[i, j]
+            for k in range(0, j-1):
+                sum += -a[i, k]*a[j, k]
+            if i>j:
+                a[i, j] = sum/a[j, j]
+            else:
+                if sum > 0:
+                    a[i, i] = np.sqrt(sum)
+                else:
+                    print('ERROR')
     # Vergleich mit Housholder Transformation
     G = None
+    print(a)
     return(G)
 
 
