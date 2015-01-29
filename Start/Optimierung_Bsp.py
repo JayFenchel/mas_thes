@@ -147,7 +147,7 @@ lambda_k = lambda_0
 GS1 = LinearSystem(1, G, c, A, b)
 GS2 = LinearSystem(2, G, c, A, b)
 
-for k in range(0, 10):
+for k in range(0, 6):
     
     # Set (x, y, lambda_) = ((xk, yk, lambda_k))
     x, y, lambda_ = xk, yk, lambda_k
@@ -161,13 +161,18 @@ for k in range(0, 10):
     delta_aff = GS1.solve(x, y, lambda_, sigma, my, 0)
     
     # Calculate alpha_aff_Dach = max(...)
-#    alpha_test = 1
-#    y_test = y + alpha_test*delta_aff[2:5]
-#    lambda_test = alpha_test*delta_aff[5:8]
-#    if np.vstack([y[0:2],lambda_]).min() <= 0:    
-    
-    alpha_aff_dach = 0.9 # TODO
-    
+    alpha_test = 1
+    for i in range(0, 10):
+        y_test = y + alpha_test*delta_aff[2:5]
+        lambda_test = lambda_ + alpha_test*delta_aff[5:8]
+        print(np.vstack([y_test[0:2],lambda_test]).min())
+        if np.vstack([y_test[0:2], lambda_test]).min() <= 0:
+            alpha_test += -0.1
+        else:
+            break
+    print('alpha_test1 = ', alpha_test, 'i', i)
+
+    alpha_aff_dach = alpha_test  # TODO
     # Calculate my_dach = ...
     my_aff = (np.dot((y + alpha_aff_dach*delta_aff[2:5]).T, 
              (lambda_ + alpha_aff_dach*delta_aff[5:8])) / m)
@@ -179,8 +184,29 @@ for k in range(0, 10):
     delta = GS2.solve(x, y, lambda_, sigma, my, delta_aff)
     
     # Choose tau_k ... and set alpha_dach = ... (see(16.66))    
-    alpha_dach = 0.9 # TODO
-    
+    tau_k = 1  # tau_k is element(0, 1)
+
+    alpha_pri_test = 1
+    for i in range(0, 10):
+        y_test = y + alpha_pri_test*delta[2:5]
+        # print(np.vstack([y[0:2],lambda_]))
+        if y_test[0:2].min() <= 0:
+            alpha_pri_test += -0.1
+        else:
+            break
+    print('alpha_test2 = ', alpha_pri_test, 'i', i)
+
+    alpha_dual_test = 1
+    for i in range(0,10):
+        lambda_test = lambda_ + alpha_dual_test*delta[5:8]
+        # print(np.vstack([y[0:2],lambda_]))
+        if lambda_test.min() <= 0:
+            alpha_dual_test += -0.1
+        else:
+            break
+    print('alpha_test2 = ', alpha_dual_test, 'i', i)
+
+    alpha_dach = min(alpha_pri_test, alpha_dual_test) # TODO
     # Set (x+, y+, lambda+) = (x, y, lambda) + alpha_dach
     # * delta(x, y, lambda)    
     xk = x + alpha_dach*delta[0:2]
