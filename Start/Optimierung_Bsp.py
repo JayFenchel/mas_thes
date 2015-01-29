@@ -41,7 +41,6 @@ class LinearSystem:
 
         Y_inv = np.linalg.pinv(Y)
         Y_inv[2][2] = 1
-        print(Y_inv)
         Lambda = matrix_diag(lambda_)
 
         V = np.hstack([
@@ -183,12 +182,10 @@ for k in range(0, 6):
     for i in range(0, 10):
         y_test = y + alpha_test*delta_aff[2:5]
         lambda_test = lambda_ + alpha_test*delta_aff[5:8]
-        print(np.vstack([y_test[0:2],lambda_test]).min())
         if np.vstack([y_test[0:2], lambda_test]).min() <= 0:
             alpha_test += -0.1
         else:
             break
-    print('alpha_test1 = ', alpha_test, 'i', i)
 
     alpha_aff_dach = alpha_test  # TODO
     # Calculate my_dach = ...
@@ -207,12 +204,10 @@ for k in range(0, 6):
     alpha_pri_test = 1
     for i in range(0, 10):
         y_test = y + alpha_pri_test*delta[2:5]
-        print(y_test[0:2]).min()
         if y_test[0:2].min() <= 0:
             alpha_pri_test += -0.1
         else:
             break
-    print('alpha_test2 = ', alpha_pri_test, 'i', i)
 
     alpha_dual_test = 1
     for i in range(0,10):
@@ -222,7 +217,6 @@ for k in range(0, 6):
             alpha_dual_test += -0.1
         else:
             break
-    print('alpha_test2 = ', alpha_dual_test, 'i', i)
 
     alpha_dach = min(alpha_pri_test, alpha_dual_test) # TODO
     # Set (x+, y+, lambda+) = (x, y, lambda) + alpha_dach
@@ -233,5 +227,4 @@ for k in range(0, 6):
     
     print(np.vstack([xk, yk, lambda_k]).T)
 
-input()
 
