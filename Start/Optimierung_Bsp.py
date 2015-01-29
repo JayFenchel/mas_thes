@@ -224,7 +224,12 @@ for k in range(0, 6):
     xk = x + alpha_dach*delta[0:2]
     yk = y + alpha_dach*delta[2:5]
     lambda_k = lambda_ + alpha_dach*delta[5:8]
-    
-    print(np.vstack([xk, yk, lambda_k]).T)
+
+    epsilon = 1e-10
+    if abs(yk[2]) >= epsilon:
+        print('Gleichungsnebenbed. nicht erfüllt!')
+    if np.vstack([yk[0:2], lambda_k]).min() <= 0:
+        print('Größer-gleich-Null-Bed. nicht erfüllt')
+    print(xk.T)
 
 
