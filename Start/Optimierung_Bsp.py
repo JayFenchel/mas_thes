@@ -37,29 +37,30 @@ class LinearSystem:
     def solve(self, x, y, lambda_, sigma, my, delta_aff):
         
         Y = matrix_diag(y)
+        Y_inv = np.linalg.pinv(Y)
         Lambda = matrix_diag(lambda_)
 
         V = np.hstack([
                 np.vstack([G, np.zeros_like(A), -A]),
-                np.vstack([np.zeros_like(A.T), Lambda, +np.array(np.eye(3))]),
-                np.vstack([-A.T, Y, np.zeros_like(Y)])])
+                np.vstack([np.zeros_like(A.T), np.dot(Y_inv, Lambda), +np.array(np.eye(3))]),
+                np.vstack([-A.T, np.array(np.eye(3)), np.zeros_like(Y)])])
         
         if self.gleichung == 1:
             H = np.vstack([
                     -(np.dot(G, x) - np.dot(A.T, lambda_) + c),
-                    -np.dot(np.dot(Lambda, Y), np.array([[1.], [1.], [0.] ])) 
-                        + sigma*my*np.array([[1.], [1.], [0.] ]),
+                    -np.dot(np.dot(np.dot(Y_inv, Lambda), Y), np.array([[1.], [1.], [1.] ]))
+                        + np.dot(Y_inv, sigma*my*np.array([[1.], [1.], [1.] ])),
                     +(np.dot(A, x) - y - b)])
-                           
+
         if self.gleichung == 2:
             delta_aff_Y = matrix_diag(delta_aff[2:5])
             delta_aff_Lambda = matrix_diag(delta_aff[5:8])
             
             H = np.vstack([
                     -(np.dot(G, x) - np.dot(A.T, lambda_) + c),
-                    -np.dot(np.dot(Lambda, Y), np.array([[1.], [1.], [0.] ])) 
-                        - np.dot(np.dot(delta_aff_Lambda, delta_aff_Y), np.array([[1.], [1.], [0.] ])) 
-                        + sigma*my*np.array([[1.], [1.], [0.] ]),
+                    -np.dot(np.dot(np.dot(Y_inv,Lambda), Y), np.array([[1.], [1.], [1.] ]))
+                        - np.dot(np.dot(np.dot(Y_inv, delta_aff_Lambda), delta_aff_Y), np.array([[1.], [1.], [1.] ]))
+                        + np.dot(Y_inv,sigma*my*np.array([[1.], [1.], [0.] ])),
                     +(np.dot(A, x) - y - b)])
 
         # return np.linalg.solve(V, H)    # lin GS lösen
@@ -189,7 +190,7 @@ for k in range(0, 6):
     alpha_pri_test = 1
     for i in range(0, 10):
         y_test = y + alpha_pri_test*delta[2:5]
-        # print(np.vstack([y[0:2],lambda_]))
+        print(y_test[0:2]).min()
         if y_test[0:2].min() <= 0:
             alpha_pri_test += -0.1
         else:
@@ -213,7 +214,7 @@ for k in range(0, 6):
     yk = y + alpha_dach*delta[2:5]
     lambda_k = lambda_ + alpha_dach*delta[5:8]
     
-    print(np.vstack([x, y, lambda_]).T)
+    print(np.vstack([xk, yk, lambda_k]).T)
 
 input()
 
