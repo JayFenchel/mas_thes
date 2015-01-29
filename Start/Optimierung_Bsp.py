@@ -38,20 +38,22 @@ class LinearSystem:
     def solve(self, x, y, lambda_, sigma, my, delta_aff):
         
         Y = matrix_diag(y)
-        print(Y)
+
         Y_inv = np.linalg.pinv(Y)
+        Y_inv[2][2] = 1
+        print(Y_inv)
         Lambda = matrix_diag(lambda_)
 
         V = np.hstack([
                 np.vstack([G, np.zeros_like(A), -A]),
                 np.vstack([np.zeros_like(A.T), np.dot(Y_inv, Lambda), +np.array(np.eye(3))]),
-                np.vstack([-A.T, np.array(np.eye(3)), np.zeros_like(Y)])])
+                np.vstack([-A.T, np.dot(Y, Y_inv), np.zeros_like(Y)])])
         
         if self.gleichung == 1:
             H = np.vstack([
                     -(np.dot(G, x) - np.dot(A.T, lambda_) + c),
-                    -np.dot(np.dot(np.dot(Y_inv, Lambda), Y), np.array([[1.], [1.], [1.] ]))
-                        + np.dot(Y_inv, sigma*my*np.array([[1.], [1.], [1.] ])),
+                    -np.dot(np.dot(np.dot(Y_inv, Lambda), Y), np.array([[1.], [1.], [0] ]))
+                        + np.dot(Y_inv, sigma*my*np.array([[1.], [1.], [0] ])),
                     +(np.dot(A, x) - y - b)])
 
         if self.gleichung == 2:
@@ -60,9 +62,9 @@ class LinearSystem:
             
             H = np.vstack([
                     -(np.dot(G, x) - np.dot(A.T, lambda_) + c),
-                    -np.dot(np.dot(np.dot(Y_inv,Lambda), Y), np.array([[1.], [1.], [1.] ]))
-                        - np.dot(np.dot(np.dot(Y_inv, delta_aff_Lambda), delta_aff_Y), np.array([[1.], [1.], [1.] ]))
-                        + np.dot(Y_inv,sigma*my*np.array([[1.], [1.], [1.] ])),
+                    -np.dot(np.dot(np.dot(Y_inv,Lambda), Y), np.array([[1.], [1.], [0] ]))
+                        - np.dot(np.dot(np.dot(Y_inv, delta_aff_Lambda), delta_aff_Y), np.array([[1.], [1.], [0] ]))
+                        + np.dot(Y_inv,sigma*my*np.array([[1.], [1.], [0] ])),
                     +(np.dot(A, x) - y - b)])
 
         # return np.linalg.solve(V, H)    # lin GS lösen
