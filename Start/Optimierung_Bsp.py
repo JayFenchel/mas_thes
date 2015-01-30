@@ -94,27 +94,40 @@ def householder(a):
 
 def cholesky(a):
     # TODO
-    for i in range(0, 8):
+    n=a.shape[0]
+    print(a)
+    for i in range(0, n):
         for j in range(0, i):
             sum = a[i, j]
             for k in range(0, j-1):
                 sum += -a[i, k]*a[j, k]
             if i>j:
-                a[i, j] = sum/a[j, j]
+                a[i, j] = sum/np.abs(a[j, j])
             else:
                 if sum > 0:
                     a[i, i] = np.sqrt(sum)
                 else:
                     print('ERROR')
+    #
+    #
+    # for k in range(0, 8):
+    #     for j in range(0, k-1):
+    #         a[k, k] = a[k, k] - a[k, j]*a[k, j]
+    #     a[k, k] = np.sqrt(np.abs(a[k, k]))
+    #     for i in range(k+1, 8):
+    #         for j in range(0, k-1):
+    #             a[i, k] = a[i, k] - a[i, j]*a[k, j]
+    #         a[i, k] = a[i, k]/a[k, k]
+
     # Vergleich mit Housholder Transformation
     G = None
-    print(a)
+    # print(a)
     return(G)
 
 
 def vector_norm(a):
     n = 0
-    for i in range (0, a.shape[0]):
+    for i in range(0, a.shape[0]):
         n += a[i]**2
     return np.sqrt(n)
 
