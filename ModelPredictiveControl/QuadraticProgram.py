@@ -52,6 +52,7 @@ class QuadraticProgram:
         for i in range(1, T):
             P[i*2*(n+m):(i+1)*2*(n+m)].T[m+(i-1)*(m+n):m+i*(m+n)] = np.vstack([sys.Fx.T, sys.Fu.T])
         P[T*2*(n+m):T*2*(n+m)+n].T[m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = sys.Ff.T
+        self.P = P
 
         h = np.eye(2*T*(m+n)+n, 1)
         for i in range(0,T):
@@ -70,6 +71,15 @@ class QuadraticProgram:
         self.b[0:n] = np.dot(self.A, xk)
         self.g[0:m] += 2*np.dot(self.S.T, xk)
         self.h[0:2*(n+m)] += -np.dot(self.Fx, xk)
+
+        z0 = np.eye(T*(n+m), 1)*0 + 1
+        kappa = 10  # >0 barrier parameter
+
+        print(self.P.shape)
+        d = np.eye(103, 1)
+        d[:] = 1/(self.h[:]-np.dot(self.P[:], z0))
+
+        # Phi = 2*self.H + kappa*self.P.T* ' diag(d) ' *P
 
 
         return xk
