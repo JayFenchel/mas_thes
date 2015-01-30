@@ -53,6 +53,6 @@ class SimpleExample:
         qf[0] = 0
         self.qf = qf
         self.Ff = np.zeros_like(A)
-        self.ff = np.zeros_like(qf)
+        self.ff = np.zeros_like(qf)+1 # TODO, was wenn keine ff12
 
         self.T = 10  # Planning Horizon
