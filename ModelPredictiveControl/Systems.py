@@ -25,13 +25,9 @@ class SimpleExample:
 
         # Objective
         self.Q = np.eye(n, n)  # weighting of states
-        q = np.eye(n, 1)
-        q *= 0
-        self.q = q
+        self.q = np.eye(n, 1)*0
         self.R = np.eye(m, m)  # weighting of inputs
-        r = np.eye(m, 1)
-        r *= 0
-        self.r = r
+        self.r = np.eye(m, 1)*0
         self.S = np.zeros_like(B)  # non zero if not separable in states and control
 
         # Box constraints
