@@ -25,7 +25,13 @@ class SimpleExample:
 
         # Objective
         self.Q = np.eye(n, n)  # weighting of states
+        q = np.eye(n, 1)
+        q *= 0
+        self.q = q
         self.R = np.eye(m, m)  # weighting of inputs
+        r = np.eye(m, 1)
+        r *= 0
+        self.r = r
         self.S = np.zeros_like(B)  # non zero if not separable in states and control
 
         # Box constraints
@@ -36,7 +42,7 @@ class SimpleExample:
         fx[n:2*n] = -1
         fx *= 10
         Fu = np.eye(2*(n+m), m)
-        Fu[2*n:2*n+m],Fu[2*n+m:2*(n+m)], Fu[0:m]= Fu[0:m], Fu[0:m], 0
+        Fu[2*n:2*n+m],Fu[2*n+m:2*(n+m)], Fu[0:m] = Fu[0:m], Fu[0:m], 0
         self.Fu = Fu
         fu = np.ones([2*m, 1])
         fu[m:2*m] = -1
@@ -52,3 +58,5 @@ class SimpleExample:
         self.qf = qf
         self.Ff = np.zeros_like(A)
         self.ff = np.zeros_like(qf)
+
+        self.T = 10  # Planning Horizon
