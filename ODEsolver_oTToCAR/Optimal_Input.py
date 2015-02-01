@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.integrate import ode
 from scipy.optimize import fmin
+from scipy.optimize import minimize
 from time import time
 from Modell_kont import OdeModel
 from Modell_diskret_new import DiskretOdeModel
@@ -76,11 +77,17 @@ if __name__ == '__main__':
     print(time()-time1)
     print(uopt)
 
+    time1 = time()
+    bnds = [(-0.1, 1)]
+    uopt = minimize(cost_function_diskret, u0[0], method='SLSQP',args=(x0,), bounds=bnds)
+    print(uopt)
+    print(time()-time1)
+
     t1 = 1
     dt = 0.01
     n_sample = (t1-t0)/dt + 1
     t = np.linspace(t0, t1, n_sample)
-    u = [uopt, 30]
+    u = [uopt.x, 30]
     endsolution = odeint(myDGL.f, x0, t, args=(u,))
 
 
