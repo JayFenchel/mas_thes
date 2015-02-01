@@ -3,6 +3,7 @@
 __author__ = 'jayf'
 
 import numpy as np
+from MyMath import matrix_diag
 
 
 
@@ -62,24 +63,34 @@ class QuadraticProgram:
 
 
 
-    def solve(self, xk):
+    def solve(self, zk):
 
         T = self.T
         n = self.n
         m = self.m
 
+        xk = zk[m:m+n]
         self.b[0:n] = np.dot(self.A, xk)
         self.g[0:m] += 2*np.dot(self.S.T, xk)
         self.h[0:2*(n+m)] += -np.dot(self.Fx, xk)
 
-        z0 = np.eye(T*(n+m), 1)*0 + 1
+        v = np.eye(T*n, 1)*0
+
         kappa = 10  # >0 barrier parameter
 
-        print(self.P.shape)
         d = np.eye(103, 1)
-        d[:] = 1/(self.h[:]-np.dot(self.P[:], z0))
-
-        # Phi = 2*self.H + kappa*self.P.T* ' diag(d) ' *P
+        d[:] = 1/(self.h[:]-np.dot(self.P[:], zk))
 
 
-        return xk
+
+        Phi = 2*self.H + kappa*np.dot(np.dot(self.P.T, matrix_diag(d)), self.P)
+        rd = 2*np.dot(self.H, zk) + self.g + kappa*np.dot(self.P.T, d) + np.dot(self.C.T, v)
+        rp = np.dot(self.C, zk) - self.b
+
+        r = np.vstack([rd, rp])
+
+        SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
+
+
+
+        return np.linalg.solve(SS, -r)

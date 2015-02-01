@@ -10,3 +10,7 @@ def vector_norm(a):
     for i in range(0, a.shape[0]):
         n += a[i]**2
     return np.sqrt(n)
+
+def matrix_diag(a):
+
+    return np.diag(a.T[0])
