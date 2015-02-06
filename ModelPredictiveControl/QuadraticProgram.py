@@ -4,6 +4,7 @@ __author__ = 'jayf'
 
 import numpy as np
 from MyMath import matrix_diag
+from MyMath import solve_lin_gs
 
 
 
@@ -13,7 +14,9 @@ class QuadraticProgram:
 
         n = sys.n
         m = sys.m
-        T = sys.T  # Planning horizon
+        T = sys.T  # Planning horizon, Anzahl der Schritte
+
+        self.delta_t = sys.delta_t  # Länge der Schritte # TODO richtige Zeitschitte einbauen
 
         self.n = n
         self.m = m
@@ -77,8 +80,8 @@ class QuadraticProgram:
 
         self.kappa = 10  # >0 barrier parameter
 
-        self.d = np.eye(103, 1)
-        self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:50]))
+        self.d = np.eye(2*self.T*(self.m+self.n)+n, 1)
+        self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
 
 
 
@@ -91,10 +94,44 @@ class QuadraticProgram:
         lsg = np.linalg.solve(SS, -r)
         return lsg, r
 
+    def solve_own(self, zv_k):
+
+        T = self.T
+        n = self.n
+        m = self.m
+
+        xk = zv_k[m:m+n]
+        self.b[0:n] = np.dot(self.A, xk)
+        self.g[0:m] += 2*np.dot(self.S.T, xk)
+        self.h[0:2*(n+m)] += -np.dot(self.Fx, xk)
+
+        self.kappa = 10  # >0 barrier parameter
+
+        self.d = np.eye(2*self.T*(self.m+self.n)+n, 1)
+        self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
+
+
+
+        Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(self.d)), self.P)
+
+        r = self.residual(zv_k)
+        SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
+
+
+        lsg = np.linalg.solve(SS, -r)
+        lsg = solve_lin_gs(SS, -r)
+        return lsg, r
+
     def residual(self, zv_k):
         rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, self.d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
         return np.vstack([rd, rp])
+
+    def check(self, zv_k):
+        if((np.dot(self.P, zv_k[0:self.T*(self.m+self.n)]) - self.h) < 0).any():
+            return False
+        return True
+
 
 
