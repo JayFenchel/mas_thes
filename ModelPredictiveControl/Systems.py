@@ -57,6 +57,7 @@ class SimpleExample:
         self.ff = np.zeros_like(qf)+1 # TODO, was wenn keine ff12
 
         self.T = 10  # Planning Horizon
+        self.delta_t = 1  # Länge der Schritte # TODO richtige Zeitschitte einbauen
 
 class AirCraft:
     def __init__(self):
@@ -92,16 +93,18 @@ class AirCraft:
         self.S = np.zeros_like(Bd)
         # input constraints
         eui = 0.262  # rad (15 degrees). Elevator angle.
-        u_lb = [[-eui]]
-        u_ub =  [[eui]]
-        Fu = np.eye(2*(n+m), m)
-        Ku = [[0],
+        u_lb = -eui
+        u_ub =  eui
+        Ku = np.array([[0],
               [0],
-              [1]]
-        Fu[2*n:2*n+m],Fu[2*n+m:2*(n+m)], Fu[0:m] = Fu[0:m], Fu[0:m], 0
-        self.Fu = Fu
-        fu = np.ones([2*m, 1])*u_ub
-        fu[m:2*m] = u_lb
+              [1],
+              [0],
+              [0],
+              [1]])
+        self.Fu = Ku
+        fu = np.ones([np.shape(Ku)[0], 1])
+        fu[np.shape(Ku)[0]/2-1] = u_lb
+        fu[np.shape(Ku)[0]-1] = -u_lb
         # mixed constraints
         ex2 = 0.349  # rad/s (20 degrees). Pitch angle constraint.
         ex5 = 0.524 * self.delta_t  # rad/s * dt input slew rate constraint in discrete time
@@ -113,22 +116,20 @@ class AirCraft:
         Kx = np.array([[0, 1, 0, 0, 0],
               [-128.2, 128.2, 0, 0, 0],
               [0., 0., 0., 0., -1.],
-              [0., 0., 0., 0., 0.],
-              [0., 0., 0., 0., 0.]])
-        # hier mgl noch 2 mal 0 Zeilen
-        Fx = np.eye(2*(n+m), n)
-        Fx[0:n] = Kx
-        Fx[n:2*n] = Fx[0:n]
-        self.Fx = Fx
-        fx = np.ones([2*n, 1])
-        fx [0:n] = np.array([[ex2], [ey3], [ex5], [1], [1]])
-        fx[n:2*n] = -1*fx [0:n]
+              [0, 1, 0, 0, 0],
+              [-128.2, 128.2, 0, 0, 0],
+              [0., 0., 0., 0., -1.]])
+        self.Fx = Kx
+        fx = np.ones([2*3, 1])
+        fx [0:3] = np.array([[ex2], [ey3], [ex5]])
+        fx[3:2*3] = -1*fx [0:3]
 
         f = np.vstack([fx, fu])
+        f = fx + fu
         self.f = f
 
         # terminal state constraints
-        self.ff = fx[n:2*n]
+        self.ff = fx
         f_ub = e_ub
         self.Ff = Kx
 
