@@ -15,8 +15,8 @@ def cvxopt_solve_problem(x, mpc):
             mtx(np.vstack((C, -C))), mtx(np.vstack((c_ub, -c_lb))))
     return np.array(res['x'])[:]
 
-mpc = muaompc.ltidt.setup_mpc_problem('sys_simple')
-x0 = np.array([0, 0, 0])
+mpc = muaompc.ltidt.setup_mpc_problem('sys_aircraft')
+x0 = np.array([0, 0, 0, 400, 0])
 mpc.ctl.conf.in_iter = 24
 mpc.ctl.conf.ex_iter = 2
 mpc.ctl.conf.warmstart = True
