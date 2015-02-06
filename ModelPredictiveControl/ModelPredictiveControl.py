@@ -23,11 +23,11 @@ u0 = np.array([[0]])
 z0 = np.eye(T*(n+m), 1)*0
 v0 = np.eye(T*n, 1)*0
 
-# Startwere SimpleSys
-x0 = np.array([[0], [1], [0]])
-u0 = np.array([[0],[0]])
-z0 = np.eye(T*(n+m), 1)*0
-v0 = np.eye(T*n, 1)*0
+# # Startwere SimpleSys
+# x0 = np.array([[0], [1], [0]])
+# u0 = np.array([[0],[0]])
+# z0 = np.eye(T*(n+m), 1)*0
+# v0 = np.eye(T*n, 1)*0
 
 zk = z0
 vk = v0
@@ -82,7 +82,7 @@ for i in xrange(0, 20):
             break
 
     zv_k += s*delta_zv
-for i in range (0,T):
+for i in range(0, T):
     print(zv_k[i:(i+1)*m])
 print(s, r_norm)
 

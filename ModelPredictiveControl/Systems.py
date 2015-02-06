@@ -101,7 +101,7 @@ class AirCraft:
         Fu[2*n:2*n+m],Fu[2*n+m:2*(n+m)], Fu[0:m] = Fu[0:m], Fu[0:m], 0
         self.Fu = Fu
         fu = np.ones([2*m, 1])*u_ub
-        fu[m:2*m] = u_lb
+        fu[m:2*m] = fu[0:m]*(-1)*(-1)
         # mixed constraints
         ex2 = 0.349  # rad/s (20 degrees). Pitch angle constraint.
         ex5 = 0.524 * self.delta_t  # rad/s * dt input slew rate constraint in discrete time
@@ -122,7 +122,7 @@ class AirCraft:
         self.Fx = Fx
         fx = np.ones([2*n, 1])
         fx [0:n] = np.array([[ex2], [ey3], [ex5], [1], [1]])
-        fx[n:2*n] = -1*fx [0:n]
+        fx[n:2*n] = -1*-1*fx [0:n]
 
         f = np.vstack([fx, fu])
         self.f = f
