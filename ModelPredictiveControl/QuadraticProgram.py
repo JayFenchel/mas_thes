@@ -60,37 +60,41 @@ class QuadraticProgram:
             h[i*2*(m+n):(i+1)*2*(m+n)] = sys.f
         h[2*T*(m+n):2*T*(m+n)+n] = sys.ff
         self.h = h
+        self.v0 = np.eye(T*n, 1)*0
 
 
 
-    def solve(self, zk):
+    def solve(self, zv_k):
 
         T = self.T
         n = self.n
         m = self.m
 
-        xk = zk[m:m+n]
+        xk = zv_k[m:m+n]
         self.b[0:n] = np.dot(self.A, xk)
         self.g[0:m] += 2*np.dot(self.S.T, xk)
         self.h[0:2*(n+m)] += -np.dot(self.Fx, xk)
 
-        v = np.eye(T*n, 1)*0
+        self.kappa = 10  # >0 barrier parameter
 
-        kappa = 10  # >0 barrier parameter
-
-        d = np.eye(103, 1)
-        d[:] = 1/(self.h[:]-np.dot(self.P[:], zk))
+        self.d = np.eye(103, 1)
+        self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:50]))
 
 
 
-        Phi = 2*self.H + kappa*np.dot(np.dot(self.P.T, matrix_diag(d)), self.P)
-        rd = 2*np.dot(self.H, zk) + self.g + kappa*np.dot(self.P.T, d) + np.dot(self.C.T, v)
-        rp = np.dot(self.C, zk) - self.b
+        Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(self.d)), self.P)
 
-        r = np.vstack([rd, rp])
-
+        r = self.residual(zv_k)
         SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
 
 
+        lsg = np.linalg.solve(SS, -r)
+        return lsg, r
 
-        return np.linalg.solve(SS, -r)
+    def residual(self, zv_k):
+        rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, self.d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
+        rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
+
+        return np.vstack([rd, rp])
+
+

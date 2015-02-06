@@ -3,6 +3,7 @@
 __author__ = 'jayf'
 
 import numpy as np
+from numpy import diag
 
 
 class SimpleExample:
@@ -56,3 +57,47 @@ class SimpleExample:
         self.ff = np.zeros_like(qf)+1 # TODO, was wenn keine ff12
 
         self.T = 10  # Planning Horizon
+
+class AirCraft:
+    def __init__(self):
+
+        dt = 0.5
+        N = 10
+        mu = 100
+        # discrete-time system
+        Ad = [[  0.23996015,   0., 0.17871287,   0., 0.],
+              [ -0.37221757,   1., 0.27026411,   0., 0.],
+              [ -0.99008755,   0., 0.13885973,   0., 0.],
+              [-48.93540655, 64.1, 2.39923411,   1., 0.],
+              [0., 0., 0., 0., 0.]]
+        Bd = [[-1.2346445 ],
+              [-1.43828223],
+              [-4.48282454],
+              [-1.79989043],
+              [1.]]
+        # Weighting matrices for a problem with a better condition number
+        Q = diag([1014.7, 3.2407, 5674.8, 0.3695, 471.75])
+        R = diag([471.65])
+        P = Q
+        # input constraints
+        eui = 0.262  # rad (15 degrees). Elevator angle.
+        u_lb = [[-eui]]
+        u_ub =  [[eui]]
+        # mixed constraints
+        ex2 = 0.349  # rad/s (20 degrees). Pitch angle constraint.
+        ex5 = 0.524 * dt  # rad/s * dt input slew rate constraint in discrete time
+        ey3 = 30.
+        # bounds
+        e_lb = [[-ex2], [-ey3], [-ex5]]
+        e_ub = [[ex2], [ey3], [ex5]]
+        # constraint matrices
+        Kx = [[0, 1, 0, 0, 0],
+              [-128.2, 128.2, 0, 0, 0],
+              [0., 0., 0., 0., -1.]]
+        Ku = [[0],
+              [0],
+              [1]]
+        # terminal state constraints
+        f_lb = e_lb
+        f_ub = e_ub
+        F = Kx
