@@ -19,7 +19,7 @@ m = sys.m
 T = sys.T  # Planning horizon
 
 # Startwerte AirCraft
-x0 = np.array([[-5], [-1]])
+x0 = np.array([[-1], [-1]])
 u0 = np.array([[0]])
 z0 = np.eye(T*(n+m), 1)*0
 v0 = np.eye(T*n, 1)*0

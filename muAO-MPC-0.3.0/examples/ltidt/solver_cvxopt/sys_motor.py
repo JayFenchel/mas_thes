@@ -53,7 +53,7 @@ compute it as a stabilizing matrix.
 
 """
 
-T = 1
+T = .1
 K = 0.2
 dt = T / 10
 N = 10

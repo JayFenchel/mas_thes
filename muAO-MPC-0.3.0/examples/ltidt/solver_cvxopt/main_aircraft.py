@@ -16,7 +16,7 @@ def cvxopt_solve_problem(x, mpc):
     return np.array(res['x'])[:]
 
 mpc = muaompc.ltidt.setup_mpc_problem('sys_motor')
-x0 = np.array([-5, -1])
+x0 = np.array([-1, -1])
 mpc.ctl.conf.in_iter = 24
 mpc.ctl.conf.ex_iter = 2
 mpc.ctl.conf.warmstart = True

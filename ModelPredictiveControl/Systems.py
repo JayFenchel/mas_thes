@@ -142,7 +142,7 @@ class Motor:
     def __init__(self):
         K = 0.2
         self.T = 10
-        self.delta_t = 1  # Länge der Schritte # TODO richtige Zeitschitte einbauen
+        self.delta_t = .1  # Länge der Schritte # TODO richtige Zeitschitte einbauen
         # mu = 100
 
         # discrete-time system
@@ -168,12 +168,12 @@ class Motor:
         eui = 100  # rad (15 degrees). Elevator angle.
         u_lb = -eui
         u_ub =  eui
-        Ku = np.array([[0],[1],[0],[-1]])
+        Ku = np.array([[1],[-1]])
         self.Fu = Ku
         fu = np.ones([np.shape(Ku)[0]+1, 1])
         fu[np.shape(Ku)[0]/2] = -(u_lb)
         fu[np.shape(Ku)[0]] = (u_ub)
-        fu = np.array([[0],[-u_lb],[0],[u_ub]])
+        fu = np.array([[-u_lb],[u_ub]])
         # mixed constraints
         ex2 = 0.349  # rad/s (20 degrees). Pitch angle constraint.
         ex5 = 0.524 * self.delta_t  # rad/s * dt input slew rate constraint in discrete time
