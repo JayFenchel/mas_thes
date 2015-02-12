@@ -45,16 +45,19 @@ for i in xrange(0, 20):
     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
 
     last_r_norm = 10000000000
+    s = 0
     for i in np.linspace(1, .1, 10):
         zv_help = zv_k + i*delta_zv
-        print(QP.check(zv_help))
-        r = QP.residual(zv_help)
-        r_norm = ((r[:]*r[:]).sum())
-        if r_norm < last_r_norm:
-            s = i
-            last_r_norm = r_norm
-        else:
-            break
+        if QP.check(zv_help):
+            r = QP.residual(zv_help)
+            r_norm = ((r[:]*r[:]).sum())
+            if r_norm < last_r_norm:
+                s = i
+                last_r_norm = r_norm
+            else:
+                break
+    if s == 0:
+        print('No valid step possible')
 
     zv_k += s*delta_zv
 for i in range (0,T):
@@ -71,17 +74,19 @@ for i in xrange(0, 20):
     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
 
     last_r_norm = 10000000000
+    s = 0
     for i in np.linspace(1, .1, 10):
         zv_help = zv_k + i*delta_zv
-        # TODO Pz < h überprüfen
-        print(QP.check(zv_help))
-        r = QP.residual(zv_help)
-        r_norm = ((r[:]*r[:]).sum())
-        if r_norm < last_r_norm:
-            s = i
-            last_r_norm = r_norm
-        else:
-            break
+        if QP.check(zv_help):
+            r = QP.residual(zv_help)
+            r_norm = ((r[:]*r[:]).sum())
+            if r_norm < last_r_norm:
+                s = i
+                last_r_norm = r_norm
+            else:
+                break
+    if s == 0:
+        print('No valid step possible')
 
     zv_k += s*delta_zv
 for i in range (0,T):
