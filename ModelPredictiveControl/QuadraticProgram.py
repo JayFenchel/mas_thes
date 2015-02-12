@@ -51,19 +51,19 @@ class QuadraticProgram:
         self.b = np.eye(T*n, 1)
 
         # Inequality constraints
-        P = np.eye(T*np.shape(sys.Fu)[0]+np.shape(sys.Ff.T)[1], T*(n+m))*0
+        P = np.eye(T*np.shape(sys.Fu)[0]+0, T*(n+m))*0
         P[0:np.shape(sys.Fu)[0]].T[0:m] = sys.Fu.T
         for i in range(1, T):
-            Hilf = np.vstack([sys.Fx.T, sys.Fu.T])
+            Hilf = np.vstack([sys.Fu.T])
             P[i*np.shape(sys.Fu)[0]:(i+1)*np.shape(sys.Fu)[0]].T[m+(i-1)*(m+n):m+i*(m+n)] = Hilf
 
-        P[T*np.shape(sys.Fu)[0]:T*np.shape(sys.Fu)[0]+np.shape(sys.Ff.T)[1]].T[m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = sys.Ff.T
+        # P[T*np.shape(sys.Fu)[0]:T*np.shape(sys.Fu)[0]+np.shape(sys.Ff.T)[1]].T[m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = sys.Ff.T
         self.P = P
         print(np.shape(sys.f)[0])
-        h = np.eye(T*np.shape(sys.f)[0]+np.shape(sys.ff)[0], 1)
+        h = np.eye(T*np.shape(sys.f)[0], 1)
         for i in range(0,T):
             h[i*np.shape(sys.f)[0]:(i+1)*np.shape(sys.f)[0]] = sys.f
-        h[T*np.shape(sys.f)[0]:T*np.shape(sys.f)[0]+np.shape(sys.ff)[0]] = sys.ff
+        # h[T*np.shape(sys.f)[0]:T*np.shape(sys.f)[0]+np.shape(sys.ff)[0]] = sys.ff
         self.h = h
         self.v0 = np.eye(T*n, 1)*0
 
@@ -78,7 +78,7 @@ class QuadraticProgram:
         xk = zv_k[m:m+n]
         self.b[0:n] = np.dot(self.A, xk)
         self.g[0:m] += 2*np.dot(self.S.T, xk)
-        self.h[0:np.shape(self.Fx)[0]] += -np.dot(self.Fx, xk)
+        self.h[0:np.shape(self.Fx)[0]] += 0 #-np.dot(self.Fx, xk)
 
         self.kappa = 10  # >0 barrier parameter
 
@@ -107,7 +107,7 @@ class QuadraticProgram:
         self.g[0:m] += 2*np.dot(self.S.T, xk)
         self.h[0:np.shape(self.Fx)[0]] += -np.dot(self.Fx, xk)
 
-        self.kappa = .001  # >0 barrier parameter
+        self.kappa = 1  # >0 barrier parameter
 
         self.d = np.eye(np.shape(self.P)[0], 1)
         self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))

@@ -6,11 +6,12 @@ import numpy as np
 from MyMath import vector_norm
 from Systems import SimpleExample
 from Systems import AirCraft
+from Systems import Motor
 from QuadraticProgram import QuadraticProgram
 
 
 
-sys = AirCraft()
+sys = Motor()
 QP = QuadraticProgram(sys)
 
 n = sys.n
@@ -18,7 +19,7 @@ m = sys.m
 T = sys.T  # Planning horizon
 
 # Startwerte AirCraft
-x0 = np.array([[0], [0], [0], [400], [0]])
+x0 = np.array([[-5], [-1]])
 u0 = np.array([[0]])
 z0 = np.eye(T*(n+m), 1)*0
 v0 = np.eye(T*n, 1)*0
@@ -50,6 +51,7 @@ for i in xrange(0, 20):
         print(QP.check(zv_help))
         r = QP.residual(zv_help)
         r_norm = ((r[:]*r[:]).sum())
+        print r_norm
         if r_norm < last_r_norm:
             s = i
             last_r_norm = r_norm

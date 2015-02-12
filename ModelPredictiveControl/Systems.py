@@ -137,3 +137,69 @@ class AirCraft:
         qf = np.eye(n, 1)
         qf[0] = 0
         self.qf = qf
+
+class Motor:
+    def __init__(self):
+        K = 0.2
+        self.T = 10
+        self.delta_t = 1  # Länge der Schritte # TODO richtige Zeitschitte einbauen
+        # mu = 100
+
+        # discrete-time system
+        Ac = [[0, 1], [0, -1/self.T]]
+        Bc = [[0], [K/self.T]]
+        Ad = np.array(Ac)
+        self.A = Ad
+        Bd = np.array(Bc)
+        self.B = Bd
+        n = Ad.shape[1]  # columns in A
+        self.n = n
+        m = Bd.shape[1]  # columns in B
+        self.m = m
+
+        # Weighting matrices for a problem with a better condition number
+        self.Q = np.array(diag([1, 1]))
+        self.q = np.eye(n, 1)*0
+        self.R = np.array(diag([1]))
+        self.r = np.eye(m, 1)*0
+        P = self.Q  # TODO Was ist P
+        self.S = np.zeros_like(Bd)
+        # input constraints
+        eui = 100  # rad (15 degrees). Elevator angle.
+        u_lb = -eui
+        u_ub =  eui
+        Ku = np.array([[0],[1],[0],[-1]])
+        self.Fu = Ku
+        fu = np.ones([np.shape(Ku)[0]+1, 1])
+        fu[np.shape(Ku)[0]/2] = -(u_lb)
+        fu[np.shape(Ku)[0]] = (u_ub)
+        fu = np.array([[0],[-u_lb],[0],[u_ub]])
+        # mixed constraints
+        ex2 = 0.349  # rad/s (20 degrees). Pitch angle constraint.
+        ex5 = 0.524 * self.delta_t  # rad/s * dt input slew rate constraint in discrete time
+        ey3 = 30.
+        # bounds
+        e_lb = [[0], [0]]
+        e_ub = [[0], [0]]
+        # constraint matrices
+        Kx = np.array([[]])
+        self.Fx = Kx
+        fx = np.ones([4, 1])
+        fx [0:2] = - np.array(e_lb)
+        fx[2:4] = np.array(e_ub)
+        fx = np.array([])
+
+        #f = np.vstack([fx, fu]) # stacken - anderer branche
+        # f = fx + fu
+        f = fu
+        self.f = f
+
+        # terminal state constraints
+        self.ff = fx
+        f_ub = e_ub
+        self.Ff = Kx
+
+        self.Qf = P
+        qf = np.eye(n, 1)
+        qf[0] = 0
+        self.qf = qf
