@@ -97,14 +97,14 @@ class AirCraft:
         u_ub =  eui
         Ku = np.array([[0],
               [0],
-              [1],
+              [-1],
               [0],
               [0],
               [1]])
         self.Fu = Ku
         fu = np.ones([np.shape(Ku)[0], 1])
-        fu[np.shape(Ku)[0]/2-1] = -(u_ub)
-        fu[np.shape(Ku)[0]-1] = 1*(-u_lb)
+        fu[np.shape(Ku)[0]/2-1] = -(u_lb)
+        fu[np.shape(Ku)[0]-1] = (u_ub)
         # mixed constraints
         ex2 = 0.349  # rad/s (20 degrees). Pitch angle constraint.
         ex5 = 0.524 * self.delta_t  # rad/s * dt input slew rate constraint in discrete time
@@ -113,18 +113,18 @@ class AirCraft:
         e_lb = [[-ex2], [-ey3], [-ex5]]
         e_ub = [[ex2], [ey3], [ex5]]
         # constraint matrices
-        Kx = np.array([[0, 1, 0, 0, 0],
-              [-128.2, 128.2, 0, 0, 0],
-              [0., 0., 0., 0., -1.],
+        Kx = np.array([[0, -1, 0, 0, 0],
+              [128.2, -128.2, 0, 0, 0],
+              [0., 0., 0., 0., 1.],
               [0, 1, 0, 0, 0],
               [-128.2, 128.2, 0, 0, 0],
               [0., 0., 0., 0., -1.]])
         self.Fx = Kx
         fx = np.ones([2*3, 1])
-        fx [0:3] = -np.array([[ex2], [ey3], [ex5]])
-        fx[3:2*3] = 1*np.array([[-ex2], [-ey3], [-ex5]])
+        fx [0:3] = - np.array(e_lb)
+        fx[3:2*3] = np.array(e_ub)
 
-        f = np.vstack([fx, fu])
+        f = np.vstack([fx, fu]) # stacken - anderer branche
         f = fx + fu
         self.f = f
 
