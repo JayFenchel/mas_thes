@@ -129,7 +129,7 @@ class QuadraticProgram:
         return np.vstack([rd, rp])
 
     def check(self, zv_k):
-        if((np.dot(self.P, zv_k[0:self.T*(self.m+self.n)]) - self.h) < 0).any():
+        if((np.dot(self.P, zv_k[0:self.T*(self.m+self.n)]) - self.h) > 0).all():
             return False
         return True
 

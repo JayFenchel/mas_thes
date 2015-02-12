@@ -31,13 +31,12 @@ v0 = np.eye(T*n, 1)*0
 
 zk = z0
 vk = v0
-zv_k = np.vstack([zk, vk])
+for i in xrange(0, T):
+    zk[i:i+m], zk[i+m:i+m+n] = u0, x0
+zv_k0 = np.vstack([zk, vk])
 
-for i in xrange(0, 20):
-    for i in xrange(0, T):
-        zk[i:i+m], zk[i+m:i+m+n] = u0, x0
-
-
+zv_k = zv_k0
+for i in xrange(0, 30):
     delta_zv, r = QP.solve(zv_k)
 
     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
@@ -59,11 +58,10 @@ for i in range (0,T):
     print(zv_k[i:(i+1)*m])
 print(s, r_norm)
 
+
+zv_k = zv_k0
+
 for i in xrange(0, 20):
-    for i in xrange(0, T):
-        zk[i:i+m], zk[i+m:i+m+n] = u0, x0
-
-
     delta_zv, r = QP.solve_own(zv_k)
 
     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
@@ -71,7 +69,6 @@ for i in xrange(0, 20):
     last_r_norm = 10000000000
     for i in np.linspace(1, .1, 10):
         zv_help = zv_k + i*delta_zv
-        # TODO Pz < h überprüfen
         print(QP.check(zv_help))
         r = QP.residual(zv_help)
         r_norm = ((r[:]*r[:]).sum())
