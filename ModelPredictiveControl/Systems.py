@@ -98,7 +98,7 @@ class AirCraft:
         Ku = [[0],
               [0],
               [1]]
-        Fu[2*n:2*n+m],Fu[2*n+m:2*(n+m)], Fu[0:m] = Fu[0:m], Fu[0:m], 0
+        Fu[2*n:2*n+m],Fu[2*n+m:2*(n+m)], Fu[0:m] = -Fu[0:m], Fu[0:m], 0
         self.Fu = Fu
         fu = np.ones([2*m, 1])*u_ub
         fu[m:2*m] = fu[0:m]*(-1)*(-1)
@@ -117,12 +117,12 @@ class AirCraft:
               [0., 0., 0., 0., 0.]])
         # hier mgl noch 2 mal 0 Zeilen
         Fx = np.eye(2*(n+m), n)
-        Fx[0:n] = Kx
-        Fx[n:2*n] = Fx[0:n]
+        Fx[0:n] = -Kx
+        Fx[n:2*n] = -Fx[0:n]
         self.Fx = Fx
         fx = np.ones([2*n, 1])
         fx [0:n] = np.array([[ex2], [ey3], [ex5], [1], [1]])
-        fx[n:2*n] = -1*-1*fx [0:n]
+        fx[n:2*n] = -1*-1*fx[0:n]
 
         f = np.vstack([fx, fu])
         self.f = f
