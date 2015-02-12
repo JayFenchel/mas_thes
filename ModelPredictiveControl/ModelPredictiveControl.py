@@ -31,11 +31,13 @@ v0 = np.eye(T*n, 1)*0
 
 zk = z0
 vk = v0
-zv_k = np.vstack([zk, vk])
+for i in xrange(0, T):
+    zk[i:i+m], zk[i+m:i+m+n] = u0, x0
+zv_k0 = np.vstack([zk, vk])
 
+zv_k = zv_k0
 for i in xrange(0, 20):
-    for i in xrange(0, T):
-        zk[i:i+m], zk[i+m:i+m+n] = u0, x0
+
 
 
     delta_zv, r = QP.solve(zv_k)
@@ -59,9 +61,9 @@ for i in range (0,T):
     print(zv_k[i:(i+1)*m])
 print(s, r_norm)
 
+zv_k = zv_k0
+
 for i in xrange(0, 20):
-    for i in xrange(0, T):
-        zk[i:i+m], zk[i+m:i+m+n] = u0, x0
 
 
     delta_zv, r = QP.solve_own(zv_k)

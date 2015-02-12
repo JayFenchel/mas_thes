@@ -107,7 +107,7 @@ class QuadraticProgram:
         self.g[0:m] += 2*np.dot(self.S.T, xk)
         self.h[0:np.shape(self.Fx)[0]] += -np.dot(self.Fx, xk)
 
-        self.kappa = 10  # >0 barrier parameter
+        self.kappa = .001  # >0 barrier parameter
 
         self.d = np.eye(np.shape(self.P)[0], 1)
         self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
