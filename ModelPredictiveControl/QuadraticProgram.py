@@ -5,6 +5,7 @@ __author__ = 'jayf'
 import numpy as np
 from MyMath import matrix_diag
 from MyMath import solve_lin_gs
+from MyMath import solve_lin_gs_structured
 
 
 
@@ -22,6 +23,7 @@ class QuadraticProgram:
         self.m = m
         self.T = T
         self.A = sys.A
+        self.B = sys.B
         self.S = sys.S
         self.Fx = sys.Fx
 
@@ -89,11 +91,19 @@ class QuadraticProgram:
 
         Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(self.d)), self.P)
 
+        # print(m)
+        # print(self.P[0:m+n+7].T[0:m+n+3]).T
+        # print(np.linalg.inv(Phi))
+
         r = self.residual(zv_k)
         SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
 
+        v = zv_k[self.T*(self.m+self.n):]
+        lsg = solve_lin_gs_structured(Phi, r, self.A, self.B, self.C, T, m, n, v)
+        print lsg[100:]
 
         lsg = np.linalg.solve(SS, -r)
+        print lsg[100:]
         return lsg, r
 
     def solve_own(self, zv_k):
@@ -119,8 +129,6 @@ class QuadraticProgram:
         r = self.residual(zv_k)
         SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
 
-
-        lsg = np.linalg.solve(SS, -r)
         lsg = solve_lin_gs(SS, -r)
         return lsg, r
 
