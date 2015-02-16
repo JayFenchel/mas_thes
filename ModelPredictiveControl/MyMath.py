@@ -39,6 +39,8 @@ def householder(a):
 
 def cholesky(a):
 
+    # TODO Prüfen, ob a symmetrisch
+
     n=a.shape[0]
     for k in range(0, n):
         for j in range(0, k):
@@ -76,14 +78,18 @@ def solve_lin_gs_structured(Phi_not_inv, r, A, B, C, T, m, n, v):
 ############
     Phi = np.linalg.inv(Phi_not_inv)
 ############
-
+    # TODO flogende Zeilen rausnehmen
     Y = np.eye(T*n, T*n)*0
     Y[0*n:(0+1)*n].T[0*n:(0+1)*n] = np.dot(B, np.linalg.solve(L_Phi.T[0:m].T[0:m], np.linalg.solve(L_Phi.T[0:m].T[0:m].T, B.T))).T\
                                                 + Phi[m:m+n].T[m:m+n].T
     for i in range(0, T):
         for j in range(i, i+2):
+            #Y[0, 0]
+            if i == 0 and j == 0:
+                Y[0*n:(0+1)*n].T[0*n:(0+1)*n] = np.dot(np.dot(B, Phi[0][0]), B.T).T\
+                                                + Phi[m:m+n].T[m:m+n].T
             #Y[i, i]
-            if i == j:
+            elif i == j:
                 Y[i*n:(i+1)*n].T[i*n:(i+1)*n] = (np.dot(np.dot(A, Phi[m+(i-1)*(m+n):m+(i-1)*(m+n)+n].T[m+(i-1)*(m+n):m+(i-1)*(m+n)+n].T), A.T)
                                                 + np.dot(np.dot(B, Phi[m+(i-1)*(m+n)+n:m+(i-1)*(m+n)+n+m].T[m+(i-1)*(m+n)+n:m+(i-1)*(m+n)+n+m].T), B.T)
                                                 + Phi[m+i*(m+n):m+i*(m+n)+n].T[m+i*(m+n):m+i*(m+n)+n].T).T
@@ -117,7 +123,9 @@ def solve_lin_gs_structured(Phi_not_inv, r, A, B, C, T, m, n, v):
     return x
 
 def forward_substitution():
+    # TODO
     return 0
 
 def backward_substitution():
+    # TODO
     return 0
