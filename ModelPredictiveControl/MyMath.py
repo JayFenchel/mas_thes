@@ -38,36 +38,22 @@ def householder(a):
     return Q, R
 
 def cholesky(a):
-    # # TODO
-    # n=a.shape[0]
-    # print(a)
-    # for i in range(0, n):
-    #     for j in range(0, i):
-    #         sum = a[i, j]
-    #         for k in range(0, j-1):
-    #             sum += -a[i, k]*a[j, k]
-    #         if i>j:
-    #             a[i, j] = sum/np.abs(a[j, j])
-    #         else:
-    #             if sum > 0:
-    #                 a[i, i] = np.sqrt(sum)
-    #             else:
-    #                 print('ERROR')
-    #
-    #
-    # for k in range(0, 8):
-    #     for j in range(0, k-1):
-    #         a[k, k] = a[k, k] - a[k, j]*a[k, j]
-    #     a[k, k] = np.sqrt(np.abs(a[k, k]))
-    #     for i in range(k+1, 8):
-    #         for j in range(0, k-1):
-    #             a[i, k] = a[i, k] - a[i, j]*a[k, j]
-    #         a[i, k] = a[i, k]/a[k, k]
 
-    # Vergleich mit Housholder Transformation
-    G = np.linalg.cholesky(a)
-    # print(a)
-    return(G)
+    n=a.shape[0]
+    for k in range(0, n):
+        for j in range(0, k):
+            a[k, k] = a[k, k] - a[k, j]*a[k, j]
+        a[k, k] = np.sqrt(np.abs(a[k, k]))
+        for i in range(k+1, n):
+            for j in range(0, k):
+                a[i, k] = a[i, k] - a[i, j]*a[k, j]
+            a[i, k] = a[i, k]/a[k, k]
+
+    for k in range(0, n):
+        for j in range(k+1, n):
+            a[k, j] = 0
+
+    return(a)
 
 def solve_lin_gs(A, b):
 
