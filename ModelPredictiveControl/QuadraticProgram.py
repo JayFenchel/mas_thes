@@ -61,7 +61,7 @@ class QuadraticProgram:
 
         P[T*np.shape(sys.Fu)[0]:T*np.shape(sys.Fu)[0]+np.shape(sys.Ff.T)[1]].T[m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = sys.Ff.T
         self.P = P
-        print(np.shape(sys.f)[0])
+        # print(np.shape(sys.f)[0])
         h = np.eye(T*np.shape(sys.f)[0]+np.shape(sys.ff)[0], 1)
         for i in range(0,T):
             h[i*np.shape(sys.f)[0]:(i+1)*np.shape(sys.f)[0]] = sys.f
@@ -100,10 +100,10 @@ class QuadraticProgram:
 
         v = zv_k[self.T*(self.m+self.n):]
         lsg = solve_lin_gs_structured(Phi, r, self.A, self.B, self.C, T, m, n, v)
-        print lsg[100:]
+        # print lsg[100:]
 
         lsg = np.linalg.solve(SS, -r)
-        print lsg[100:]
+        # print lsg[100:]
         return lsg, r
 
     def solve_own(self, zv_k):
