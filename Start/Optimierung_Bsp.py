@@ -120,7 +120,7 @@ def cholesky(a):
     #         a[i, k] = a[i, k]/a[k, k]
 
     # Vergleich mit Housholder Transformation
-    G = None
+    G = np.linalg.cholesky(a)
     # print(a)
     return(G)
 
