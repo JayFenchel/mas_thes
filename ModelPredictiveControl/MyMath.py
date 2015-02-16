@@ -85,19 +85,19 @@ def solve_lin_gs(A, b):
 
 def solve_lin_gs_structured(Phi_not_inv, r, A, B, C, T, m, n, v):
 
-    Phi = np.linalg.inv(Phi_not_inv)
-    Y = np.eye(T*n, T*n)*0
 
-    Y[0*n:(0+1)*n].T[0*n:(0+1)*n] = np.dot(np.dot(B, Phi[0][0]), B.T).T\
+    L_Phi = np.linalg.cholesky(Phi_not_inv)
+############
+    Phi = np.linalg.inv(Phi_not_inv)
+############
+
+    Y = np.eye(T*n, T*n)*0
+    Y[0*n:(0+1)*n].T[0*n:(0+1)*n] = np.dot(B, np.linalg.solve(L_Phi.T[0:m].T[0:m], np.linalg.solve(L_Phi.T[0:m].T[0:m].T, B.T))).T\
                                                 + Phi[m:m+n].T[m:m+n].T
     for i in range(0, T):
         for j in range(i, i+2):
-            #Y[0, 0]
-            if i == 0 and j == 0:
-                Y[0*n:(0+1)*n].T[0*n:(0+1)*n] = np.dot(np.dot(B, Phi[0][0]), B.T).T\
-                                                + Phi[m:m+n].T[m:m+n].T
             #Y[i, i]
-            elif i == j:
+            if i == j:
                 Y[i*n:(i+1)*n].T[i*n:(i+1)*n] = (np.dot(np.dot(A, Phi[m+(i-1)*(m+n):m+(i-1)*(m+n)+n].T[m+(i-1)*(m+n):m+(i-1)*(m+n)+n].T), A.T)
                                                 + np.dot(np.dot(B, Phi[m+(i-1)*(m+n)+n:m+(i-1)*(m+n)+n+m].T[m+(i-1)*(m+n)+n:m+(i-1)*(m+n)+n+m].T), B.T)
                                                 + Phi[m+i*(m+n):m+i*(m+n)+n].T[m+i*(m+n):m+i*(m+n)+n].T).T
@@ -129,3 +129,9 @@ def solve_lin_gs_structured(Phi_not_inv, r, A, B, C, T, m, n, v):
     delta_z = np.linalg.solve(Phi_not_inv, -r[0:T*(n+m)] - np.dot(C.T, v))
     x = np.vstack([delta_z, delta_v])
     return x
+
+def forward_substitution():
+    return 0
+
+def backward_substitution():
+    return 0
