@@ -59,14 +59,14 @@ for i in xrange(0, 100):
             else:
                 break
     # backtracking line search
-    f_x = abs(np.vstack(QP.residual(zv_k))).sum()
-    testschritt = np.zeros_like(delta_zv) + 1
-    nabla_f = (abs(np.vstack(QP.residual(zv_k + testschritt))) - f_x)/1
-    alpha = 0.4
+    f_x = np.square(np.vstack(QP.residual(zv_k))).sum()
+    testschritt = delta_zv * .001
+    nabla_f = (np.square(np.vstack(QP.residual(zv_k + testschritt))) - f_x)/.001
+    alpha = 0.5
     beta = 0.8
     st = 1
     print np.dot(nabla_f.T, delta_zv)
-    while abs(np.vstack(QP.residual(zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(nabla_f.T, delta_zv):
+    while np.square(np.vstack(QP.residual(zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(nabla_f.T, .001):
         st = beta*st
         print s
         print st
