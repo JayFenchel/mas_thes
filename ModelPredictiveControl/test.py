@@ -31,13 +31,13 @@ b = np.array([[-1.2346445 ,1],
               [1.,1]])
 
 x_f = forward_substitution(A, b)
-if (abs(np.dot(A, x_f)-b)).sum() < 0.00001:
+if (abs(np.dot(A, x_f)-b)).sum() < 1e-10:
     print("forward_substitution did it right, error =", (abs(np.dot(A, x_f)-b)).sum())
 else:
     print("forward_substitution failed")
 
 x_b = backward_substitution(A.T, b)
-if (abs(np.dot(A.T, x_b)-b)).sum() < 0.00001:
+if (abs(np.dot(A.T, x_b)-b)).sum() < 1e-10:
     print("backward_substitution did it right, error =", (abs(np.dot(A.T, x_b)-b)).sum())
 else:
     print("backward_substitution failed")

@@ -39,9 +39,10 @@ def householder(a):
 
 def cholesky(a):
 
-    # TODO Prüfen, ob a symmetrisch
+    # TODO Prüfen, ob a symmetrisch,
 
-    n=a.shape[0]
+    c = np.linalg.cholesky(a)  # Zum Vergleich mit der eigenen Funktion
+    n = a.shape[0]
     for k in range(0, n):
         for j in range(0, k):
             a[k, k] = a[k, k] - a[k, j]*a[k, j]
@@ -54,7 +55,9 @@ def cholesky(a):
     for k in range(0, n):
         for j in range(k+1, n):
             a[k, j] = 0
-
+    # compare with build-in function
+    if abs(a-c).sum() > 1e-10:
+        print('cholesky-Zerlegung failed')
     return(a)
 
 def solve_lin_gs(A, b):
@@ -66,9 +69,7 @@ def solve_lin_gs(A, b):
     Rtilde = R[0:npe, 0:npe]
     ctilde = c[0:npe]
     x=np.array(np.eye(npe, 1))
-    for k in range(npe-1, 0-1, -1):
-        x[k] = (ctilde[k] - np.dot(Rtilde[k, k+1:npe], x[k+1:npe]))/Rtilde[k, k]
-
+    x = backward_substitution(Rtilde, ctilde)
     return x
 
 def solve_lin_gs_structured(Phi_not_inv, r, A, B, C, T, m, n, v):
@@ -114,9 +115,9 @@ def solve_lin_gs_structured(Phi_not_inv, r, A, B, C, T, m, n, v):
     delta_v = np.linalg.solve(Y, -beta)
     for k in range(np.shape(beta)[0]-1, 0-1, -1):
         delta_v[k] = (hilf[k] - np.dot(L_Y.T[k, k+1:], hilf[k+1:]))/L_Y.T[k, k]
-    print delta_v[:10]
+    # print delta_v[:10]
     delta_v = np.linalg.solve(Y, -beta)
-    print delta_v[:10]
+    # print delta_v[:10]
 
     delta_z = np.linalg.solve(Phi_not_inv, -r[0:T*(n+m)] - np.dot(C.T, v))
     x = np.vstack([delta_z, delta_v])
