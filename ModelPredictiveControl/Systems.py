@@ -86,12 +86,12 @@ class AirCraft:
 
         # Weighting matrices for a problem with a better condition number
         self.Q = np.array(diag([1014.7, 3.2407, 5674.8, 0.3695, 471.75]))
-        self.q = np.eye(n, 1)*0
+        self.q = np.zeros([n, 1])
         self.R = np.array(diag([471.65]))
-        self.r = np.eye(m, 1)*0
+        self.r = np.zeros([m, 1])
         P = self.Q  # TODO Was ist P, terminal weighting?
         self.Qf = P
-        qf = np.eye(n, 1)*0
+        qf = np.zeros([n, 1])
         self.qf = qf
         self.S = np.zeros_like(Bd)  # no combined weighting
 

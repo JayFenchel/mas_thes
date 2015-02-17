@@ -28,48 +28,44 @@ class QuadraticProgram:
         self.Fx = sys.Fx
 
         # Cost function
-        H = np.eye(T*(sys.n+sys.m), T*(sys.n+sys.m))
-        H[0:m].T[0:m] = sys.R
+        H = np.eye(T*(n+m), T*(n+m))
+        H[0:m, 0:m] = sys.R
         QSR = np.hstack([np.vstack([sys.Q, sys.S.T]), np.vstack([sys.S, sys.R])])
         for i in range(1, T):
-            # TODO wegen dem Transponieren auf Symmetrie achten
-            H[m+(i-1)*(m+n):m+i*(m+n)].T[m+(i-1)*(m+n):m+i*(m+n)] = QSR
-        H[m+(T-1)*(m+n):m+(T-1)*(m+n)+n].T[m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = sys.Qf
+            H[m+(i-1)*(m+n):m+i*(m+n), m+(i-1)*(m+n):m+i*(m+n)] = QSR
+        H[m+(T-1)*(m+n):m+(T-1)*(m+n)+n, m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = sys.Qf
         self.H = H
 
-        g = np.eye(T*(m+n), 1)
-        for i in range(0,T):
+        g = np.zeros([T*(m+n), 1])
+        for i in range(0, T):
             g[i*(n+m):(i+1)*(n+m)] = np.vstack([sys.r, sys.q])
         g[(T-1)*(n+m)+m:T*(n+m)] = sys.qf
         self.g = g
 
         # Equality constraints
-        C = np.eye(T*n, T*(n+m))*0
-        C[0:n].T[0:m+n] = np.vstack([-sys.B.T, np.eye(n, n)])
-        for i in range(1, T):
-            C[i*n:(i+1)*n].T[m+(i-1)*(m+n):m+i*(m+n)+n] = np.vstack([-sys.A.T, -sys.B.T, np.eye(n, n)])
+        C = np.zeros([T*n, T*(n+m)])
+        C[0:n, 0:m+n] = np.hstack([-sys.B, np.eye(n, n)])
+        for i in range(1, T): #TODO hier gehts weiter
+            C[i*n:(i+1)*n, m+(i-1)*(m+n):m+i*(m+n)+n] = np.hstack([-sys.A, -sys.B, np.eye(n, n)])
         self.C = C
 
-        self.b = np.eye(T*n, 1)
+        self.b = np.zeros([T*n, 1])
 
         # Inequality constraints
-        P = np.eye(T*np.shape(sys.Fu)[0]+np.shape(sys.Ff.T)[1], T*(n+m))*0
-        P[0:np.shape(sys.Fu)[0]].T[0:m] = sys.Fu.T
+        n_Fu = np.shape(sys.Fu)[0]
+        P = np.zeros([T*n_Fu+np.shape(sys.Ff)[0], T*(n+m)])
+        P[0:n_Fu, 0:m] = sys.Fu
         for i in range(1, T):
-            Hilf = np.vstack([sys.Fx.T, sys.Fu.T])
-            P[i*np.shape(sys.Fu)[0]:(i+1)*np.shape(sys.Fu)[0]].T[m+(i-1)*(m+n):m+i*(m+n)] = Hilf
+            Hilf = np.hstack([sys.Fx, sys.Fu])
+            P[i*n_Fu:(i+1)*n_Fu, m+(i-1)*(m+n):m+i*(m+n)] = Hilf
 
-        P[T*np.shape(sys.Fu)[0]:T*np.shape(sys.Fu)[0]+np.shape(sys.Ff.T)[1]].T[m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = sys.Ff.T
+        P[T*n_Fu:T*n_Fu+np.shape(sys.Ff)[0], m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = sys.Ff
         self.P = P
-        # print(np.shape(sys.f)[0])
-        h = np.eye(T*np.shape(sys.f)[0]+np.shape(sys.ff)[0], 1)
-        for i in range(0,T):
+        h = np.zeros([T*np.shape(sys.f)[0]+np.shape(sys.ff)[0], 1])
+        for i in range(0, T):
             h[i*np.shape(sys.f)[0]:(i+1)*np.shape(sys.f)[0]] = sys.f
         h[T*np.shape(sys.f)[0]:T*np.shape(sys.f)[0]+np.shape(sys.ff)[0]] = sys.ff
         self.h = h
-        self.v0 = np.eye(T*n, 1)*0
-
-
 
     def solve(self, zv_k):
 
@@ -113,7 +109,7 @@ class QuadraticProgram:
         m = self.m
 
         xk = zv_k[m:m+n]
-        self.b[0:n] = np.dot(self.A, xk)
+        self.b[0:n] += np.dot(self.A, xk)
         self.g[0:m] += 2*np.dot(self.S.T, xk)
         self.h[0:np.shape(self.Fx)[0]] += -np.dot(self.Fx, xk)
 
