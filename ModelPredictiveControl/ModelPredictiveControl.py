@@ -37,8 +37,8 @@ zv_k0 = np.vstack([zk, vk])
 
 xk = x0
 zv_k = zv_k0
+print 'startwert valide = ',QP.check(zv_k)  # Validität des Startwerts prüfen
 for i in xrange(0, 100):
-    print QP.check(zv_k)
     delta_zv = QP.solve(xk, zv_k)
 
     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
@@ -58,13 +58,24 @@ for i in xrange(0, 100):
                 last_r_norm = r_norm
             else:
                 break
+    # backtracking line search
+    f_x = abs(np.vstack(QP.residual(zv_k))).sum()
+    testschritt = np.zeros_like(delta_zv) + 1
+    nabla_f = (abs(np.vstack(QP.residual(zv_k + testschritt))) - f_x)/1
+    alpha = 0.4
+    beta = 0.8
+    st = 1
+    print np.dot(nabla_f.T, delta_zv)
+    while abs(np.vstack(QP.residual(zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(nabla_f.T, delta_zv):
+        st = beta*st
+        print s
+        print st
     if s == 0:
         print('No valid step possible')
-    print(s, r_norm)
     zv_k += s*delta_zv
     # print(zv_k)
-    for i in range (0,T):
-        print(zv_k[i*(m+n):i*(m+n)+m])
+for i in range (0,T):
+    print(zv_k[i*(m+n):i*(m+n)+m])
 print(s, r_norm)
 #
 # xk = x0
