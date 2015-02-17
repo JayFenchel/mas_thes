@@ -79,12 +79,10 @@ class QuadraticProgram:
         self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
         self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 
-        self.kappa = 10  # >0 barrier parameter
+        self.kappa = 15 # >0 barrier parameter
 
-        self.d = np.eye(np.shape(self.P)[0], 1)
+        self.d = np.zeros([np.shape(self.P)[0], 1])
         self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
-
-
 
         Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(self.d)), self.P)
 
@@ -92,47 +90,51 @@ class QuadraticProgram:
         # print(self.P[0:m+n+7].T[0:m+n+3]).T
         # print(np.linalg.inv(Phi))
 
-        r = self.residual(zv_k)
+        r = np.vstack(self.residual(zv_k))
         SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
 
-        v = zv_k[self.T*(self.m+self.n):]
-        lsg = solve_lin_gs_structured(Phi, r, self.A, self.B, self.C, T, m, n, v)
+        # v = zv_k[self.T*(self.m+self.n):]
+        # lsg = solve_lin_gs_structured(Phi, r, self.A, self.B, self.C, T, m, n, v)
         # print lsg[100:]
 
         lsg = np.linalg.solve(SS, -r)
         # print lsg[100:]
-        return lsg, r
-
-    def solve_own(self, xk, zv_k):
-
-        T = self.T
-        n = self.n
-        m = self.m
-
-        self.b[0:n] = np.dot(self.A, xk)
-        self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
-        self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
-
-        self.kappa = .001  # >0 barrier parameter
-
-        self.d = np.eye(np.shape(self.P)[0], 1)
-        self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
-
-
-
-        Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(self.d)), self.P)
-
-        r = self.residual(zv_k)
-        SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
-
-        lsg = solve_lin_gs(SS, -r)
-        return lsg, r
+        return lsg
+    #
+    # def solve_own(self, xk, zv_k):
+    #
+    #     T = self.T
+    #     n = self.n
+    #     m = self.m
+    #
+    #     self.b[0:n] = np.dot(self.A, xk)
+    #     self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
+    #     self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
+    #
+    #     self.kappa = .001  # >0 barrier parameter
+    #
+    #     self.d = np.eye(np.shape(self.P)[0], 1)
+    #     self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
+    #
+    #
+    #
+    #     Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(self.d)), self.P)
+    #
+    #     r = self.residual(zv_k)
+    #     SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
+    #
+    #     lsg = solve_lin_gs(SS, -r)
+    #     return lsg, r
 
     def residual(self, zv_k):
+
+        self.d = np.zeros([np.shape(self.P)[0], 1])
+        self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
+
         rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, self.d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
-        return np.vstack([rd, rp])
+        return rd, rp
 
     def check(self, zv_k):
         return ((np.dot(self.P, zv_k[0:self.T*(self.m+self.n)]) - self.h) < 0).all()

@@ -32,26 +32,27 @@ v0 = np.eye(T*n, 1)*0
 zk = z0
 vk = v0
 for i in xrange(0, T):
-    zk[i*(n+m):i*(m+n)+m], zk[i*(m+n)+m:i*(m+n)+m+n] = u0, x0
+    zk[i*(n+m):i*(m+n)+m], zk[i*(m+n)+m:i*(m+n)+m+n] = u0, 0
 zv_k0 = np.vstack([zk, vk])
 
 xk = x0
 zv_k = zv_k0
-for i in xrange(0, 20):
-
-
-
-    delta_zv, r = QP.solve(xk, zv_k)
+for i in xrange(0, 100):
+    print QP.check(zv_k)
+    delta_zv = QP.solve(xk, zv_k)
 
     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
 
-    last_r_norm = 10000000000
+    last_r_norm = 100000000000000000
     s = 0
-    for i in np.linspace(1, .1, 10):
+    for i in np.linspace(1, .01, 100):
         zv_help = zv_k + i*delta_zv
         if QP.check(zv_help):
-            r = QP.residual(zv_help)
-            r_norm = ((r[:]*r[:]).sum())
+            print('Valid step possible')
+            rd, rp = QP.residual(zv_help)
+            rd_norm = abs(rd[:]).sum()
+            rp_norm = abs(rp[:]).sum()
+            r_norm = rd_norm + rp_norm
             if r_norm < last_r_norm:
                 s = i
                 last_r_norm = r_norm
@@ -59,39 +60,40 @@ for i in xrange(0, 20):
                 break
     if s == 0:
         print('No valid step possible')
-
+    print(s, r_norm)
     zv_k += s*delta_zv
-for i in range (0,T):
-    print(zv_k[i:(i+1)*m])
+    # print(zv_k)
+    for i in range (0,T):
+        print(zv_k[i*(m+n):i*(m+n)+m])
 print(s, r_norm)
-
-xk = x0
-zv_k = zv_k0
-
-for i in xrange(0, 20):
-
-
-    delta_zv, r = QP.solve_own(xk, zv_k)
-
-    # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
-
-    last_r_norm = 10000000000
-    s = 0
-    for i in np.linspace(1, .1, 10):
-        zv_help = zv_k + i*delta_zv
-        if QP.check(zv_help):
-            r = QP.residual(zv_help)
-            r_norm = ((r[:]*r[:]).sum())
-            if r_norm < last_r_norm:
-                s = i
-                last_r_norm = r_norm
-            else:
-                break
-    if s == 0:
-        print('No valid step possible')
-
-    zv_k += s*delta_zv
-for i in range (0,T):
-    print(zv_k[i:(i+1)*m])
-print(s, r_norm)
-
+#
+# xk = x0
+# zv_k = zv_k0
+#
+# for i in xrange(0, 20):
+#
+#
+#     delta_zv, r = QP.solve_own(xk, zv_k)
+#
+#     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
+#
+#     last_r_norm = 10000000000
+#     s = 0
+#     for i in np.linspace(1, .1, 10):
+#         zv_help = zv_k + i*delta_zv
+#         if QP.check(zv_help):
+#             r = QP.residual(zv_help)
+#             r_norm = ((r[:]*r[:]).sum())
+#             if r_norm < last_r_norm:
+#                 s = i
+#                 last_r_norm = r_norm
+#             else:
+#                 break
+#     if s == 0:
+#         print('No valid step possible')
+#
+#     zv_k += s*delta_zv
+# for i in range (0,T):
+#     print(zv_k[i:(i+1)*m])
+# print(s, r_norm)
+#
