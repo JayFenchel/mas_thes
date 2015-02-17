@@ -24,6 +24,8 @@ class QuadraticProgram:
         self.T = T
         self.A = sys.A
         self.B = sys.B
+        self.r = sys.r
+        self.f = sys.f
         self.S = sys.S
         self.Fx = sys.Fx
 
@@ -73,12 +75,9 @@ class QuadraticProgram:
         n = self.n
         m = self.m
 
-        b = self.b
         self.b[0:self.n] = np.dot(self.A, xk)
-        g = self.g
-        self.g[0:m] += 2*np.dot(self.S.T, xk)
-        h = self.h
-        self.h[0:np.shape(self.Fx)[0]] += -np.dot(self.Fx, xk)
+        self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
+        self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 
         self.kappa = 10  # >0 barrier parameter
 
@@ -110,9 +109,9 @@ class QuadraticProgram:
         n = self.n
         m = self.m
 
-        self.b[0:n] += np.dot(self.A, xk)
-        self.g[0:m] += 2*np.dot(self.S.T, xk)
-        self.h[0:np.shape(self.Fx)[0]] += -np.dot(self.Fx, xk)
+        self.b[0:n] = np.dot(self.A, xk)
+        self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
+        self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 
         self.kappa = .001  # >0 barrier parameter
 
