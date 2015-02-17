@@ -67,15 +67,17 @@ class QuadraticProgram:
         h[T*np.shape(sys.f)[0]:T*np.shape(sys.f)[0]+np.shape(sys.ff)[0]] = sys.ff
         self.h = h
 
-    def solve(self, zv_k):
+    def solve(self, xk, zv_k):
 
         T = self.T
         n = self.n
         m = self.m
 
-        xk = zv_k[m:m+n]
-        self.b[0:n] = np.dot(self.A, xk)
+        b = self.b
+        self.b[0:self.n] = np.dot(self.A, xk)
+        g = self.g
         self.g[0:m] += 2*np.dot(self.S.T, xk)
+        h = self.h
         self.h[0:np.shape(self.Fx)[0]] += -np.dot(self.Fx, xk)
 
         self.kappa = 10  # >0 barrier parameter
@@ -102,13 +104,12 @@ class QuadraticProgram:
         # print lsg[100:]
         return lsg, r
 
-    def solve_own(self, zv_k):
+    def solve_own(self, xk, zv_k):
 
         T = self.T
         n = self.n
         m = self.m
 
-        xk = zv_k[m:m+n]
         self.b[0:n] += np.dot(self.A, xk)
         self.g[0:m] += 2*np.dot(self.S.T, xk)
         self.h[0:np.shape(self.Fx)[0]] += -np.dot(self.Fx, xk)

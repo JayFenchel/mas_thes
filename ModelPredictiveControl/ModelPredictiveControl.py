@@ -32,15 +32,16 @@ v0 = np.eye(T*n, 1)*0
 zk = z0
 vk = v0
 for i in xrange(0, T):
-    zk[i:i+m], zk[i+m:i+m+n] = u0, x0
+    zk[i*(n+m):i*(m+n)+m], zk[i*(m+n)+m:i*(m+n)+m+n] = u0, x0
 zv_k0 = np.vstack([zk, vk])
 
+xk = x0
 zv_k = zv_k0
 for i in xrange(0, 20):
 
 
 
-    delta_zv, r = QP.solve(zv_k)
+    delta_zv, r = QP.solve(xk, zv_k)
 
     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
 
@@ -64,12 +65,13 @@ for i in range (0,T):
     print(zv_k[i:(i+1)*m])
 print(s, r_norm)
 
+xk = x0
 zv_k = zv_k0
 
 for i in xrange(0, 20):
 
 
-    delta_zv, r = QP.solve_own(zv_k)
+    delta_zv, r = QP.solve_own(xk, zv_k)
 
     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
 
