@@ -84,7 +84,7 @@ class QuadraticProgram:
         self.d = np.zeros([np.shape(self.P)[0], 1])
         self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
 
-        Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(self.d)), self.P)
+        Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(self.d**2)), self.P)
 
         # print(m)
         # print(self.P[0:m+n+7].T[0:m+n+3]).T
