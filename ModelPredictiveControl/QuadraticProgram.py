@@ -79,12 +79,12 @@ class QuadraticProgram:
         self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
         self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 
-        self.kappa = 15 # >0 barrier parameter
+        self.kappa = 75 # >0 barrier parameter
 
         self.d = np.zeros([np.shape(self.P)[0], 1])
         self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
 
-        Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(self.d**2)), self.P)
+        Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(self.d**2)), self.P)  # TODO vernünftiges Quadrieren
 
         # print(m)
         # print(self.P[0:m+n+7].T[0:m+n+3]).T

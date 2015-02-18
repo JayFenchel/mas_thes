@@ -7,7 +7,7 @@ from MyMath import vector_norm
 from Systems import SimpleExample
 from Systems import AirCraft
 from QuadraticProgram import QuadraticProgram
-
+import matplotlib.pyplot as plt
 
 
 sys = AirCraft()
@@ -32,9 +32,9 @@ v0 = np.eye(T*n, 1)*0
 zk = z0
 vk = v0
 for i in xrange(0, T):
-    zk[i*(n+m):i*(m+n)+m], zk[i*(m+n)+m:i*(m+n)+m+n] = u0, 0
+    zk[i*(n+m):i*(m+n)+m], zk[i*(m+n)+m:i*(m+n)+m+n] = u0, x0
 zv_k0 = np.vstack([zk, vk])
-
+print zv_k0
 xk = x0
 zv_k = zv_k0
 print 'startwert valide = ',QP.check(zv_k)  # Validität des Startwerts prüfen
@@ -50,34 +50,41 @@ for i in xrange(0, 100):
         if QP.check(zv_help):
             print('Valid step possible')
             rd, rp = QP.residual(zv_help)
-            rd_norm = abs(rd[:]).sum()
-            rp_norm = abs(rp[:]).sum()
+            rd_norm = np.square(rd[:]).sum()
+            rp_norm = np.square(rp[:]).sum()
             r_norm = rd_norm + rp_norm
             if r_norm < last_r_norm:
                 s = i
+                print s
                 last_r_norm = r_norm
             else:
                 break
     # backtracking line search
     f_x = np.square(np.vstack(QP.residual(zv_k))).sum()
-    testschritt = delta_zv * .001
-    nabla_f = (np.square(np.vstack(QP.residual(zv_k + testschritt))) - f_x)/.001
-    alpha = 0.5
-    beta = 0.8
+    f_xp = np.zeros([100, 1])
+    for i in range (0, 100, 1):
+        f_xp[i] = np.square(np.vstack(QP.residual(zv_k + (100.-i)*delta_zv/100.))).sum()
+        # print ((100.-i)/100., QP.check(zv_k + (100-i)*delta_zv/100))
+    plt.plot(np.linspace(1, 0, 100), f_xp)
+    plt.grid()
+    # plt.show()
+    testschritt = delta_zv * .0000001
+    nabla_f = (np.square(np.vstack(QP.residual(zv_k + testschritt))).sum() - f_x)/np.sqrt(np.square(testschritt).sum())
+    alpha = 0.4
+    beta = 0.6
     st = 1
-    print np.dot(nabla_f.T, delta_zv)
-    while np.square(np.vstack(QP.residual(zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(nabla_f.T, .001):
+    while np.square(np.vstack(QP.residual(zv_k + st*delta_zv))).sum() > f_x + alpha*st*nabla_f:
         st = beta*st
         print s
         print st
     if s == 0:
         print('No valid step possible')
     zv_k += s*delta_zv
-    # print(zv_k)
+    print(zv_k)
 for i in range (0,T):
     print(zv_k[i*(m+n):i*(m+n)+m])
-print(s, r_norm)
-#
+print(s, rp_norm)
+print rp
 # xk = x0
 # zv_k = zv_k0
 #
