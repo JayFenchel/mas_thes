@@ -34,7 +34,6 @@ vk = v0
 for i in xrange(0, T):
     zk[i*(n+m):i*(m+n)+m], zk[i*(m+n)+m:i*(m+n)+m+n] = u0, x0
 zv_k0 = np.vstack([zk, vk])
-print zv_k0
 xk = x0
 zv_k = zv_k0
 print 'startwert valide = ',QP.check(zv_k)  # Validität des Startwerts prüfen
@@ -42,23 +41,6 @@ for i in xrange(0, 100):
     delta_zv = QP.solve(xk, zv_k)
 
     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
-
-    last_r_norm = 100000000000000000
-    s = 0
-    for i in np.linspace(1, .01, 100):
-        zv_help = zv_k + i*delta_zv
-        if QP.check(zv_help):
-            print('Valid step possible')
-            rd, rp = QP.residual(zv_help)
-            rd_norm = np.square(rd[:]).sum()
-            rp_norm = np.square(rp[:]).sum()
-            r_norm = rd_norm + rp_norm
-            if r_norm < last_r_norm:
-                s = i
-                print s
-                last_r_norm = r_norm
-            else:
-                break
     # backtracking line search
     f_x = np.square(np.vstack(QP.residual(zv_k))).sum()
     f_xp = np.zeros([100, 1])
@@ -69,22 +51,33 @@ for i in xrange(0, 100):
     plt.grid()
     # plt.show()
     testschritt = delta_zv * .0000001
+    DELTA = np.eye(np.shape(zv_k)[0])*0.000001
+    HILF = (zv_k + DELTA)
+    print(HILF.T[0:1].T)
+    delta_f = np.zeros([np.shape(zv_k)[0], 1])
+    for k in range(0, np.shape(zv_k)[0]):
+        # print (np.square(np.vstack(QP.residual(HILF.T[0:1].T))).sum() - f_x)/np.square(0.00001)
+        delta_f[k] = (np.square(np.vstack(QP.residual(HILF.T[k:k+1].T))).sum() - f_x)/0.000001
     nabla_f = (np.square(np.vstack(QP.residual(zv_k + testschritt))).sum() - f_x)/np.sqrt(np.square(testschritt).sum())
     alpha = 0.4
     beta = 0.6
     st = 1
-    while np.square(np.vstack(QP.residual(zv_k + st*delta_zv))).sum() > f_x + alpha*st*nabla_f:
+    print np.dot(delta_f.T, delta_zv)
+    while np.square(np.vstack(QP.residual(zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(delta_f.T, delta_zv):
         st = beta*st
-        print s
         print st
-    if s == 0:
-        print('No valid step possible')
-    zv_k += s*delta_zv
-    print(zv_k)
+    if QP.check(zv_k + st*delta_zv):
+        print('Valid step possible')
+    zv_k += st*delta_zv
+    # print(zv_k)
 for i in range (0,T):
     print(zv_k[i*(m+n):i*(m+n)+m])
-print(s, rp_norm)
-print rp
+rd, rp = QP.residual(zv_k)
+rd_norm = np.square(rd[:]).sum()
+rp_norm = np.square(rp[:]).sum()
+r_norm = rd_norm + rp_norm
+print(st, rd_norm)
+# print rp
 # xk = x0
 # zv_k = zv_k0
 #
