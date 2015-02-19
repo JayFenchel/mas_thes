@@ -47,7 +47,7 @@ class QuadraticProgram:
         # Equality constraints
         C = np.zeros([T*n, T*(n+m)])
         C[0:n, 0:m+n] = np.hstack([-sys.B, np.eye(n, n)])
-        for i in range(1, T): #TODO hier gehts weiter
+        for i in range(1, T):
             C[i*n:(i+1)*n, m+(i-1)*(m+n):m+i*(m+n)+n] = np.hstack([-sys.A, -sys.B, np.eye(n, n)])
         self.C = C
 
