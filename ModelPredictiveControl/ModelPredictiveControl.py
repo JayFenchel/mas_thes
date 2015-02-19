@@ -33,6 +33,7 @@ zk = z0
 vk = v0
 for i in xrange(0, T):
     zk[i*(n+m):i*(m+n)+m], zk[i*(m+n)+m:i*(m+n)+m+n] = u0, x0
+zk[0] = 0
 zv_k0 = np.vstack([zk, vk])
 xk = x0
 zv_k = zv_k0
@@ -46,6 +47,8 @@ for i in xrange(0, 100):
     f_xp = np.zeros([100, 1])
     for i in range (0, 100, 1):
         f_xp[i] = np.square(np.vstack(QP.residual(zv_k + (100.-i)*delta_zv/100.))).sum()
+        # if not QP.check(zv_k + (100.-i)*delta_zv/100.):
+        #     f_xp[i] = 0
         # print ((100.-i)/100., QP.check(zv_k + (100-i)*delta_zv/100))
     plt.plot(np.linspace(1, 0, 100), f_xp)
     plt.grid()
@@ -53,7 +56,7 @@ for i in xrange(0, 100):
     testschritt = delta_zv * .0000001
     DELTA = np.eye(np.shape(zv_k)[0])*0.000001
     HILF = (zv_k + DELTA)
-    print(HILF.T[0:1].T)
+    # print(HILF.T[0:1].T)
     delta_f = np.zeros([np.shape(zv_k)[0], 1])
     for k in range(0, np.shape(zv_k)[0]):
         # print (np.square(np.vstack(QP.residual(HILF.T[0:1].T))).sum() - f_x)/np.square(0.00001)
@@ -68,15 +71,18 @@ for i in xrange(0, 100):
         print st
     if QP.check(zv_k + st*delta_zv):
         print('Valid step possible')
-    zv_k += st*delta_zv
+        zv_k += st*delta_zv
+    else:
+        st = 0
     # print(zv_k)
-for i in range (0,T):
-    print(zv_k[i*(m+n):i*(m+n)+m])
-rd, rp = QP.residual(zv_k)
-rd_norm = np.square(rd[:]).sum()
-rp_norm = np.square(rp[:]).sum()
-r_norm = rd_norm + rp_norm
-print(st, rd_norm)
+    for i in range (0,T):
+        print(zv_k[i*(m+n):i*(m+n)+m])
+    rd, rp = QP.residual(zv_k)
+    rd_norm = np.square(rd[:]).sum()
+    rp_norm = np.square(rp[:]).sum()
+    r_norm = rd_norm + rp_norm
+    print(st, rp_norm, rd_norm)
+print zv_k
 # print rp
 # xk = x0
 # zv_k = zv_k0

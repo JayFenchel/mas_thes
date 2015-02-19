@@ -79,7 +79,7 @@ class QuadraticProgram:
         self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
         self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 
-        self.kappa = 75 # >0 barrier parameter
+        self.kappa = .00# >0 barrier parameter
 
         d = np.zeros([np.shape(self.P)[0], 1])
         d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
@@ -98,6 +98,8 @@ class QuadraticProgram:
         # print lsg[100:]
 
         lsg = np.linalg.solve(SS, -r)
+
+        # print abs(-r - np.dot(SS, lsg)).sum()
         # print lsg[100:]
         return lsg
     #
@@ -131,12 +133,17 @@ class QuadraticProgram:
         d = np.zeros([np.shape(self.P)[0], 1])
         d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
 
+        # print 'term12',np.square(2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d)).sum()
         rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
+
+        if not self.check(zv_k):
+            return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
 
         return rd, rp
 
     def check(self, zv_k):
+        print 'check',np.dot(self.P, zv_k[0:self.T*(self.m+self.n)]) - self.h
         return ((np.dot(self.P, zv_k[0:self.T*(self.m+self.n)]) - self.h) < 0).all()
 
 
