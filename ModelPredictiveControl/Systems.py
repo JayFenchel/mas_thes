@@ -63,7 +63,7 @@ class AirCraft:
     def __init__(self):
 
         self.T = 10
-        self.delta_t = 0.5  # Länge der Schritte # TODO richtige Zeitschitte einbauen
+        self.delta_t = 1  # Länge der Schritte # TODO richtige Zeitschitte einbauen
         # mu = 100
 
         # discrete-time system
@@ -99,35 +99,41 @@ class AirCraft:
         eui = 0.262  # rad (15 degrees). Elevator angle.
         u_lb = -eui
         u_ub = eui
-        Ku = np.array([[0],
-              [0],
+        Ku = np.array([[0.],
+              [0.],
               [-1],
               [0],
-              [0],
-              [1]])
+              [0.],
+              [0.],
+              [1],
+              [0],])
         self.Fu = Ku
         fu = np.zeros([np.shape(Ku)[0], 1])
+        fu[np.shape(Ku)[0]/2-2] = -(u_lb)
         fu[np.shape(Ku)[0]/2-1] = -(u_lb)  # TODO wirklich mit den 0en?
+        fu[np.shape(Ku)[0]-2] = (u_ub)
         fu[np.shape(Ku)[0]-1] = (u_ub)
-
+        print fu
         # mixed constraints
         ex2 = 0.349  # rad/s (20 degrees). Pitch angle constraint.
         ex5 = 0.524 * self.delta_t  # rad/s * dt input slew rate constraint in discrete time
         ey3 = 30.
         # bounds
-        e_lb = [[-ex2], [-ey3], [-ex5]]
-        e_ub = [[ex2], [ey3], [ex5]]
+        e_lb = [[-ex2], [-ey3], [-ex5], [0]]
+        e_ub = [[ex2], [ey3], [ex5], [0]]
         # constraint matrices
-        Kx = np.array([[0, -1, 0, 0, 0],
-              [128.2, -128.2, 0, 0, 0],
+        Kx = np.array([[0, -1., 0., 0., 0.],
+              [128.2, -128.2, 0, 0., 0.],
               [0., 0., 0., 0., 1.],
-              [0, 1, 0, 0, 0],
-              [-128.2, 128.2, 0, 0, 0],
-              [0., 0., 0., 0., -1.]])
+              [0., 0., 0., 0., 0.],
+              [0., 1., 0., 0., 0.],
+              [-128.2, 128.2, 0, 0., 0.],
+              [0., 0., 0., 0., -1.],
+              [0., 0., 0., 0., 0.]])
         self.Fx = Kx
-        fx = np.ones([2*3, 1])
-        fx [0:3] = - np.array(e_lb)
-        fx[3:2*3] = np.array(e_ub)
+        fx = np.ones([2*4, 1])
+        fx [0:4] = - np.array(e_lb)
+        fx[4:2*4] = np.array(e_ub)
 
         f = np.vstack([fx, fu]) # stacken - anderer branch
         f = fx + fu  # TODO fraglich
@@ -135,4 +141,6 @@ class AirCraft:
 
         # terminal state constraints
         self.ff = fx
+        self.ff[3] = 1
+        self.ff[7] = 1
         self.Ff = Kx

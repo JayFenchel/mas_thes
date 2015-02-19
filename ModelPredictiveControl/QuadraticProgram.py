@@ -143,7 +143,6 @@ class QuadraticProgram:
         return rd, rp
 
     def check(self, zv_k):
-        print 'check',np.dot(self.P, zv_k[0:self.T*(self.m+self.n)]) - self.h
         return ((np.dot(self.P, zv_k[0:self.T*(self.m+self.n)]) - self.h) < 0).all()
 
 
