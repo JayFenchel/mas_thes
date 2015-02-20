@@ -43,10 +43,10 @@ for i in xrange(0, 100):
 
     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
     # backtracking line search
-    f_x = np.square(np.vstack(QP.residual(zv_k))).sum()
+    f_x = np.square(np.vstack(QP.residual(xk, zv_k))).sum()
     f_xp = np.zeros([100, 1])
     for i in range (0, 100, 1):
-        f_xp[i] = np.square(np.vstack(QP.residual(zv_k + (100.-i)*delta_zv/100.))).sum()
+        f_xp[i] = np.square(np.vstack(QP.residual(xk, zv_k + (100.-i)*delta_zv/100.))).sum()
         # if not QP.check(zv_k + (100.-i)*delta_zv/100.):
         #     f_xp[i] = 0
         # print ((100.-i)/100., QP.check(zv_k + (100-i)*delta_zv/100))
@@ -59,14 +59,14 @@ for i in xrange(0, 100):
     # print(HILF.T[0:1].T)
     delta_f = np.zeros([np.shape(zv_k)[0], 1])
     for k in range(0, np.shape(zv_k)[0]):
-        # print (np.square(np.vstack(QP.residual(HILF.T[0:1].T))).sum() - f_x)/np.square(0.00001)
-        delta_f[k] = (np.square(np.vstack(QP.residual(HILF.T[k:k+1].T))).sum() - f_x)/0.000001
-    nabla_f = (np.square(np.vstack(QP.residual(zv_k + testschritt))).sum() - f_x)/np.sqrt(np.square(testschritt).sum())
+        # print (np.square(np.vstack(QP.residual(xk, HILF.T[0:1].T))).sum() - f_x)/np.square(0.00001)
+        delta_f[k] = (np.square(np.vstack(QP.residual(xk, HILF.T[k:k+1].T))).sum() - f_x)/0.000001
+    nabla_f = (np.square(np.vstack(QP.residual(xk, zv_k + testschritt))).sum() - f_x)/np.sqrt(np.square(testschritt).sum())
     alpha = 0.4
     beta = 0.6
     st = 1
     print np.dot(delta_f.T, delta_zv)
-    while np.square(np.vstack(QP.residual(zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(delta_f.T, delta_zv):
+    while np.square(np.vstack(QP.residual(xk, zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(delta_f.T, delta_zv):
         st = beta*st
         print st
     if QP.check(zv_k + st*delta_zv):
@@ -77,12 +77,44 @@ for i in xrange(0, 100):
     # print(zv_k)
     for i in range (0,T):
         print(zv_k[i*(m+n):i*(m+n)+m])
-    rd, rp = QP.residual(zv_k)
+    rd, rp = QP.residual(xk, zv_k)
     rd_norm = np.square(rd[:]).sum()
     rp_norm = np.square(rp[:]).sum()
     r_norm = rd_norm + rp_norm
     print(st, rp_norm, rd_norm)
 print zv_k
+zv_k2 = np.array([[  5.76106978e-02],
+ [ -7.11287312e-02],
+ [ -8.28604429e-02],
+ [ -2.58258650e-01],
+ [  3.99896307e+02],
+ [  5.76106978e-02],
+ [  9.12805886e-03],
+ [ -7.44921132e-02],
+ [ -1.39311848e-01],
+ [ -6.35754146e-03],
+ [  3.97429614e+02],
+ [  9.12805886e-03],
+ [  1.44812007e+04],
+ [ -1.88247611e+04],
+ [  2.26375648e+03],
+ [ -5.89223855e+02],
+ [ -5.43556934e+01],
+ [  1.51174295e+02],
+ [  9.02935815e-01],
+ [  7.21555526e+01],
+ [ -2.93700484e+02],
+ [ -8.61232354e+00]])
+print zv_k - zv_k2
+sys2 = AirCraft()
+QP2 = QuadraticProgram(sys2)
+x0 = np.array([[0], [0], [0], [400], [0]])
+
+for i in range(0, 1, 100):
+    delta_zv2 = QP2.solve(x0, zv_k)
+rd2, rp2 = QP2.residual(xk, zv_k)
+
+print(np.square(rd2).sum())
 # print rp
 # xk = x0
 # zv_k = zv_k0
@@ -99,7 +131,7 @@ print zv_k
 #     for i in np.linspace(1, .1, 10):
 #         zv_help = zv_k + i*delta_zv
 #         if QP.check(zv_help):
-#             r = QP.residual(zv_help)
+#             r = QP.residual(xk, zv_help)
 #             r_norm = ((r[:]*r[:]).sum())
 #             if r_norm < last_r_norm:
 #                 s = i

@@ -13,6 +13,9 @@ class QuadraticProgram:
 
     def __init__(self, sys):
 
+
+        self.kappa = 1.00# >0 barrier parameter
+
         n = sys.n
         m = sys.m
         T = sys.T  # Planning horizon, Anzahl der Schritte
@@ -79,8 +82,6 @@ class QuadraticProgram:
         self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
         self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 
-        self.kappa = .00# >0 barrier parameter
-
         d = np.zeros([np.shape(self.P)[0], 1])
         d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
 
@@ -90,7 +91,7 @@ class QuadraticProgram:
         # print(self.P[0:m+n+7].T[0:m+n+3]).T
         # print(np.linalg.inv(Phi))
 
-        r = np.vstack(self.residual(zv_k))
+        r = np.vstack(self.residual(xk, zv_k))
         SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
 
         # v = zv_k[self.T*(self.m+self.n):]
@@ -128,10 +129,12 @@ class QuadraticProgram:
     #     lsg = solve_lin_gs(SS, -r)
     #     return lsg, r
 
-    def residual(self, zv_k):
+    def residual(self, xk, zv_k):
+        h=self.h
+        h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 
         d = np.zeros([np.shape(self.P)[0], 1])
-        d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
+        d[:] = 1/(h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
 
         # print 'term12',np.square(2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d)).sum()
         rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
