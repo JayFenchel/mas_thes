@@ -31,14 +31,14 @@ v0 = np.eye(T*n, 1)*0
 
 zk = z0
 vk = v0
-for i in xrange(0, T):
+for i in range(0, T):
     zk[i*(n+m):i*(m+n)+m], zk[i*(m+n)+m:i*(m+n)+m+n] = u0, x0
 zk[0] = 0
 zv_k0 = np.vstack([zk, vk])
 xk = x0
 zv_k = zv_k0
-print 'startwert valide = ',QP.check(zv_k)  # Validität des Startwerts prüfen
-for i in xrange(0, 100):
+print('startwert valide = ',QP.check(zv_k))  # Validität des Startwerts prüfen
+for i in range(0, 100):
     delta_zv = QP.solve(xk, zv_k)
 
     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
@@ -65,10 +65,10 @@ for i in xrange(0, 100):
     alpha = 0.4
     beta = 0.6
     st = 1
-    print np.dot(delta_f.T, delta_zv)
+    print(np.dot(delta_f.T, delta_zv))
     while np.square(np.vstack(QP.residual(xk, zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(delta_f.T, delta_zv):
         st = beta*st
-        print st
+        print(st)
     if QP.check(zv_k + st*delta_zv):
         print('Valid step possible')
         zv_k += st*delta_zv
@@ -82,7 +82,7 @@ for i in xrange(0, 100):
     rp_norm = np.square(rp[:]).sum()
     r_norm = rd_norm + rp_norm
     print(st, rp_norm, rd_norm)
-print zv_k
+print(zv_k)
 zv_k2 = np.array([[  5.76106978e-02],
  [ -7.11287312e-02],
  [ -8.28604429e-02],
@@ -105,7 +105,7 @@ zv_k2 = np.array([[  5.76106978e-02],
  [  7.21555526e+01],
  [ -2.93700484e+02],
  [ -8.61232354e+00]])
-print zv_k - zv_k2
+print(zv_k - zv_k2)
 sys2 = AirCraft()
 QP2 = QuadraticProgram(sys2)
 x0 = np.array([[0], [0], [0], [400], [0]])

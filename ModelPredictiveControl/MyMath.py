@@ -127,7 +127,7 @@ def forward_substitution(A, b):
     #TODO Prüfen ob A untere Dreiecksmatrix
     dim = [np.shape(A)[1], np.shape(b)[1]]
     x = np.array(np.eye(dim[0], dim[1]))
-    for k in xrange(0, dim[0]):
+    for k in range(0, dim[0]):
         x[k] = (b[k] - np.dot(A[k, 0:k], x[0:k])) / A[k, k]
     return x
 
@@ -135,7 +135,7 @@ def backward_substitution(A, b):
     #TODO Prüfen ob A obere Dreiecksmatrix
     dim = [np.shape(A)[1], np.shape(b)[1]]
     x = np.array(np.eye(dim[0], dim[1]))
-    for k in xrange(0, dim[0]):
+    for k in range(0, dim[0]):
         kh = dim[0] - k - 1
         x[kh] = (b[kh] - np.dot(A[kh, kh+1:], x[kh+1:])) / A[kh, kh]
     return x
