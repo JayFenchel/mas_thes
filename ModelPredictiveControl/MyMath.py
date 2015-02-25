@@ -39,7 +39,7 @@ def householder(a):
 
 def cholesky(a):
 
-    # TODO Prüfen, ob a symmetrisch,
+    # TODO Prüfen, ob a symmetrisch, A == A.T ?
 
     c = np.linalg.cholesky(a)  # Zum Vergleich mit der eigenen Funktion
     n = a.shape[0]
