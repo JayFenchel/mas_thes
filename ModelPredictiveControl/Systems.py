@@ -63,7 +63,7 @@ class AirCraft:
     def __init__(self):
 
         self.T = 10
-        self.delta_t = 1  # Länge der Schritte # TODO richtige Zeitschitte einbauen
+        self.delta_t = .5  # Länge der Schritte # TODO richtige Zeitschitte einbauen
         # mu = 100
 
         # discrete-time system

@@ -14,7 +14,7 @@ class QuadraticProgram:
     def __init__(self, sys):
 
 
-        self.kappa = 1.00# >0 barrier parameter
+        self.kappa = 90#>0 barrier parameter
 
         n = sys.n
         m = sys.m
