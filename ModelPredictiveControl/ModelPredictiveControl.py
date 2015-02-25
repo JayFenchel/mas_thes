@@ -6,14 +6,14 @@ import numpy as np
 from MyMath import vector_norm
 from Systems import SimpleExample
 from Systems import AirCraft
-from Systems import Systems
+from Systems import qp_from_sys
 from QuadraticProgram import QuadraticProgram
 import matplotlib.pyplot as plt
 
 
 sys = SimpleExample()
 QP1 = QuadraticProgram(sys)
-QP = Systems().qp_from_sys()
+QP = qp_from_sys()
 
 n = QP.n
 m = QP.m

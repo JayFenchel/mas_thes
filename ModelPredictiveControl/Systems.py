@@ -61,14 +61,16 @@ class SimpleExample:
         self.delta_t = 1  # Länge der Schritte # TODO richtige Zeitschitte einbauen
 
 
-class Systems:
-    def __init__(self):
-        self.QP = QuadraticProgram
+# class Systems:
+    # def __init__(self):
+    #     self.QP = QuadraticProgram
 
-    def qp_from_sys(self):
-        sys = AirCraft()
-        qp = QuadraticProgram(sys)
-        return qp
+def qp_from_sys():
+    sys = AirCraft()
+    qp = QuadraticProgram(sys)
+
+    # qp.set_constraints()
+    return qp
 
 
 class AirCraft:
