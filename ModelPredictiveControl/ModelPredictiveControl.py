@@ -148,51 +148,57 @@ zv_k = np.array([[  2.09719785e-01],
 [ -1.33346052e+02],
 [  2.02084617e+01]])
 print('startwert valide = ',QP.check(zv_k))  # Validität des Startwerts prüfen
-for i in range(0, 100):
-    delta_zv = QP.solve(xk, zv_k)
 
-    # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
-    # backtracking line search
-    f_x = np.square(np.vstack(QP.residual(xk, zv_k))).sum()
-    f_xp = np.zeros([100, 1])
-    for i in range (0, 100, 1):
-        f_xp[i] = np.square(np.vstack(QP.residual(xk, zv_k + (100.-i)*delta_zv/100.))).sum()
-        # if not QP.check(zv_k + (100.-i)*delta_zv/100.):
-        #     f_xp[i] = 0
-        # print ((100.-i)/100., QP.check(zv_k + (100-i)*delta_zv/100))
-    plt.plot(np.linspace(1, 0, 100), f_xp)
-    plt.grid()
-    # plt.show()
-    testschritt = delta_zv * .0000001
-    DELTA = np.eye(np.shape(zv_k)[0])*0.000001
-    HILF = (zv_k + DELTA)
-    # print(HILF.T[0:1].T)
-    delta_f = np.zeros([np.shape(zv_k)[0], 1])
-    for k in range(0, np.shape(zv_k)[0]):
-        # print (np.square(np.vstack(QP.residual(xk, HILF.T[0:1].T))).sum() - f_x)/np.square(0.00001)
-        delta_f[k] = (np.square(np.vstack(QP.residual(xk, HILF.T[k:k+1].T))).sum() - f_x)/0.000001
-    nabla_f = (np.square(np.vstack(QP.residual(xk, zv_k + testschritt))).sum() - f_x)/np.sqrt(np.square(testschritt).sum())
-    alpha = 0.4
-    beta = 0.6
-    st = 1
-    print(np.dot(delta_f.T, delta_zv))
-    while np.square(np.vstack(QP.residual(xk, zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(delta_f.T, delta_zv):
-        st = beta*st
-        print(st)
-    if QP.check(zv_k + st*delta_zv):
-        print('Valid step possible')
-        zv_k += st*delta_zv
-    else:
-        st = 0
-    # print(zv_k)
-    for i in range (0,T):
-        print(zv_k[i*(m+n):i*(m+n)+m])
-    rd, rp = QP.residual(xk, zv_k)
-    rd_norm = np.square(rd[:]).sum()
-    rp_norm = np.square(rp[:]).sum()
-    r_norm = rd_norm + rp_norm
-    print(st, rp_norm, rd_norm)
-print(zv_k)
+for schritt in range(2):
+    for i in range(0, 10):
+        delta_zv = QP.solve(xk, zv_k)
+
+        # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
+        # backtracking line search
+        f_x = np.square(np.vstack(QP.residual(xk, zv_k))).sum()
+        f_xp = np.zeros([100, 1])
+        for i in range (0, 100, 1):
+            f_xp[i] = np.square(np.vstack(QP.residual(xk, zv_k + (100.-i)*delta_zv/100.))).sum()
+            # if not QP.check(zv_k + (100.-i)*delta_zv/100.):
+            #     f_xp[i] = 0
+            # print ((100.-i)/100., QP.check(zv_k + (100-i)*delta_zv/100))
+        plt.plot(np.linspace(1, 0, 100), f_xp)
+        plt.grid()
+        # plt.show()
+        testschritt = delta_zv * .0000001
+        DELTA = np.eye(np.shape(zv_k)[0])*0.000001
+        HILF = (zv_k + DELTA)
+        # print(HILF.T[0:1].T)
+        delta_f = np.zeros([np.shape(zv_k)[0], 1])
+        for k in range(0, np.shape(zv_k)[0]):
+            # print (np.square(np.vstack(QP.residual(xk, HILF.T[0:1].T))).sum() - f_x)/np.square(0.00001)
+            delta_f[k] = (np.square(np.vstack(QP.residual(xk, HILF.T[k:k+1].T))).sum() - f_x)/0.000001
+        nabla_f = (np.square(np.vstack(QP.residual(xk, zv_k + testschritt))).sum() - f_x)/np.sqrt(np.square(testschritt).sum())
+        alpha = 0.4
+        beta = 0.6
+        st = 1
+        print(np.dot(delta_f.T, delta_zv))
+        while np.square(np.vstack(QP.residual(xk, zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(delta_f.T, delta_zv):
+            st = beta*st
+            print(st)
+        if QP.check(zv_k + st*delta_zv):
+            print('Valid step possible')
+            zv_k += st*delta_zv
+        else:
+            st = 0
+        # print(zv_k)
+        for i in range (0,T):
+            print(zv_k[i*(m+n):i*(m+n)+m])
+        rd, rp = QP.residual(xk, zv_k)
+        rd_norm = np.square(rd[:]).sum()
+        rp_norm = np.square(rp[:]).sum()
+        r_norm = rd_norm + rp_norm
+        print(st, rp_norm, rd_norm)
+    print(zv_k)
+    print(zv_k[0])
+    print(np.dot(sys.B, zv_k[0]))
+    xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
+    print('xk',xk)
 zv_k2 = np.array([[  5.76106978e-02],
  [ -7.11287312e-02],
  [ -8.28604429e-02],
