@@ -11,6 +11,17 @@ from MyMath import solve_lin_gs_structured
 
 class QuadraticProgram:
 
+
+    def set_sys_dynamics(self, A, B):
+        pass
+
+    def set_weighting(self):
+        pass
+
+    def set_constraints(self, Fu, fu, Fx, fx, Ff, ff):
+        pass
+
+
     def __init__(self, sys):
 
 
