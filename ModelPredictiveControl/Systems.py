@@ -4,6 +4,7 @@ __author__ = 'jayf'
 
 import numpy as np
 from numpy import diag
+from QuadraticProgram import QuadraticProgram
 
 
 class SimpleExample:
@@ -58,6 +59,17 @@ class SimpleExample:
 
         self.T = 10  # Planning Horizon
         self.delta_t = 1  # Länge der Schritte # TODO richtige Zeitschitte einbauen
+
+
+class Systems:
+    def __init__(self):
+        self.QP = QuadraticProgram
+
+    def qp_from_sys(self):
+        sys = AirCraft()
+        qp = QuadraticProgram(sys)
+        return qp
+
 
 class AirCraft:
     def __init__(self):

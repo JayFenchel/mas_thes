@@ -6,15 +6,17 @@ import numpy as np
 from MyMath import vector_norm
 from Systems import SimpleExample
 from Systems import AirCraft
+from Systems import Systems
 from QuadraticProgram import QuadraticProgram
 import matplotlib.pyplot as plt
 
 
-sys = AirCraft()
-QP = QuadraticProgram(sys)
+sys = SimpleExample()
+QP1 = QuadraticProgram(sys)
+QP = Systems().qp_from_sys()
 
-n = sys.n
-m = sys.m
+n = QP.n
+m = QP.m
 T = sys.T  # Planning horizon
 
 # Startwerte AirCraft
