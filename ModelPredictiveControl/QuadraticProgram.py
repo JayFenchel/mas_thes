@@ -30,9 +30,9 @@ class QuadraticProgram:
     def set_constraints(self, Fu, fu, Fx, fx, Ff, ff):
 
         if self.n is None:
-            print('You have to set_sys_dynamics() fist.')
+            print('You have to set_sys_dynamics() first.')
             exit()
-        T, n, m = 10, 5, 1
+        T, n, m = self.T, self.n, self.m
 
         # Inequality constraints
         n_Fu = np.shape(Fu)[0]
@@ -54,8 +54,10 @@ class QuadraticProgram:
         h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(ff)[0]] = ff
         self.h = h
 
-    def __init__(self):
-        self.n = None
+    def __init__(self, T, n, m):
+        self.T = T
+        self.n = n
+        self.m = m
 
     # def __init__(self, sys):
     #
