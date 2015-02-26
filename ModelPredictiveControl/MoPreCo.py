@@ -20,8 +20,8 @@ m = QP.m
 T = sys.T  # Planning horizon
 
 # Startwerte AirCraft
-x0 = np.array([[0], [0], [0], [400], [0]])
-u0 = np.array([[0]])
+x0 = np.array([[0.], [0.], [0.], [400.], [0.]])
+u0 = np.array([[0.]])
 z0 = np.eye(T*(n+m), 1)*0
 v0 = np.eye(T*n, 1)*0
 
@@ -201,66 +201,3 @@ for schritt in range(1):
     # print(np.dot(sys.B, zv_k[0]))
     # xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
     # print('xk',xk)
-zv_k2 = np.array([[  5.76106978e-02],
- [ -7.11287312e-02],
- [ -8.28604429e-02],
- [ -2.58258650e-01],
- [  3.99896307e+02],
- [  5.76106978e-02],
- [  9.12805886e-03],
- [ -7.44921132e-02],
- [ -1.39311848e-01],
- [ -6.35754146e-03],
- [  3.97429614e+02],
- [  9.12805886e-03],
- [  1.44812007e+04],
- [ -1.88247611e+04],
- [  2.26375648e+03],
- [ -5.89223855e+02],
- [ -5.43556934e+01],
- [  1.51174295e+02],
- [  9.02935815e-01],
- [  7.21555526e+01],
- [ -2.93700484e+02],
- [ -8.61232354e+00]])
-print(zv_k - zv_k2)
-sys2 = AirCraft()
-QP2 = QuadraticProgram(sys2)
-x0 = np.array([[0], [0], [0], [400], [0]])
-
-for i in range(0, 1, 100):
-    delta_zv2 = QP2.solve(x0, zv_k)
-rd2, rp2 = QP2.residual(xk, zv_k)
-
-print(np.square(rd2).sum())
-# print rp
-# xk = x0
-# zv_k = zv_k0
-#
-# for i in xrange(0, 20):
-#
-#
-#     delta_zv, r = QP.solve_own(xk, zv_k)
-#
-#     # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
-#
-#     last_r_norm = 10000000000
-#     s = 0
-#     for i in np.linspace(1, .1, 10):
-#         zv_help = zv_k + i*delta_zv
-#         if QP.check(zv_help):
-#             r = QP.residual(xk, zv_help)
-#             r_norm = ((r[:]*r[:]).sum())
-#             if r_norm < last_r_norm:
-#                 s = i
-#                 last_r_norm = r_norm
-#             else:
-#                 break
-#     if s == 0:
-#         print('No valid step possible')
-#
-#     zv_k += s*delta_zv
-# for i in range (0,T):
-#     print(zv_k[i:(i+1)*m])
-# print(s, r_norm)
-#

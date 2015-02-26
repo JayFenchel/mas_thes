@@ -106,12 +106,12 @@ def qp_from_sys():
     u_ub = eui
     Ku = np.array([[0.],
           [0.],
-          [-1],
-          [0],
+          [-1.],
           [0.],
           [0.],
-          [1],
-          [0],])
+          [0.],
+          [1.],
+          [0.],])
     Fu = Ku
     fu = np.zeros([np.shape(Ku)[0], 1])
     fu[np.shape(Ku)[0]/2-2] = -(u_lb)
@@ -191,12 +191,12 @@ class AirCraft:
         u_ub = eui
         Ku = np.array([[0.],
               [0.],
-              [-1],
-              [0],
+              [-1.],
               [0.],
               [0.],
-              [1],
-              [0],])
+              [0.],
+              [1.],
+              [0.],])
         self.Fu = Ku
         fu = np.zeros([np.shape(Ku)[0], 1])
         fu[np.shape(Ku)[0]/2-2] = -(u_lb)
