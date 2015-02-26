@@ -41,6 +41,8 @@ class MyTestCase(unittest.TestCase):
                         'backward_substitution failed')
 
     # Test functions of Quadratic Program
+    # TODO def test_set_sys_dynamics(self):
+    # TODO def test_set_weighting(self):
     def test_set_constraints(self):
 
         Fx = np.array([[1, 2, 3, 4, 5],
@@ -76,7 +78,7 @@ class MyTestCase(unittest.TestCase):
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   0,   0,   0, 0.5,   0]])
 
         self.assertTrue((self.test_qp.P == ref).all(), 'False P-matrix')
-
+        # TODO Test h-vector
 
 if __name__ == '__main__':
     unittest.main()

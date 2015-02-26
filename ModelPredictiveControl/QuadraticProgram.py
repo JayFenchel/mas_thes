@@ -8,9 +8,12 @@ from MyMath import solve_lin_gs
 from MyMath import solve_lin_gs_structured
 
 
-
 class QuadraticProgram:
 
+    def __init__(self, T, n, m):
+        self.T = T
+        self.n = n
+        self.m = m
 
     def set_sys_dynamics(self, A, B):
 
@@ -54,10 +57,7 @@ class QuadraticProgram:
         h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(ff)[0]] = ff
         self.h = h
 
-    def __init__(self, T, n, m):
-        self.T = T
-        self.n = n
-        self.m = m
+
 
     # def __init__(self, sys):
     #
