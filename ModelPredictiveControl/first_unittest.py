@@ -1,7 +1,9 @@
+#!/usr/bin/env python3
 __author__ = 'jayf'
 
 from ModelPredictiveControl.MyMath import forward_substitution
 from ModelPredictiveControl.MyMath import backward_substitution
+from ModelPredictiveControl.MyMath import cholesky
 from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 import numpy as np
 from numpy.testing import assert_allclose
@@ -12,6 +14,22 @@ import unittest
 class MyTestCase(unittest.TestCase):
 
     def setUp(self):
+
+        self.sym_matrix1 = np.array([[80., 2., 3., 4., 1., 1., 0.],
+                                     [2., 90., 1., 6., 5., 4., 3.],
+                                     [3., 1., 70., 1., 1., 1., 2.],
+                                     [4., 6., 1., 40., 1., 1., 1.],
+                                     [1., 5., 1., 1., 50., 5., 1.],
+                                     [1., 4., 1., 1., 5., 60., 1.],
+                                     [0., 3., 2., 1., 1., 1., 40.]])
+        self.sym_matrix2 = np.array([[ 1., 0., 0., 0., .1, 0., 0.],
+                                     [ 0., 1., 0., .4, 0., 0., .7],
+                                     [ 0., 0., 1., .5, .3, 0., 0.],
+                                     [ 0., .4, .5, 1., 0., 0., 0.],
+                                     [ .1, 0., .3, 0., 1., 0., 0.],
+                                     [ 0. , 0.,  0.,  0.,  0.,  1.,  0.],
+                                     [ 0., .7,  0.,  0.,  0.,  0.,  1.]])
+
         self.A = np.array([[  0.23996015,   0., 0.,   0., 0.],
                       [ -0.37221757,   1., 0.,   0., 0.],
                       [ -0.99008755,   0., 0.13885973,   0., 0.],
@@ -28,6 +46,17 @@ class MyTestCase(unittest.TestCase):
         self.test_qp = QuadraticProgram(T, n, m)
 
     # Test functions of MyMath
+    # TODO geeignete asserts für Toleranzbereiche wählen
+
+    def test_cholesky(self):
+        ref = np.linalg.cholesky(self.sym_matrix1)
+        c = cholesky(self.sym_matrix1)
+        self.assertTrue((abs(c - ref)).sum() < 1e-10,
+                        'cholesky decomposition failed')
+        c = cholesky(self.sym_matrix1)
+        self.assertTrue((abs(c - ref)).sum() < 1e-10,
+                        'cholesky decomposition failed (second)')
+
     def test_forward_substitution(self):
 
         x_f = forward_substitution(self.A, self.b)

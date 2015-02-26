@@ -37,11 +37,11 @@ def householder(a):
 
     return Q, R
 
-def cholesky(a):
-
+def cholesky(hilf):
+    a = np.zeros_like(hilf)
+    a[:, :] = hilf  # damit die ursprüngliche Matrix nicht mitverändert wird
     # TODO Prüfen, ob a symmetrisch, A == A.T ?
 
-    c = np.linalg.cholesky(a)  # Zum Vergleich mit der eigenen Funktion
     n = a.shape[0]
     for k in range(0, n):
         for j in range(0, k):
@@ -55,9 +55,7 @@ def cholesky(a):
     for k in range(0, n):
         for j in range(k+1, n):
             a[k, j] = 0
-    # compare with build-in function
-    if abs(a-c).sum() > 1e-10:
-        print('cholesky-Zerlegung failed')
+            
     return(a)
 
 def solve_lin_gs(A, b):
