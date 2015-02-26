@@ -66,8 +66,6 @@ class SimpleExample:
     #     self.QP = QuadraticProgram
 
 def qp_from_sys():
-    sys = AirCraft()
-
     # discrete-time system
     Ad = np.array([[  0.23996015,   0., 0.17871287,   0., 0.],
                    [ -0.37221757,   1., 0.27026411,   0., 0.],
@@ -120,7 +118,6 @@ def qp_from_sys():
     fu[np.shape(Ku)[0]/2-1] = -(u_lb)  # TODO wirklich mit den 0en?
     fu[np.shape(Ku)[0]-2] = (u_ub)
     fu[np.shape(Ku)[0]-1] = (u_ub)
-    print(fu)
     # mixed constraints
     ex2 = 0.349  # rad/s (20 degrees). Pitch angle constraint.
     ex5 = 0.524 * delta_t  # rad/s * dt input slew rate constraint in discrete time

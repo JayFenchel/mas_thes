@@ -55,7 +55,7 @@ def cholesky(hilf):
     for k in range(0, n):
         for j in range(k+1, n):
             a[k, j] = 0
-            
+
     return(a)
 
 def solve_lin_gs(A, b):

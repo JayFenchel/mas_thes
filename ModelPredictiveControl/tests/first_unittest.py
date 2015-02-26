@@ -12,7 +12,6 @@ from numpy.testing import assert_allclose
 import unittest
 
 
-
 class MyTestCase(unittest.TestCase):
 
     def setUp(self):

@@ -182,7 +182,7 @@ for schritt in range(1):
         print(np.dot(delta_f.T, delta_zv))
         while np.square(np.vstack(QP.residual(xk, zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(delta_f.T, delta_zv):
             st = beta*st
-            print(st)
+            # print(st)
         if QP.check(zv_k + st*delta_zv):
             print('Valid step possible')
             zv_k += st*delta_zv
@@ -196,7 +196,7 @@ for schritt in range(1):
         rp_norm = np.square(rp[:]).sum()
         r_norm = rd_norm + rp_norm
         print(st, rp_norm, rd_norm)
-    print(zv_k)
+    # print(zv_k)
     # print(zv_k[0])
     # print(np.dot(sys.B, zv_k[0]))
     # xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden

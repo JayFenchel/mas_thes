@@ -115,31 +115,6 @@ class QuadraticProgram:
         lsg = solve_lin_gs(SS, -r)
         # print(lsg)
         return lsg
-    #
-    # def solve_own(self, xk, zv_k):
-    #
-    #     T = self.T
-    #     n = self.n
-    #     m = self.m
-    #
-    #     self.b[0:n] = np.dot(self.A, xk)
-    #     self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
-    #     self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
-    #
-    #     self.kappa = .001  # >0 barrier parameter
-    #
-    #     self.d = np.eye(np.shape(self.P)[0], 1)
-    #     self.d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
-    #
-    #
-    #
-    #     Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(self.d)), self.P)
-    #
-    #     r = self.residual(zv_k)
-    #     SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
-    #
-    #     lsg = solve_lin_gs(SS, -r)
-    #     return lsg, r
 
     def residual(self, xk, zv_k):
         h=self.h
