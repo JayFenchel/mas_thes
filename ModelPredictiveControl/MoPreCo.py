@@ -3,11 +3,11 @@
 __author__ = 'jayf'
 
 import numpy as np
-from MyMath import vector_norm
-from Systems import SimpleExample
-from Systems import AirCraft
-from Systems import qp_from_sys
-from QuadraticProgram import QuadraticProgram
+from ModelPredictiveControl.MyMath import vector_norm
+from ModelPredictiveControl.Systems import SimpleExample
+from ModelPredictiveControl.Systems import AirCraft
+from ModelPredictiveControl.Systems import qp_from_sys
+from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 import matplotlib.pyplot as plt
 
 
@@ -151,7 +151,7 @@ zv_k = np.array([[  2.09719785e-01],
 [  2.02084617e+01]])
 print('startwert valide = ',QP.check(zv_k))  # Validität des Startwerts prüfen
 
-for schritt in range(2):
+for schritt in range(1):
     for i in range(0, 10):
         delta_zv = QP.solve(xk, zv_k)
 
@@ -197,10 +197,10 @@ for schritt in range(2):
         r_norm = rd_norm + rp_norm
         print(st, rp_norm, rd_norm)
     print(zv_k)
-    print(zv_k[0])
-    print(np.dot(sys.B, zv_k[0]))
-    xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
-    print('xk',xk)
+    # print(zv_k[0])
+    # print(np.dot(sys.B, zv_k[0]))
+    # xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
+    # print('xk',xk)
 zv_k2 = np.array([[  5.76106978e-02],
  [ -7.11287312e-02],
  [ -8.28604429e-02],
