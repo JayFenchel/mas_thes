@@ -66,21 +66,19 @@ def solve_lin_gs(A, b):
     c = np.dot(Q, b)
     Rtilde = R[0:npe, 0:npe]
     ctilde = c[0:npe]
-    x=np.array(np.eye(npe, 1))
     x = backward_substitution(Rtilde, ctilde)
     return x
 
 def solve_lin_gs_structured(Phi_not_inv, r, A, B, C, T, m, n, v):
 
-
-    L_Phi = np.linalg.cholesky(Phi_not_inv)
+    L_Phi = cholesky(Phi_not_inv)
 ############
     Phi = np.linalg.inv(Phi_not_inv)
 ############
-    # TODO flogende Zeilen rausnehmen
-    Y = np.eye(T*n, T*n)*0
-    Y[0*n:(0+1)*n].T[0*n:(0+1)*n] = np.dot(B, np.linalg.solve(L_Phi.T[0:m].T[0:m], np.linalg.solve(L_Phi.T[0:m].T[0:m].T, B.T))).T\
-                                                + Phi[m:m+n].T[m:m+n].T
+    # TODO flogende 2 Zeilen rausnehmen führen zum selben Ergebnis wie i==0, j==0 in Schelife
+    Y = np.zeros([T*n, T*n])
+    Y[0:n, 0:n] = np.dot(B, np.linalg.solve(L_Phi[0:m, 0:m].T, np.linalg.solve(L_Phi[0:m, 0:m], B.T)))\
+                                                + Phi[m:m+n, m:m+n]
     for i in range(0, T):
         for j in range(i, i+2):
             #Y[0, 0]
@@ -110,7 +108,9 @@ def solve_lin_gs_structured(Phi_not_inv, r, A, B, C, T, m, n, v):
     hilf=np.array(np.eye(np.shape(beta)[0],1))
     for k in range(0, 1, np.shape(beta)[0]):
         hilf[k] = (-beta[k] - np.dot(L_Y[k, 0:k], hilf[0 : k]))/L_Y[k, k]
+
     delta_v = np.linalg.solve(Y, -beta)
+
     for k in range(np.shape(beta)[0]-1, 0-1, -1):
         delta_v[k] = (hilf[k] - np.dot(L_Y.T[k, k+1:], hilf[k+1:]))/L_Y.T[k, k]
     # print delta_v[:10]
