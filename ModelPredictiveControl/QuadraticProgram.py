@@ -17,23 +17,26 @@ class QuadraticProgram:
         self.T = T
         self.n = n
         self.m = m
+        self.A = np.zeros([n, n])
+        self.B = np.zeros([n, m])
+        self.C = np.zeros([T*n, T*(n+m)])
+        self.b = np.zeros([T*n, 1])
+
         # TODO Instance attributes als None initieren und abfragen, ob gesetzt
 
     def set_sys_dynamics(self, A, B):
 
         T, n, m = self.T, self.n, self.m
 
-        self.A = A
-        self.B = B
+        self.A[:] = A
+        self.B[:] = B
 
         # Equality constraints
-        C = np.zeros([T*n, T*(n+m)])
-        C[0:n, 0:m+n] = np.hstack([-B, np.eye(n, n)])
+        self.C[0:n, 0:m+n] = np.hstack([-B, np.eye(n, n)])
         for i in range(1, T):
-            C[i*n:(i+1)*n, m+(i-1)*(m+n):m+i*(m+n)+n] = np.hstack([-A, -B, np.eye(n, n)])
-        self.C = C
+            self.C[i*n:(i+1)*n, m+(i-1)*(m+n):m+i*(m+n)+n] = np.hstack([-A, -B, np.eye(n, n)])
 
-        self.b = np.zeros([T*n, 1])
+        self.b = np.zeros([T*n, 1])  # TODO add disturbance if not zero
 
     def set_weighting(self, Q, q, R, r, S, Qf, qf):
 
@@ -86,6 +89,12 @@ class QuadraticProgram:
         h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(ff)[0]] = ff
         self.h = h
 
+    def form_d(self, zv_k):
+        # Form d for further use
+        d = np.zeros([np.shape(self.P)[0], 1])
+        d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
+        return d
+
     def solve(self, xk, zv_k):
 
         T = self.T
@@ -96,8 +105,7 @@ class QuadraticProgram:
         self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
         self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 
-        d = np.zeros([np.shape(self.P)[0], 1])
-        d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
+        d = self.form_d(zv_k)
 
         Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(d**2)), self.P)  # TODO vernünftiges Quadrieren
 
