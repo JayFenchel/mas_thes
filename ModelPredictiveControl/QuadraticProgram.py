@@ -108,14 +108,12 @@ class QuadraticProgram:
         r = np.vstack(self.residual(xk, zv_k))
         SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
 
-        # v = zv_k[self.T*(self.m+self.n):]
-        # lsg = solve_lin_gs_structured(Phi, r, self.A, self.B, self.C, T, m, n, v)
-        # print lsg[100:]
+        v = zv_k[self.T*(self.m+self.n):]
+        lsg = solve_lin_gs_structured(Phi, r, self.A, self.B, self.C, T, m, n, v)
+        # print(lsg)
 
-        lsg = np.linalg.solve(SS, -r)
-
-        # print abs(-r - np.dot(SS, lsg)).sum()
-        # print lsg[100:]
+        lsg = solve_lin_gs(SS, -r)
+        # print(lsg)
         return lsg
     #
     # def solve_own(self, xk, zv_k):
