@@ -67,9 +67,40 @@ class SimpleExample:
 
 def qp_from_sys():
     sys = AirCraft()
-    qp = QuadraticProgram(sys)
+
+    # discrete-time system
+    Ad = np.array([[  0.23996015,   0., 0.17871287,   0., 0.],
+                   [ -0.37221757,   1., 0.27026411,   0., 0.],
+                   [ -0.99008755,   0., 0.13885973,   0., 0.],
+                   [-48.93540655, 64.1, 2.39923411,   1., 0.],
+                   [0., 0., 0., 0., 0.]])
+    A = Ad
+    Bd = np.array([[-1.2346445 ],
+                   [-1.43828223],
+                   [-4.48282454],
+                   [-1.79989043],
+                   [1.]])
+    B = Bd
+    n = Ad.shape[1]  # columns in A
+    m = Bd.shape[1]  # columns in B
+    qp = QuadraticProgram(10, n, m)
 
     delta_t = 0.5
+
+    qp.set_sys_dynamics(A, B)
+
+    # Weighting matrices for a problem with a better condition number
+    Q = np.array(diag([1014.7, 3.2407, 5674.8, 0.3695, 471.75]))
+    q = np.zeros([n, 1])
+    R = np.array(diag([471.65]))
+    r = np.zeros([m, 1])
+    P = Q  # TODO Was ist P, terminal weighting?
+    Qf = P
+    qf = np.zeros([n, 1])
+    qf = qf
+    S = np.zeros_like(Bd)  # no combined weighting
+
+    qp.set_weighting(Q, q, R, r, S, Qf, qf)
 
     # input constraints
     eui = 0.262  # rad (15 degrees). Elevator angle.

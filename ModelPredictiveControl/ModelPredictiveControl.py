@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 
 sys = SimpleExample()
-QP1 = QuadraticProgram(sys)
+# QP1 = QuadraticProgram(sys)
 QP = qp_from_sys()
 
 n = QP.n

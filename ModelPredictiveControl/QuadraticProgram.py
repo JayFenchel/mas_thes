@@ -11,31 +11,57 @@ from MyMath import solve_lin_gs_structured
 class QuadraticProgram:
 
     def __init__(self, T, n, m):
+
+        self.kappa = 90  # >0 barrier parameter
+
         self.T = T
         self.n = n
         self.m = m
 
     def set_sys_dynamics(self, A, B):
 
+        T, n, m = self.T, self.n, self.m
+
+        self.A = A
+        self.B = B
+
         # Equality constraints
         C = np.zeros([T*n, T*(n+m)])
-        C[0:n, 0:m+n] = np.hstack([-sys.B, np.eye(n, n)])
+        C[0:n, 0:m+n] = np.hstack([-B, np.eye(n, n)])
         for i in range(1, T):
-            C[i*n:(i+1)*n, m+(i-1)*(m+n):m+i*(m+n)+n] = np.hstack([-sys.A, -sys.B, np.eye(n, n)])
+            C[i*n:(i+1)*n, m+(i-1)*(m+n):m+i*(m+n)+n] = np.hstack([-A, -B, np.eye(n, n)])
         self.C = C
 
         self.b = np.zeros([T*n, 1])
-        pass
 
-    def set_weighting(self):
+    def set_weighting(self, Q, q, R, r, S, Qf, qf):
+
+        T, n, m = self.T, self.n, self.m
+
+        self.r = r
+        self.S = S
+
+        # Cost function
+        H = np.eye(T*(n+m), T*(n+m))
+        H[0:m, 0:m] = R
+        QSR = np.hstack([np.vstack([Q, S.T]), np.vstack([S, R])])
+        for i in range(1, T):
+            H[m+(i-1)*(m+n):m+i*(m+n), m+(i-1)*(m+n):m+i*(m+n)] = QSR
+        H[m+(T-1)*(m+n):m+(T-1)*(m+n)+n, m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = Qf
+        self.H = H
+
+        g = np.zeros([T*(m+n), 1])
+        for i in range(0, T):
+            g[i*(n+m):(i+1)*(n+m)] = np.vstack([r, q])
+        g[(T-1)*(n+m)+m:T*(n+m)] = qf
+        self.g = g
         pass
 
     def set_constraints(self, Fu, fu, Fx, fx, Ff, ff):
 
-        if self.n is None:
-            print('You have to set_sys_dynamics() first.')
-            exit()
         T, n, m = self.T, self.n, self.m
+
+        self.Fx = Fx
 
         # Inequality constraints
         n_Fu = np.shape(Fu)[0]
@@ -50,6 +76,8 @@ class QuadraticProgram:
 
         f = np.vstack([fx, fu]) # stacken - anderer branch
         f = fx + fu  # TODO fraglich
+
+        self.f = f
 
         h = np.zeros([T*np.shape(f)[0]+np.shape(ff)[0], 1])
         for i in range(0, T):
