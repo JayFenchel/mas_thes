@@ -1,8 +1,8 @@
 __author__ = 'jayf'
 
-from MyMath import forward_substitution
-from MyMath import backward_substitution
-from QuadraticProgram import QuadraticProgram
+from ModelPredictiveControl.MyMath import forward_substitution
+from ModelPredictiveControl.MyMath import backward_substitution
+from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 import numpy as np
 from numpy.testing import assert_allclose
 import unittest

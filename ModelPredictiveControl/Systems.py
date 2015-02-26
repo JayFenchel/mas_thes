@@ -4,7 +4,7 @@ __author__ = 'jayf'
 
 import numpy as np
 from numpy import diag
-from QuadraticProgram import QuadraticProgram
+from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 
 
 class SimpleExample:
