@@ -69,7 +69,55 @@ def qp_from_sys():
     sys = AirCraft()
     qp = QuadraticProgram(sys)
 
-    # qp.set_constraints()
+    delta_t = 0.5
+
+    # input constraints
+    eui = 0.262  # rad (15 degrees). Elevator angle.
+    u_lb = -eui
+    u_ub = eui
+    Ku = np.array([[0.],
+          [0.],
+          [-1],
+          [0],
+          [0.],
+          [0.],
+          [1],
+          [0],])
+    Fu = Ku
+    fu = np.zeros([np.shape(Ku)[0], 1])
+    fu[np.shape(Ku)[0]/2-2] = -(u_lb)
+    fu[np.shape(Ku)[0]/2-1] = -(u_lb)  # TODO wirklich mit den 0en?
+    fu[np.shape(Ku)[0]-2] = (u_ub)
+    fu[np.shape(Ku)[0]-1] = (u_ub)
+    print(fu)
+    # mixed constraints
+    ex2 = 0.349  # rad/s (20 degrees). Pitch angle constraint.
+    ex5 = 0.524 * delta_t  # rad/s * dt input slew rate constraint in discrete time
+    ey3 = 30.
+    # bounds
+    e_lb = [[-ex2], [-ey3], [-ex5], [0]]
+    e_ub = [[ex2], [ey3], [ex5], [0]]
+    # constraint matrices
+    Kx = np.array([[0, -1., 0., 0., 0.],
+          [128.2, -128.2, 0, 0., 0.],
+          [0., 0., 0., 0., 1.],
+          [0., 0., 0., 0., 0.],
+          [0., 1., 0., 0., 0.],
+          [-128.2, 128.2, 0, 0., 0.],
+          [0., 0., 0., 0., -1.],
+          [0., 0., 0., 0., 0.]])
+    Fx = Kx
+    fx = np.ones([2*4, 1])
+    fx [0:4] = - np.array(e_lb)
+    fx[4:2*4] = np.array(e_ub)
+
+    # # terminal state constraints
+    ff = fx
+    ff[3] = 1
+    ff[7] = 1
+    Ff = Kx
+
+    qp.set_constraints(Fu, fu, Fx, fx, Ff, ff)
     return qp
 
 

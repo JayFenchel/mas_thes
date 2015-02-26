@@ -13,13 +13,43 @@ class QuadraticProgram:
 
 
     def set_sys_dynamics(self, A, B):
+
+        # Equality constraints
+        C = np.zeros([T*n, T*(n+m)])
+        C[0:n, 0:m+n] = np.hstack([-sys.B, np.eye(n, n)])
+        for i in range(1, T):
+            C[i*n:(i+1)*n, m+(i-1)*(m+n):m+i*(m+n)+n] = np.hstack([-sys.A, -sys.B, np.eye(n, n)])
+        self.C = C
+
+        self.b = np.zeros([T*n, 1])
         pass
 
     def set_weighting(self):
         pass
 
     def set_constraints(self, Fu, fu, Fx, fx, Ff, ff):
-        pass
+
+        T, n, m = 10, 5, 1
+
+        # Inequality constraints
+        n_Fu = np.shape(Fu)[0]
+        P = np.zeros([T*n_Fu+np.shape(Ff)[0], T*(n+m)])
+        P[0:n_Fu, 0:m] = Fu
+        for i in range(1, T):
+            Hilf = np.hstack([Fx, Fu])
+            P[i*n_Fu:(i+1)*n_Fu, m+(i-1)*(m+n):m+i*(m+n)] = Hilf
+
+        P[T*n_Fu:T*n_Fu+np.shape(Ff)[0], m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = Ff
+        self.P = P
+
+        f = np.vstack([fx, fu]) # stacken - anderer branch
+        f = fx + fu  # TODO fraglich
+
+        h = np.zeros([T*np.shape(f)[0]+np.shape(ff)[0], 1])
+        for i in range(0, T):
+            h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
+        h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(ff)[0]] = ff
+        self.h = h
 
 
     def __init__(self, sys):
