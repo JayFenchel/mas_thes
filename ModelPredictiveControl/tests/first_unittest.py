@@ -110,5 +110,9 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue((self.test_qp.P == ref).all(), 'False P-matrix')
         # TODO Test h-vector
 
+        # TODO Test form_d
+        z_test = np.ones([21, 1])
+        print(z_test)
+
 if __name__ == '__main__':
     unittest.main()
