@@ -89,7 +89,7 @@ def form_Y(Phi_inv, A, B, T, n, m):
                 Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
     return Y
 
-def solve_lin_gs_with_Y(Phi, C, rd, rp, v):
+def solve_lin_gs_with_Y(Phi, C, rd, rp):
 
     Phi_inv = np.linalg.inv(Phi)
 
@@ -102,7 +102,7 @@ def solve_lin_gs_with_Y(Phi, C, rd, rp, v):
     x = np.vstack([delta_z, delta_v])
     return x
 
-def solve_lin_gs_structured(Phi, r, A, B, C, T, m, n, v):
+def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m):
 
     Phi_inv = np.linalg.inv(Phi)
     Y2 = form_Y(Phi_inv, A, B, T, n, m)
@@ -110,7 +110,7 @@ def solve_lin_gs_structured(Phi, r, A, B, C, T, m, n, v):
     Y = np.dot(C, np.dot(Phi_inv, C.T))
 
     # print(abs(Y-Y2).sum())
-    beta = -r[T*(n+m):] + np.dot(np.dot(C, Phi_inv), r[0:T*(n+m)])
+    beta = -rp + np.dot(np.dot(C, Phi_inv), rd)
 
     # L_Y = np.zeros_like(Y)
     # L_Y[0*n:(0+1)*n].T[0*n:(0+1)*n] = cholesky(Y[0*n:(0+1)*n].T[0*n:(0+1)*n])
@@ -122,18 +122,18 @@ def solve_lin_gs_structured(Phi, r, A, B, C, T, m, n, v):
 
     L_Y = cholesky(Y)
     hilf=np.array(np.eye(np.shape(beta)[0],1))
-    for k in range(0, 1, np.shape(beta)[0]):
-        hilf[k] = (-beta[k] - np.dot(L_Y[k, 0:k], hilf[0 : k]))/L_Y[k, k]
+    # for k in range(0, 1, np.shape(beta)[0]):
+    #     hilf[k] = (-beta[k] - np.dot(L_Y[k, 0:k], hilf[0 : k]))/L_Y[k, k]
 
     delta_v = np.linalg.solve(Y, -beta)
 
-    for k in range(np.shape(beta)[0]-1, 0-1, -1):
-        delta_v[k] = (hilf[k] - np.dot(L_Y.T[k, k+1:], hilf[k+1:]))/L_Y.T[k, k]
+    # for k in range(np.shape(beta)[0]-1, 0-1, -1):
+    #     delta_v[k] = (hilf[k] - np.dot(L_Y.T[k, k+1:], hilf[k+1:]))/L_Y.T[k, k]
     # print delta_v[:10]
     delta_v = np.linalg.solve(Y, -beta)
     # print delta_v[:10]
 
-    delta_z = np.linalg.solve(Phi, -r[0:T*(n+m)] - np.dot(C.T, delta_v))
+    delta_z = np.linalg.solve(Phi, -rd - np.dot(C.T, delta_v))
     x = np.vstack([delta_z, delta_v])
     return x
 

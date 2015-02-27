@@ -137,12 +137,12 @@ class QuadraticProgram:
         SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
 
         v = zv_k[self.T*(self.m+self.n):]
-        lsg = solve_lin_gs_structured(Phi, r, self.A, self.B, self.C, T, m, n, v)
-        # lsg = solve_lin_gs_with_Y(Phi, self.C, rd, rp, v)
+        lsg = solve_lin_gs_structured(Phi, rd, rp, self.A, self.B, self.C, T, n, m)
+        # lsg = solve_lin_gs_with_Y(Phi, self.C, rd, rp)
         # print(lsg)
 
-        # lsg = solve_lin_gs(SS, -r)
-        # print(lsg)
+        lsg1 = solve_lin_gs(SS, -r)
+        print(lsg-lsg1)
         return lsg
 
     def residual(self, xk, zv_k):
@@ -151,8 +151,8 @@ class QuadraticProgram:
         rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
-        if not self.check(xk, zv_k):
-            return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
+        # if not self.check(xk, zv_k):
+        #     return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
 
         return rd, rp
 
@@ -167,8 +167,8 @@ class QuadraticProgram:
         rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
-        if not self.check(xk, zv_k):
-            return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
+        # if not self.check(xk, zv_k):
+        #     return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
 
         return rd, rp
 

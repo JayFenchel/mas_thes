@@ -17,6 +17,7 @@ class MyTestCase(unittest.TestCase):
 
     def setUp(self):
 
+        # For testing cholesky
         self.sym_matrix1 = np.array([[80., 2., 3., 4., 1., 1., 0.],
                                      [2., 90., 1., 6., 5., 4., 3.],
                                      [3., 1., 70., 1., 1., 1., 2.],
@@ -25,6 +26,7 @@ class MyTestCase(unittest.TestCase):
                                      [1., 4., 1., 1., 5., 60., 1.],
                                      [0., 3., 2., 1., 1., 1., 40.]])
 
+        # For testing solve methods
         self.A = np.array([[0.23996015,    0.,  0.,           0., 0.],
                            [-0.37221757,   1.,  0.,           0., 0.],
                            [-0.99008755,   0.,  0.13885973,   0., 0.],
@@ -37,36 +39,83 @@ class MyTestCase(unittest.TestCase):
                            [-1.79989043, 1.],
                            [1.,          1.]])
 
+        # For Tests requiring constraints
+        self.Fx = np.array([[1, 2, 3, 4, 5],
+                            [6, 7, 8, 9, 0],
+                            [0, 0, 0, 1, 0]])
+        self.fx = np.array([[1],
+                            [2],
+                            [3]])
+
+        self.Fu = np.array([[2, 1],
+                            [4, 3],
+                            [6, 5]])
+        self.fu = np.array([[0],
+                            [1],
+                            [2]])
+
+        self.Ff = 0.5*self.Fx
+        self.ff = 0.5*self.fx
+
+        self.ref_P = np.array(
+            [[2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 1, 2, 3, 4, 5, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 6, 7, 8, 9, 0, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 1, 0, 6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 2, 1, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 8, 9, 0, 4, 3, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 6, 5, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 1.0, 1.5, 2.0, 2.5],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3.0, 3.5, 4.0, 4.5,   0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   0,   0,   0, 0.5,   0]])
+
         T, n, m = 3, 5, 2
         self.test_qp = QuadraticProgram(T, n, m)
 
     # Test functions of MyMath
     # TODO geeignete asserts für Toleranzbereiche wählen
-    # def test_solve_lin_gs_structured(self):
-    #     x = solve_lin_gs_structured(self.A, self.b)
-    #     self.assertTrue((abs(np.dot(self.A, x)-self.b)).sum() < 1e-10,
-    #                     'solve_lin_gs_structured failed')
+    def test_solve_lin_gs_structured(self):
 
-    def test_form_Y(self):
-        test_Phi_inv = np.array([[1., 0., 0., 0., 0., 0.],
-                                 [0., 2., 1., 0., 0., 0.],
-                                 [0., 4., 3., 0., 0., 0.],
-                                 [0., 0., 0., 2., 0., 0.],
-                                 [0., 0., 0., 0., 1., .5],
-                                 [0., 0., 0., 0., 3., 2.]])
+        self.test_qp.set_sys_dynamics(self.A, self.b)
+        self.test_qp.set_constraints(self.Fu, self.fu, self.Fx, self.fx,
+                                     self.Ff, self.ff)
+        x_test = np.array([[5, 1, 4, 2, 3]]).T
+        z_test = np.array([[9, 0, 8, 1, 7, 2, 6, 3, 5, 4, 0, 9, 0, 8, 1, 7, 2,
+                            6, 3, 5, 4]]).T
+        v_test = np.array([[0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1]]).T
+        zv_test = np.vstack([z_test, v_test])
+        d = self.test_qp.form_d(x_test, zv_test)
+        Phi = self.test_qp.form_Phi(d)
+        rd, rp = self.test_qp.residual(x_test, zv_test)
+        A, B, C = self.test_qp.A, self.test_qp.B, self.test_qp.C
+        T, n, m = self.test_qp.T, self.test_qp.n, self.test_qp.m
+        x = solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m)
+        SS = np.hstack([np.vstack([Phi, C]), np.vstack([C.T, np.zeros([C.shape[0], C.shape[0]])])])
+        self.assertTrue((abs(np.dot(SS, x)+np.vstack([rd, rp]))).sum() < 1e-10,
+                        'solve_lin_gs_structured failed')
 
-
-        test_A = np.array([[0.5, 1.],
-                           [2., 1.5]])
-        test_B = np.array([[7.],
-                           [6.]])
-
-        ref_Y = np.array([[51, 43],
-                          [46, 39]])
-
-        Y = form_Y(test_Phi_inv, test_A, test_B, 2, 2, 1)
-        print(Y)
-        pass
+    # def test_form_Y(self):
+    #     test_Phi_inv = np.array([[1., 0., 0., 0., 0., 0.],
+    #                              [0., 2., 1., 0., 0., 0.],
+    #                              [0., 4., 3., 0., 0., 0.],
+    #                              [0., 0., 0., 2., 0., 0.],
+    #                              [0., 0., 0., 0., 1., .5],
+    #                              [0., 0., 0., 0., 3., 2.]])
+    #
+    #
+    #     test_A = np.array([[0.5, 1.],
+    #                        [2., 1.5]])
+    #     test_B = np.array([[7.],
+    #                        [6.]])
+    #
+    #     ref_Y = np.array([[51, 43],
+    #                       [46, 39]])
+    #
+    #     Y = form_Y(test_Phi_inv, test_A, test_B, 2, 2, 1)
+    #     print(Y)
+    #     pass
 
     def test_solve_lin_gs(self):
         x = solve_lin_gs(self.A, self.b)
@@ -97,39 +146,10 @@ class MyTestCase(unittest.TestCase):
     # TODO def test_set_weighting(self):
     def test_set_constraints(self):
 
-        Fx = np.array([[1, 2, 3, 4, 5],
-                       [6, 7, 8, 9, 0],
-                       [0, 0, 0, 1, 0]])
-        fx = np.array([[1],
-                       [2],
-                       [3]])
+        self.test_qp.set_constraints(self.Fu, self.fu, self.Fx, self.fx,
+                                     self.Ff, self.ff)
 
-        Fu = np.array([[2, 1],
-                       [4, 3],
-                       [6, 5]])
-        fu = np.array([[0],
-                       [1],
-                       [2]])
-
-        Ff = 0.5*Fx
-        ff = 0.5*fx
-
-        self.test_qp.set_constraints(Fu, fu, Fx, fx, Ff, ff)
-        ref_P = np.array(
-            [[2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 1, 2, 3, 4, 5, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 6, 7, 8, 9, 0, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 1, 0, 6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 2, 1, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 8, 9, 0, 4, 3, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 6, 5, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 1.0, 1.5, 2.0, 2.5],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3.0, 3.5, 4.0, 4.5,   0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   0,   0,   0, 0.5,   0]])
-
-        self.assertTrue((self.test_qp.P == ref_P).all(), 'False P-matrix')
+        self.assertTrue((self.test_qp.P == self.ref_P).all(), 'False P-matrix')
 
         ref_h = np.array([[1, 3, 5, 1, 3, 5, 1, 3, 5, 0.5, 1, 1.5]]).T
         self. assertTrue((self.test_qp.h == ref_h).all(), 'False h-vector')
