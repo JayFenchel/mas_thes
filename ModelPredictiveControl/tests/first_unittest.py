@@ -2,6 +2,7 @@
 __author__ = 'jayf'
 
 from ModelPredictiveControl.MyMath import solve_lin_gs
+from ModelPredictiveControl.MyMath import form_Y
 from ModelPredictiveControl.MyMath import solve_lin_gs_structured
 from ModelPredictiveControl.MyMath import forward_substitution
 from ModelPredictiveControl.MyMath import backward_substitution
@@ -45,6 +46,27 @@ class MyTestCase(unittest.TestCase):
     #     x = solve_lin_gs_structured(self.A, self.b)
     #     self.assertTrue((abs(np.dot(self.A, x)-self.b)).sum() < 1e-10,
     #                     'solve_lin_gs_structured failed')
+
+    def test_form_Y(self):
+        test_Phi_inv = np.array([[1., 0., 0., 0., 0., 0.],
+                                 [0., 2., 1., 0., 0., 0.],
+                                 [0., 4., 3., 0., 0., 0.],
+                                 [0., 0., 0., 2., 0., 0.],
+                                 [0., 0., 0., 0., 1., .5],
+                                 [0., 0., 0., 0., 3., 2.]])
+
+
+        test_A = np.array([[0.5, 1.],
+                           [2., 1.5]])
+        test_B = np.array([[7.],
+                           [6.]])
+
+        ref_Y = np.array([[51, 43],
+                          [46, 39]])
+
+        Y = form_Y(test_Phi_inv, test_A, test_B, 2, 2, 1)
+        print(Y)
+        pass
 
     def test_solve_lin_gs(self):
         x = solve_lin_gs(self.A, self.b)
@@ -115,7 +137,7 @@ class MyTestCase(unittest.TestCase):
         x_test = np.array([[5, 1, 4, 2, 3]]).T
         z_test = np.array([[9, 0, 8, 1, 7, 2, 6, 3, 5, 4, 0, 9, 0, 8, 1, 7, 2,
                             6, 3, 5, 4]]).T
-        v_test = np.array([[0, 1, 0, 0, 1, 0, 0, 1, 1 ,1, 0, 1, 1, 0, 1]]).T
+        v_test = np.array([[0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1]]).T
         zv_test = np.vstack([z_test, v_test])
 
         ref_d = np.array([[-0.01694915254, -0.00833333333, -0.01960784314,

@@ -69,42 +69,45 @@ def solve_lin_gs(A, b):
     x = backward_substitution(Rtilde, ctilde)
     return x
 
-def solve_lin_gs_structured(Phi_not_inv, r, A, B, C, T, m, n, v):
+def form_Y(Phi_inv, A, B, T, n, m):
 
-    L_Phi = cholesky(Phi_not_inv)
-############
-    Phi = np.linalg.inv(Phi_not_inv)
-############
-    # TODO flogende 2 Zeilen rausnehmen führen zum selben Ergebnis wie i==0, j==0 in Schelife
     Y = np.zeros([T*n, T*n])
-    Y[0:n, 0:n] = np.dot(B, np.linalg.solve(L_Phi[0:m, 0:m].T, np.linalg.solve(L_Phi[0:m, 0:m], B.T)))\
-                                                + Phi[m:m+n, m:m+n]
+
     for i in range(0, T):
         for j in range(i, i+2):
-            #Y[0, 0]
+            # Y[0, 0]
             if i == 0 and j == 0:
-                Y[0*n:(0+1)*n].T[0*n:(0+1)*n] = np.dot(np.dot(B, Phi[0][0]), B.T).T\
-                                                + Phi[m:m+n].T[m:m+n].T
-            #Y[i, i]
+                Y[0:n, 0:n] = np.dot(np.dot(B, Phi_inv[0:m, 0:m]), B.T)\
+                                                + Phi_inv[m:m+n, m:m+n]
+            # Y[i, i], i > 0
             elif i == j:
-                Y[i*n:(i+1)*n].T[i*n:(i+1)*n] = (np.dot(np.dot(A, Phi[m+(i-1)*(m+n):m+(i-1)*(m+n)+n].T[m+(i-1)*(m+n):m+(i-1)*(m+n)+n].T), A.T)
-                                                + np.dot(np.dot(B, Phi[m+(i-1)*(m+n)+n:m+(i-1)*(m+n)+n+m].T[m+(i-1)*(m+n)+n:m+(i-1)*(m+n)+n+m].T), B.T)
-                                                + Phi[m+i*(m+n):m+i*(m+n)+n].T[m+i*(m+n):m+i*(m+n)+n].T).T
+                Y[i*n:(i+1)*n, i*n:(i+1)*n] = (np.dot(np.dot(A, Phi_inv[m+(i-1)*(m+n):m+(i-1)*(m+n)+n, m+(i-1)*(m+n):m+(i-1)*(m+n)+n]), A.T)
+                                                + np.dot(np.dot(B, Phi_inv[m+(i-1)*(m+n)+n:m+i*(m+n), m+(i-1)*(m+n)+n:m+i*(m+n)]), B.T)
+                                                + Phi_inv[m+i*(m+n):m+i*(m+n)+n, m+i*(m+n):m+i*(m+n)+n])
             elif i != j and j <= T-1:
-                Y[i*n:(i+1)*n].T[j*n:(j+1)*n] = -(np.dot(Phi[m+i*(m+n):m+i*(m+n)+n].T[m+i*(m+n):m+i*(m+n)+n].T, A.T)).T
-                Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n]
+                Y[i*n:(i+1)*n, j*n:(j+1)*n] = -(np.dot(Phi_inv[m+i*(m+n):m+i*(m+n)+n].T[m+i*(m+n):m+i*(m+n)+n].T, A.T)).T
+                Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
+    return Y
 
-    beta = -r[T*(n+m):] + np.dot(np.dot(C, Phi), r[0:T*(n+m)])
+def solve_lin_gs_structured(Phi, r, A, B, C, T, m, n, v):
 
-    L_Y = np.zeros_like(Y)
-    L_Y[0*n:(0+1)*n].T[0*n:(0+1)*n] = cholesky(Y[0*n:(0+1)*n].T[0*n:(0+1)*n])
-    for i in range(1, T):
+    Phi_inv = np.linalg.inv(Phi)
+    Y2 = form_Y(Phi_inv, A, B, T, n, m)
 
-        L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n] = np.linalg.solve(L_Y[(i-1)*n:(i)*n].T[(i-1)*n:(i)*n], Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n].T)
-        L_Y[i*n:(i+1)*n].T[i*n:(i+1)*n] = cholesky(Y[i*n:(i+1)*n].T[i*n:(i+1)*n] - np.dot(L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n].T, L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n]))
+    Y = np.dot(C, np.dot(Phi_inv, C.T))
+
+    # print(abs(Y-Y2).sum())
+    beta = -r[T*(n+m):] + np.dot(np.dot(C, Phi_inv), r[0:T*(n+m)])
+
+    # L_Y = np.zeros_like(Y)
+    # L_Y[0*n:(0+1)*n].T[0*n:(0+1)*n] = cholesky(Y[0*n:(0+1)*n].T[0*n:(0+1)*n])
+    # for i in range(1, T):
+    #
+    #     L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n] = np.linalg.solve(L_Y[(i-1)*n:(i)*n].T[(i-1)*n:(i)*n], Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n].T)
+    #     L_Y[i*n:(i+1)*n].T[i*n:(i+1)*n] = cholesky(Y[i*n:(i+1)*n].T[i*n:(i+1)*n] - np.dot(L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n].T, L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n]))
 
 
-    # L_Y = cholesky(Y)
+    L_Y = cholesky(Y)
     hilf=np.array(np.eye(np.shape(beta)[0],1))
     for k in range(0, 1, np.shape(beta)[0]):
         hilf[k] = (-beta[k] - np.dot(L_Y[k, 0:k], hilf[0 : k]))/L_Y[k, k]
@@ -117,7 +120,7 @@ def solve_lin_gs_structured(Phi_not_inv, r, A, B, C, T, m, n, v):
     delta_v = np.linalg.solve(Y, -beta)
     # print delta_v[:10]
 
-    delta_z = np.linalg.solve(Phi_not_inv, -r[0:T*(n+m)] - np.dot(C.T, v))
+    delta_z = np.linalg.solve(Phi, -r[0:T*(n+m)] - np.dot(C.T, v))
     x = np.vstack([delta_z, delta_v])
     return x
 
