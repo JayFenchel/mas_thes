@@ -97,13 +97,6 @@ class QuadraticProgram:
         h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(ff)[0]] = ff
         self.h = h
 
-    def form_d(self, xk, zv_k):
-        # Form d for further use
-        h = self.h_of_xk(xk)
-        d = np.zeros([np.shape(self.P)[0], 1])
-        d[:] = 1/(h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
-        return d
-
     def h_of_xk(self, xk):
         h = np.zeros_like(self.h) + self.h  # does not change self.h
         h[0:np.shape(self.Fx)[0]] -= np.dot(self.Fx, xk)
@@ -115,6 +108,18 @@ class QuadraticProgram:
     def b_of_xk(self, xk):
         pass
 
+    def form_d(self, xk, zv_k):
+        # Form d for further use
+        h = self.h_of_xk(xk)
+        d = np.zeros([np.shape(self.P)[0], 1])
+        d[:] = 1/(h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
+        return d
+
+    def form_Phi(self, d):
+        Phi = 2*self.H\
+              + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(d*d)), self.P)
+        return Phi
+
     def solve(self, xk, zv_k):
 
         T = self.T
@@ -125,12 +130,7 @@ class QuadraticProgram:
         self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
 
         d = self.form_d(xk, zv_k)
-
-        Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(d**2)), self.P)  # TODO vernünftiges Quadrieren
-
-        # print(m)
-        # print(self.P[0:m+n+7].T[0:m+n+3]).T
-        # print(np.linalg.inv(Phi))
+        Phi = self.form_Phi(d)
 
         r = np.vstack(self.residual(xk, zv_k))
         rd, rp = self.residual(xk, zv_k)
