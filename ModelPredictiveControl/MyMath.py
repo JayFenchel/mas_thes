@@ -71,6 +71,7 @@ def solve_lin_gs(A, b):
 
 def form_Y(Phi_inv, A, B, T, n, m):
 
+    # TODO find ungenauigkeit, irgendwo ist vllt noch ein kleiner fehler
     Y = np.zeros([T*n, T*n])
 
     for i in range(0, T):
@@ -85,7 +86,7 @@ def form_Y(Phi_inv, A, B, T, n, m):
                                                 + np.dot(np.dot(B, Phi_inv[m+(i-1)*(m+n)+n:m+i*(m+n), m+(i-1)*(m+n)+n:m+i*(m+n)]), B.T)
                                                 + Phi_inv[m+i*(m+n):m+i*(m+n)+n, m+i*(m+n):m+i*(m+n)+n])
             elif i != j and j <= T-1:
-                Y[i*n:(i+1)*n, j*n:(j+1)*n] = -(np.dot(Phi_inv[m+i*(m+n):m+i*(m+n)+n].T[m+i*(m+n):m+i*(m+n)+n].T, A.T)).T
+                Y[i*n:(i+1)*n, j*n:(j+1)*n] = -(np.dot(Phi_inv[m+i*(m+n):m+i*(m+n)+n, m+i*(m+n):m+i*(m+n)+n], A.T))
                 Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
     return Y
 
@@ -105,11 +106,12 @@ def solve_lin_gs_with_Y(Phi, C, rd, rp):
 def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m):
 
     Phi_inv = np.linalg.inv(Phi)
+    L_Phi = cholesky(Phi)
     Y2 = form_Y(Phi_inv, A, B, T, n, m)
 
     Y = np.dot(C, np.dot(Phi_inv, C.T))
 
-    # print(abs(Y-Y2).sum())
+    # print('Y',abs(Y-Y2).sum())
     beta = -rp + np.dot(np.dot(C, Phi_inv), rd)
 
     # L_Y = np.zeros_like(Y)
@@ -119,21 +121,14 @@ def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m):
     #     L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n] = np.linalg.solve(L_Y[(i-1)*n:(i)*n].T[(i-1)*n:(i)*n], Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n].T)
     #     L_Y[i*n:(i+1)*n].T[i*n:(i+1)*n] = cholesky(Y[i*n:(i+1)*n].T[i*n:(i+1)*n] - np.dot(L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n].T, L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n]))
 
-
+    # TODO einezelne Blöcke in L_Y berechnen sollte schneller gehen
     L_Y = cholesky(Y)
-    hilf=np.array(np.eye(np.shape(beta)[0],1))
-    # for k in range(0, 1, np.shape(beta)[0]):
-    #     hilf[k] = (-beta[k] - np.dot(L_Y[k, 0:k], hilf[0 : k]))/L_Y[k, k]
+    delta_v_hilf = forward_substitution(L_Y, -beta)
+    delta_v = backward_substitution(L_Y.T, delta_v_hilf)
 
-    delta_v = np.linalg.solve(Y, -beta)
+    delta_z_hilf = forward_substitution(L_Phi, -rd - np.dot(C.T, delta_v))
+    delta_z = backward_substitution(L_Phi.T, delta_z_hilf)
 
-    # for k in range(np.shape(beta)[0]-1, 0-1, -1):
-    #     delta_v[k] = (hilf[k] - np.dot(L_Y.T[k, k+1:], hilf[k+1:]))/L_Y.T[k, k]
-    # print delta_v[:10]
-    delta_v = np.linalg.solve(Y, -beta)
-    # print delta_v[:10]
-
-    delta_z = np.linalg.solve(Phi, -rd - np.dot(C.T, delta_v))
     x = np.vstack([delta_z, delta_v])
     return x
 
