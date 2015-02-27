@@ -93,7 +93,7 @@ class MyTestCase(unittest.TestCase):
         ff = 0.5*fx
 
         self.test_qp.set_constraints(Fu, fu, Fx, fx, Ff, ff)
-        ref = np.array(
+        ref_P = np.array(
             [[2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
              [4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
              [6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -107,12 +107,20 @@ class MyTestCase(unittest.TestCase):
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3.0, 3.5, 4.0, 4.5,   0],
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   0,   0,   0, 0.5,   0]])
 
-        self.assertTrue((self.test_qp.P == ref).all(), 'False P-matrix')
+        self.assertTrue((self.test_qp.P == ref_P).all(), 'False P-matrix')
         # TODO Test h-vector
-
+        ref_h = np.array([[1, 3, 5, 1, 3, 5, 1, 3, 5, 0.5, 1, 1.5]]).T
+        self. assertTrue((self.test_qp.h == ref_h).all(), 'False h-vector')
         # TODO Test form_d
-        z_test = np.ones([21, 1])
-        print(z_test)
+        x_test = np.array([[5, 1, 4, 2, 3]]).T
+        z_test = np.array([[9, 0, 8, 1, 7, 2, 6, 3, 5, 4, 0, 9, 0, 8, 1, 7, 2,
+                            6, 3, 5, 4]]).T
+
+        ref_d = np.array([[-0.0169, -0.0083, -0.0196, -0.0127, -0.0065,
+                           -0.0250, -0.0127, -0.0085, -0.0278, -0.0323,
+                           -0.0165, -1.0000]]).T
+        self.assertTrue((self.test_qp.form_d(x_test, z_test) == ref_d).all(),
+                        'False d-vector')
 
 if __name__ == '__main__':
     unittest.main()
