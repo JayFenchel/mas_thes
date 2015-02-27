@@ -22,6 +22,11 @@ class QuadraticProgram:
         self.C = np.zeros([T*n, T*(n+m)])
         self.b = np.zeros([T*n, 1])
 
+        self.H = np.eye(T*(n+m), T*(n+m))
+        self.g = np.zeros([T*(m+n), 1])
+        self.r = np.zeros([m, 1])
+        self.S = np.zeros_like(self.B)
+
         self.Fx = None
         self.f = None
         # TODO Instance attributes als None initieren und abfragen, ob gesetzt
@@ -128,6 +133,17 @@ class QuadraticProgram:
         return lsg
 
     def residual(self, xk, zv_k):
+
+        d = self.form_d(xk, zv_k)
+        rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
+        rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
+
+        if not self.check(xk, zv_k):
+            return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
+
+        return rd, rp
+
+    def old_residual(self, xk, zv_k):
         h=self.h
         h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 

@@ -111,17 +111,24 @@ class MyTestCase(unittest.TestCase):
 
         ref_h = np.array([[1, 3, 5, 1, 3, 5, 1, 3, 5, 0.5, 1, 1.5]]).T
         self. assertTrue((self.test_qp.h == ref_h).all(), 'False h-vector')
-        
+
         x_test = np.array([[5, 1, 4, 2, 3]]).T
         z_test = np.array([[9, 0, 8, 1, 7, 2, 6, 3, 5, 4, 0, 9, 0, 8, 1, 7, 2,
                             6, 3, 5, 4]]).T
+        v_test = np.array([[0, 1, 0, 0, 1, 0, 0, 1, 1 ,1, 0, 1, 1, 0, 1]]).T
+        zv_test = np.vstack([z_test, v_test])
 
         ref_d = np.array([[-0.01694915254, -0.00833333333, -0.01960784314,
                            -0.01265822785, -0.00653594771, -0.02500000000,
                            -0.01265822785, -0.00847457627, -0.02777777778,
                            -0.03225806452, -0.01652892562, -1.00000000000]]).T
-        self.assertTrue((abs(self.test_qp.form_d(x_test, z_test) - ref_d)).sum() < 1e-10,
+        self.assertTrue((abs(self.test_qp.form_d(x_test, zv_test) - ref_d)).sum() < 1e-10,
                         'False d-vector')
+        # TODO Test residual(), dazu noch C-Matrix setzen
+        # Mal angenommen, das alte residual was richtig
+        self.assertTrue((np.vstack(self.test_qp.old_residual(x_test, zv_test)) ==
+                        np.vstack(self.test_qp.residual(x_test, zv_test))).all(),
+                        'Residual changed')
 
 if __name__ == '__main__':
     unittest.main()
