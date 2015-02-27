@@ -108,18 +108,19 @@ class MyTestCase(unittest.TestCase):
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   0,   0,   0, 0.5,   0]])
 
         self.assertTrue((self.test_qp.P == ref_P).all(), 'False P-matrix')
-        # TODO Test h-vector
+
         ref_h = np.array([[1, 3, 5, 1, 3, 5, 1, 3, 5, 0.5, 1, 1.5]]).T
         self. assertTrue((self.test_qp.h == ref_h).all(), 'False h-vector')
-        # TODO Test form_d
+        
         x_test = np.array([[5, 1, 4, 2, 3]]).T
         z_test = np.array([[9, 0, 8, 1, 7, 2, 6, 3, 5, 4, 0, 9, 0, 8, 1, 7, 2,
                             6, 3, 5, 4]]).T
 
-        ref_d = np.array([[-0.0169, -0.0083, -0.0196, -0.0127, -0.0065,
-                           -0.0250, -0.0127, -0.0085, -0.0278, -0.0323,
-                           -0.0165, -1.0000]]).T
-        self.assertTrue((self.test_qp.form_d(x_test, z_test) == ref_d).all(),
+        ref_d = np.array([[-0.01694915254, -0.00833333333, -0.01960784314,
+                           -0.01265822785, -0.00653594771, -0.02500000000,
+                           -0.01265822785, -0.00847457627, -0.02777777778,
+                           -0.03225806452, -0.01652892562, -1.00000000000]]).T
+        self.assertTrue((abs(self.test_qp.form_d(x_test, z_test) - ref_d)).sum() < 1e-10,
                         'False d-vector')
 
 if __name__ == '__main__':
