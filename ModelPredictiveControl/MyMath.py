@@ -89,6 +89,19 @@ def form_Y(Phi_inv, A, B, T, n, m):
                 Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
     return Y
 
+def solve_lin_gs_with_Y(Phi, C, rd, rp, v):
+
+    Phi_inv = np.linalg.inv(Phi)
+
+    Y = np.dot(C, np.dot(Phi_inv, C.T))
+    beta = - rp + np.dot(C, np.dot(Phi_inv, rd))
+
+    delta_v = np.linalg.solve(Y, -beta)
+    delta_z = np.linalg.solve(Phi, -rd-np.dot(C.T, delta_v))
+
+    x = np.vstack([delta_z, delta_v])
+    return x
+
 def solve_lin_gs_structured(Phi, r, A, B, C, T, m, n, v):
 
     Phi_inv = np.linalg.inv(Phi)
@@ -120,7 +133,7 @@ def solve_lin_gs_structured(Phi, r, A, B, C, T, m, n, v):
     delta_v = np.linalg.solve(Y, -beta)
     # print delta_v[:10]
 
-    delta_z = np.linalg.solve(Phi, -r[0:T*(n+m)] - np.dot(C.T, v))
+    delta_z = np.linalg.solve(Phi, -r[0:T*(n+m)] - np.dot(C.T, delta_v))
     x = np.vstack([delta_z, delta_v])
     return x
 

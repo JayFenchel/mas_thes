@@ -5,6 +5,7 @@ __author__ = 'jayf'
 import numpy as np
 from ModelPredictiveControl.MyMath import matrix_diag
 from ModelPredictiveControl.MyMath import solve_lin_gs
+from ModelPredictiveControl.MyMath import solve_lin_gs_with_Y
 from ModelPredictiveControl.MyMath import solve_lin_gs_structured
 
 
@@ -108,6 +109,12 @@ class QuadraticProgram:
         h[0:np.shape(self.Fx)[0]] -= np.dot(self.Fx, xk)
         return h
 
+    def g_of_xk(self, xk):
+        pass
+
+    def b_of_xk(self, xk):
+        pass
+
     def solve(self, xk, zv_k):
 
         T = self.T
@@ -126,13 +133,15 @@ class QuadraticProgram:
         # print(np.linalg.inv(Phi))
 
         r = np.vstack(self.residual(xk, zv_k))
+        rd, rp = self.residual(xk, zv_k)
         SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
 
         v = zv_k[self.T*(self.m+self.n):]
         lsg = solve_lin_gs_structured(Phi, r, self.A, self.B, self.C, T, m, n, v)
+        # lsg = solve_lin_gs_with_Y(Phi, self.C, rd, rp, v)
         # print(lsg)
 
-        lsg = solve_lin_gs(SS, -r)
+        # lsg = solve_lin_gs(SS, -r)
         # print(lsg)
         return lsg
 
