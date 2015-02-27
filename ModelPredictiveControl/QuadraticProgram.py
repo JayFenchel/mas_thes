@@ -98,11 +98,15 @@ class QuadraticProgram:
 
     def form_d(self, xk, zv_k):
         # Form d for further use
-        # TODO um h nicht zu ändern andersrum subtrhieren (-h_neu += h)
-        self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
+        h = self.h_of_xk(xk)
         d = np.zeros([np.shape(self.P)[0], 1])
-        d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
+        d[:] = 1/(h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
         return d
+
+    def h_of_xk(self, xk):
+        h = np.zeros_like(self.h) + self.h  # does not change self.h
+        h[0:np.shape(self.Fx)[0]] -= np.dot(self.Fx, xk)
+        return h
 
     def solve(self, xk, zv_k):
 
@@ -144,7 +148,7 @@ class QuadraticProgram:
         return rd, rp
 
     def old_residual(self, xk, zv_k):
-        h=self.h
+        h = np.zeros_like(self.h) + self.h
         h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 
         d = np.zeros([np.shape(self.P)[0], 1])
@@ -160,8 +164,8 @@ class QuadraticProgram:
         return rd, rp
 
     def check(self, xk, zv_k):
-        self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
-        return ((np.dot(self.P, zv_k[0:self.T*(self.m+self.n)]) - self.h) < 0).all()
+        h = self.h_of_xk(xk)
+        return ((np.dot(self.P, zv_k[0:self.T*(self.m+self.n)]) - h) < 0).all()
 
 
 
