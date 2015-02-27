@@ -22,6 +22,8 @@ class QuadraticProgram:
         self.C = np.zeros([T*n, T*(n+m)])
         self.b = np.zeros([T*n, 1])
 
+        self.Fx = None
+        self.f = None
         # TODO Instance attributes als None initieren und abfragen, ob gesetzt
 
     def set_sys_dynamics(self, A, B):
@@ -91,6 +93,7 @@ class QuadraticProgram:
 
     def form_d(self, xk, zv_k):
         # Form d for further use
+        # TODO um h nicht zu ändern andersrum subtrhieren (-h_neu += h)
         self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
         d = np.zeros([np.shape(self.P)[0], 1])
         d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
@@ -135,12 +138,13 @@ class QuadraticProgram:
         rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
-        if not self.check(zv_k):
+        if not self.check(xk, zv_k):
             return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
 
         return rd, rp
 
-    def check(self, zv_k):
+    def check(self, xk, zv_k):
+        self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
         return ((np.dot(self.P, zv_k[0:self.T*(self.m+self.n)]) - self.h) < 0).all()
 
 

@@ -149,7 +149,7 @@ zv_k = np.array([[  2.09719785e-01],
 [ -2.37228200e+02],
 [ -1.33346052e+02],
 [  2.02084617e+01]])
-print('startwert valide = ',QP.check(zv_k))  # Validität des Startwerts prüfen
+print('startwert valide = ', QP.check(xk, zv_k))  # Validität des Startwerts prüfen
 
 for schritt in range(1):
     for i in range(0, 10):
@@ -183,7 +183,7 @@ for schritt in range(1):
         while np.square(np.vstack(QP.residual(xk, zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(delta_f.T, delta_zv):
             st = beta*st
             # print(st)
-        if QP.check(zv_k + st*delta_zv):
+        if QP.check(xk, zv_k + st*delta_zv):
             print('Valid step possible')
             zv_k += st*delta_zv
         else:
