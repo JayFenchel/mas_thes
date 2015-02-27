@@ -89,8 +89,9 @@ class QuadraticProgram:
         h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(ff)[0]] = ff
         self.h = h
 
-    def form_d(self, zv_k):
+    def form_d(self, xk, zv_k):
         # Form d for further use
+        self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
         d = np.zeros([np.shape(self.P)[0], 1])
         d[:] = 1/(self.h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
         return d
@@ -103,9 +104,8 @@ class QuadraticProgram:
 
         self.b[0:self.n] = np.dot(self.A, xk)
         self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
-        self.h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 
-        d = self.form_d(zv_k)
+        d = self.form_d(xk, zv_k)
 
         Phi = 2*self.H + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(d**2)), self.P)  # TODO vernünftiges Quadrieren
 
