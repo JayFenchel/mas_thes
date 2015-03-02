@@ -72,7 +72,7 @@ zv_k = np.array([[  2.09719785e-01],
                  [ -4.21055884e+03], [  4.53808858e+03], [ -2.37228200e+02], [ -1.33346052e+02], [  2.02084617e+01]])
 print('startwert valide = ', QP.check(xk, zv_k))  # Validität des Startwerts prüfen
 
-for schritt in range(40):
+for schritt in range(1):
     for i in range(0, 5):
         delta_zv = QP.solve(xk, zv_k)
 
@@ -121,4 +121,4 @@ for schritt in range(40):
     # print(zv_k[0])
     # print(np.dot(sys.B, zv_k[0]))
     xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
-    print('xk',xk)
+    print('next xk',xk)

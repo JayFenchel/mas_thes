@@ -82,12 +82,17 @@ def form_Y(Phi_inv, A, B, T, n, m):
                                                 + Phi_inv[m:m+n, m:m+n]
             # Y[i, i], i > 0
             elif i == j:
+                # print(Phi_inv[m+(i-1)*(m+n):m+(i-1)*(m+n)+n, m+(i-1)*(m+n)+n:m+i*(m+n)])
                 Y[i*n:(i+1)*n, i*n:(i+1)*n] = (np.dot(np.dot(A, Phi_inv[m+(i-1)*(m+n):m+(i-1)*(m+n)+n, m+(i-1)*(m+n):m+(i-1)*(m+n)+n]), A.T)
+                                                + np.dot(A, np.dot(Phi_inv[m+(i-1)*(m+n):m+(i-1)*(m+n)+n, m+(i-1)*(m+n)+n:m+i*(m+n)], B.T))
+                                                + np.dot(B, np.dot(Phi_inv[m+(i-1)*(m+n):m+(i-1)*(m+n)+n, m+(i-1)*(m+n)+n:m+i*(m+n)].T, A.T))
                                                 + np.dot(np.dot(B, Phi_inv[m+(i-1)*(m+n)+n:m+i*(m+n), m+(i-1)*(m+n)+n:m+i*(m+n)]), B.T)
                                                 + Phi_inv[m+i*(m+n):m+i*(m+n)+n, m+i*(m+n):m+i*(m+n)+n])
             elif i != j and j <= T-1:
-                Y[i*n:(i+1)*n, j*n:(j+1)*n] = -(np.dot(Phi_inv[m+i*(m+n):m+i*(m+n)+n, m+i*(m+n):m+i*(m+n)+n], A.T))
+                Y[i*n:(i+1)*n, j*n:(j+1)*n] = (-(np.dot(Phi_inv[m+i*(m+n):m+i*(m+n)+n, m+i*(m+n):m+i*(m+n)+n], A.T))
+                                               -(np.dot(Phi_inv[m+i*(m+n):m+i*(m+n)+n, m+i*(m+n)+n:m+(i+1)*(m+n)], B.T)))
                 Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
+    # print(Y)
     return Y
 
 def solve_lin_gs_with_Y(Phi, C, rd, rp):
@@ -107,11 +112,8 @@ def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m):
 
     Phi_inv = np.linalg.inv(Phi)
     L_Phi = cholesky(Phi)
-    Y2 = form_Y(Phi_inv, A, B, T, n, m)
+    Y = form_Y(Phi_inv, A, B, T, n, m)
 
-    Y = np.dot(C, np.dot(Phi_inv, C.T))
-
-    # print('Y',abs(Y-Y2).sum())
     beta = -rp + np.dot(np.dot(C, Phi_inv), rd)
 
     # L_Y = np.zeros_like(Y)
