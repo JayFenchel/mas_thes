@@ -69,7 +69,7 @@ def solve_lin_gs(A, b):
     x = backward_substitution(Rtilde, ctilde)
     return x
 
-def form_Y_of_L(L_Phi, A, B, T, n, m):
+def form_Y(L_Phi, A, B, T, n, m):
 
     # TODO find ungenauigkeit, irgendwo ist vllt noch ein kleiner fehler
     Y = np.zeros([T*n, T*n])
@@ -94,55 +94,12 @@ def form_Y_of_L(L_Phi, A, B, T, n, m):
                 Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
     return Y
 
-def form_Y(Phi_inv, A, B, T, n, m):
-
-    # TODO find ungenauigkeit, irgendwo ist vllt noch ein kleiner fehler
-    Y = np.zeros([T*n, T*n])
-
-    for i in range(0, T):
-        for j in range(i, i+2):
-            # Y[0, 0]
-            if i == 0 and j == 0:
-                Y[0:n, 0:n] = np.dot(np.dot(B, Phi_inv[0:m, 0:m]), B.T)\
-                                                + Phi_inv[m:m+n, m:m+n]
-            # Y[i, i], i > 0
-            elif i == j:
-                # print(Phi_inv[m+(i-1)*(m+n):m+(i-1)*(m+n)+n, m+(i-1)*(m+n)+n:m+i*(m+n)])
-                Y[i*n:(i+1)*n, i*n:(i+1)*n] = (np.dot(np.dot(A, Phi_inv[m+(i-1)*(m+n):m+(i-1)*(m+n)+n, m+(i-1)*(m+n):m+(i-1)*(m+n)+n]), A.T)
-                                                + np.dot(A, np.dot(Phi_inv[m+(i-1)*(m+n):m+(i-1)*(m+n)+n, m+(i-1)*(m+n)+n:m+i*(m+n)], B.T))
-                                                + np.dot(B, np.dot(Phi_inv[m+(i-1)*(m+n):m+(i-1)*(m+n)+n, m+(i-1)*(m+n)+n:m+i*(m+n)].T, A.T))
-                                                + np.dot(np.dot(B, Phi_inv[m+(i-1)*(m+n)+n:m+i*(m+n), m+(i-1)*(m+n)+n:m+i*(m+n)]), B.T)
-                                                + Phi_inv[m+i*(m+n):m+i*(m+n)+n, m+i*(m+n):m+i*(m+n)+n])
-            elif i != j and j <= T-1:
-                Y[i*n:(i+1)*n, j*n:(j+1)*n] = (-(np.dot(Phi_inv[m+i*(m+n):m+i*(m+n)+n, m+i*(m+n):m+i*(m+n)+n], A.T))
-                                               -(np.dot(Phi_inv[m+i*(m+n):m+i*(m+n)+n, m+i*(m+n)+n:m+(i+1)*(m+n)], B.T)))
-                Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
-    # print(Y)
-    return Y
-
-def solve_lin_gs_with_Y(Phi, C, rd, rp):
-
-    Phi_inv = np.linalg.inv(Phi)
-
-    Y = np.dot(C, np.dot(Phi_inv, C.T))
-    beta = - rp + np.dot(C, np.dot(Phi_inv, rd))
-
-    delta_v = np.linalg.solve(Y, -beta)
-    delta_z = np.linalg.solve(Phi, -rd-np.dot(C.T, delta_v))
-
-    x = np.vstack([delta_z, delta_v])
-    return x
-
 def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m):
 
-    Phi_inv = np.linalg.inv(Phi)
     L_Phi = cholesky(Phi)
-    Y1 = form_Y(Phi_inv, A, B, T, n, m)
-    Y = form_Y_of_L(L_Phi, A, B, T, n, m)
 
-    print(np.max(abs(Y-Y1)))
-
-    beta = -rp + np.dot(np.dot(C, Phi_inv), rd)
+    Y = form_Y(L_Phi, A, B, T, n, m)
+    beta = -rp + np.dot(C, backward_substitution(L_Phi.T, forward_substitution(L_Phi, rd)))
 
     # L_Y = np.zeros_like(Y)
     # L_Y[0*n:(0+1)*n].T[0*n:(0+1)*n] = cholesky(Y[0*n:(0+1)*n].T[0*n:(0+1)*n])
@@ -153,14 +110,11 @@ def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m):
 
     # TODO einezelne Blöcke in L_Y berechnen sollte schneller gehen
     L_Y = cholesky(Y)
-    delta_v_hilf = forward_substitution(L_Y, -beta)
-    delta_v = backward_substitution(L_Y.T, delta_v_hilf)
 
-    delta_z_hilf = forward_substitution(L_Phi, -rd - np.dot(C.T, delta_v))
-    delta_z = backward_substitution(L_Phi.T, delta_z_hilf)
+    delta_v = backward_substitution(L_Y.T, forward_substitution(L_Y, -beta))
+    delta_z = backward_substitution(L_Phi.T, forward_substitution(L_Phi, -rd - np.dot(C.T, delta_v)))
 
-    x = np.vstack([delta_z, delta_v])
-    return x
+    return np.vstack([delta_z, delta_v])
 
 def forward_substitution(A, b):
     #TODO Prüfen ob A untere Dreiecksmatrix
