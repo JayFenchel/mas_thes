@@ -69,6 +69,31 @@ def solve_lin_gs(A, b):
     x = backward_substitution(Rtilde, ctilde)
     return x
 
+def form_Y_of_L(L_Phi, A, B, T, n, m):
+
+    # TODO find ungenauigkeit, irgendwo ist vllt noch ein kleiner fehler
+    Y = np.zeros([T*n, T*n])
+
+    for i in range(0, T):
+        for j in range(i, i+2):
+            # Y[0, 0]
+            if i == 0 and j == 0:
+                Y[0:n, 0:n] = np.dot(B, backward_substitution(L_Phi.T[0:m, 0:m], forward_substitution(L_Phi[0:m, 0:m], B.T)))\
+                              + backward_substitution(L_Phi.T[m:m+n+m, m:m+n+m],
+                                                      forward_substitution(L_Phi[m:m+n+m, m:m+n+m], np.eye(n+m, n)))[0:n]
+            # Y[i, i], i > 0
+            elif i == j:
+                Y[i*n:(i+1)*n, i*n:(i+1)*n] = (np.dot(np.hstack([A, B]), backward_substitution(L_Phi.T[m+(i-1)*(m+n):m+i*(m+n), m+(i-1)*(m+n):m+i*(m+n)],
+                                                                    forward_substitution(L_Phi[m+(i-1)*(m+n):m+i*(m+n), m+(i-1)*(m+n):m+i*(m+n)], np.vstack([A.T, B.T]))))
+                                               + backward_substitution(L_Phi.T[m+i*(m+n):m+i*(m+n)+n+m, m+i*(m+n):m+i*(m+n)+n+m],
+                                                                        forward_substitution(L_Phi[m+i*(m+n):m+i*(m+n)+n+m, m+i*(m+n):m+i*(m+n)+n+m], np.eye(n+m, n)))[0:n])
+            # Y[i, j] = Y[j, i]
+            elif i != j and j <= T-1:
+                Y[i*n:(i+1)*n, j*n:(j+1)*n] = (backward_substitution(L_Phi.T[m+i*(m+n):m+(i+1)*(m+n), m+i*(m+n):m+(i+1)*(m+n)],
+                                                                    forward_substitution(L_Phi[m+i*(m+n):m+(i+1)*(m+n), m+i*(m+n):m+(i+1)*(m+n)], np.vstack([-A.T, -B.T]))))[0:5]
+                Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
+    return Y
+
 def form_Y(Phi_inv, A, B, T, n, m):
 
     # TODO find ungenauigkeit, irgendwo ist vllt noch ein kleiner fehler
@@ -112,7 +137,10 @@ def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m):
 
     Phi_inv = np.linalg.inv(Phi)
     L_Phi = cholesky(Phi)
-    Y = form_Y(Phi_inv, A, B, T, n, m)
+    Y1 = form_Y(Phi_inv, A, B, T, n, m)
+    Y = form_Y_of_L(L_Phi, A, B, T, n, m)
+
+    print(np.max(abs(Y-Y1)))
 
     beta = -rp + np.dot(np.dot(C, Phi_inv), rd)
 
