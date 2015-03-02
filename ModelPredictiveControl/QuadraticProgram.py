@@ -149,8 +149,9 @@ class QuadraticProgram:
         rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
-        # if not self.check(xk, zv_k):
-        #     return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
+        if not self.check(xk, zv_k):
+            print('helpme') # TODO Gedanken machen, wie man das in unzulässigem Bereich besser lösen kann
+            return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
 
         return rd, rp
 
@@ -165,8 +166,8 @@ class QuadraticProgram:
         rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
-        # if not self.check(xk, zv_k):
-        #     return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
+        if not self.check(xk, zv_k):
+            return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
 
         return rd, rp
 
