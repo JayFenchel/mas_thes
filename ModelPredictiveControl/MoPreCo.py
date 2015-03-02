@@ -8,10 +8,10 @@ from ModelPredictiveControl.Systems import SimpleExample
 from ModelPredictiveControl.Systems import AirCraft
 from ModelPredictiveControl.Systems import qp_from_sys
 from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
-sys = SimpleExample()
+sys = AirCraft()
 # QP1 = QuadraticProgram(sys)
 QP = qp_from_sys()
 
@@ -151,8 +151,8 @@ zv_k = np.array([[  2.09719785e-01],
 [  2.02084617e+01]])
 print('startwert valide = ', QP.check(xk, zv_k))  # Validität des Startwerts prüfen
 
-for schritt in range(1):
-    for i in range(0, 10):
+for schritt in range(40):
+    for i in range(0, 5):
         delta_zv = QP.solve(xk, zv_k)
 
         # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
@@ -164,8 +164,8 @@ for schritt in range(1):
             # if not QP.check(zv_k + (100.-i)*delta_zv/100.):
             #     f_xp[i] = 0
             # print ((100.-i)/100., QP.check(zv_k + (100-i)*delta_zv/100))
-        plt.plot(np.linspace(1, 0, 100), f_xp)
-        plt.grid()
+        # plt.plot(np.linspace(1, 0, 100), f_xp)
+        # plt.grid()
         # plt.show()
         testschritt = delta_zv * .0000001
         DELTA = np.eye(np.shape(zv_k)[0])*0.000001
@@ -199,5 +199,5 @@ for schritt in range(1):
     # print(zv_k)
     # print(zv_k[0])
     # print(np.dot(sys.B, zv_k[0]))
-    # xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
-    # print('xk',xk)
+    xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
+    print('xk',xk)
