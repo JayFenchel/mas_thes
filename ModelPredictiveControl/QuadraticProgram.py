@@ -131,14 +131,13 @@ class QuadraticProgram:
         d = self.form_d(xk, zv_k)
         Phi = self.form_Phi(d)
 
-        r = np.vstack(self.residual(xk, zv_k))
         rd, rp = self.residual(xk, zv_k)
-        SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
 
-        v = zv_k[self.T*(self.m+self.n):]
         lsg = solve_lin_gs_structured(Phi, rd, rp, self.A, self.B, self.C, T, n, m)
         # print(lsg)
         #
+        # r = np.vstack(self.residual(xk, zv_k))
+        # SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.eye(self.C.shape[0], self.C.shape[0])*0])])
         # lsg1 = solve_lin_gs(SS, -r)
         # print(lsg-lsg1)
         return lsg
@@ -150,11 +149,11 @@ class QuadraticProgram:
 
         return np.square(np.vstack(self.residual(xk, zv_k))).sum()
 
-
     def residual(self, xk, zv_k):
 
         d = self.form_d(xk, zv_k)
-        rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
+        rd = (2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g
+             + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):]))
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
         return rd, rp
