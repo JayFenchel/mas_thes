@@ -138,20 +138,24 @@ class QuadraticProgram:
         v = zv_k[self.T*(self.m+self.n):]
         lsg = solve_lin_gs_structured(Phi, rd, rp, self.A, self.B, self.C, T, n, m)
         # print(lsg)
-
-        lsg1 = solve_lin_gs(SS, -r)
-        print(lsg-lsg1)
+        #
+        # lsg1 = solve_lin_gs(SS, -r)
+        # print(lsg-lsg1)
         return lsg
+
+    def residual_norm(self, xk, zv_k):
+
+        if not self.check(xk, zv_k):
+            return np.nan
+
+        return np.square(np.vstack(self.residual(xk, zv_k))).sum()
+
 
     def residual(self, xk, zv_k):
 
         d = self.form_d(xk, zv_k)
         rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
-
-        if not self.check(xk, zv_k):
-            print('helpme') # TODO Gedanken machen, wie man das in unzulässigem Bereich besser lösen kann
-            return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
 
         return rd, rp
 
@@ -166,8 +170,8 @@ class QuadraticProgram:
         rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
-        if not self.check(xk, zv_k):
-            return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
+        # if not self.check(xk, zv_k):
+        #     return rd + 100000000000000000000000000000000000000, rp + 100000000000000000000000000000000000000
 
         return rd, rp
 

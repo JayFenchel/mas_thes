@@ -144,6 +144,7 @@ class MyTestCase(unittest.TestCase):
     # Test functions of Quadratic Program
     # TODO def test_set_sys_dynamics(self):
     # TODO def test_set_weighting(self):
+    # TODO def test_residual_norm(self):
     def test_set_constraints(self):
 
         self.test_qp.set_constraints(self.Fu, self.fu, self.Fx, self.fx,

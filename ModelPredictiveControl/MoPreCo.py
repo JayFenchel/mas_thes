@@ -101,7 +101,8 @@ for schritt in range(1):
         beta = 0.6
         st = 1
         # print(np.dot(delta_f.T, delta_zv))
-        while np.square(np.vstack(QP.residual(xk, zv_k + st*delta_zv))).sum() > f_x + alpha*st*np.dot(delta_f.T, delta_zv):
+        while (np.isnan(QP.residual_norm(xk, zv_k + st*delta_zv)) or
+            QP.residual_norm(xk, zv_k + st*delta_zv) > f_x + alpha*st*np.dot(delta_f.T, delta_zv)):
             st = beta*st
             # print(st)
         if QP.check(xk, zv_k + st*delta_zv):
