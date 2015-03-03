@@ -4,12 +4,62 @@ __author__ = 'jayf'
 
 import numpy as np
 from ModelPredictiveControl.MyMath import vector_norm
+from ModelPredictiveControl.MyMath import gradient
 from ModelPredictiveControl.Systems import SimpleExample
 from ModelPredictiveControl.Systems import AirCraft
 from ModelPredictiveControl.Systems import qp_from_sys
 from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 # import matplotlib.pyplot as plt
 
+# TODO Profiling, mach das mal
+def schrittweite(QP):
+    def hilf(zv_k):
+        return QP.residual_norm(xk, zv_k)
+
+    f = hilf
+    f_x = QP.residual_norm(xk, zv_k)
+    grad_f = gradient(f, zv_k, 0.000001)
+    alpha = 0.4
+    beta = 0.6
+    st = 1
+    while (np.isnan(QP.residual_norm(xk, zv_k + st*delta_zv)) or
+        QP.residual_norm(xk, zv_k + st*delta_zv) > f_x + alpha*st*np.dot(grad_f.T, delta_zv)):
+        st = beta*st
+        # print(st)
+    return st
+
+def schrittweite_alt():
+
+    # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
+    # backtracking line search
+    f_x = np.square(np.vstack(QP.residual(xk, zv_k))).sum()
+    # f_xp = np.zeros([100, 1])
+    # for i in range (0, 100, 1):
+    #     f_xp[i] = np.square(np.vstack(QP.residual(xk, zv_k + (100.-i)*delta_zv/100.))).sum()
+        # if not QP.check(zv_k + (100.-i)*delta_zv/100.):
+        #     f_xp[i] = 0
+        # print ((100.-i)/100., QP.check(zv_k + (100-i)*delta_zv/100))
+    # plt.plot(np.linspace(1, 0, 100), f_xp)
+    # plt.grid()
+    # plt.show()
+    testschritt = delta_zv * .0000001
+    DELTA = np.eye(np.shape(zv_k)[0])*0.000001
+    HILF = (zv_k + DELTA)
+    # print(HILF.T[0:1].T)
+    delta_f = np.zeros([np.shape(zv_k)[0], 1])
+    for k in range(0, np.shape(zv_k)[0]):
+        # print (np.square(np.vstack(QP.residual(xk, HILF.T[0:1].T))).sum() - f_x)/np.square(0.00001)
+        delta_f[k] = (np.square(np.vstack(QP.residual(xk, HILF.T[k:k+1].T))).sum() - f_x)/0.000001
+    nabla_f = (np.square(np.vstack(QP.residual(xk, zv_k + testschritt))).sum() - f_x)/np.sqrt(np.square(testschritt).sum())
+    alpha = 0.4
+    beta = 0.6
+    st = 1
+    # print(np.dot(delta_f.T, delta_zv))
+    while (np.isnan(QP.residual_norm(xk, zv_k + st*delta_zv)) or
+        QP.residual_norm(xk, zv_k + st*delta_zv) > f_x + alpha*st*np.dot(delta_f.T, delta_zv)):
+        st = beta*st
+        # print(st)
+    return st
 
 sys = AirCraft()
 # QP1 = QuadraticProgram(sys)
@@ -76,35 +126,11 @@ for schritt in range(1):
     for i in range(0, 5):
         delta_zv = QP.solve(xk, zv_k)
 
-        # Schrittweite s in (0,1] bestimmen für die norm(r) minimal ist
-        # backtracking line search
-        f_x = np.square(np.vstack(QP.residual(xk, zv_k))).sum()
-        f_xp = np.zeros([100, 1])
-        for i in range (0, 100, 1):
-            f_xp[i] = np.square(np.vstack(QP.residual(xk, zv_k + (100.-i)*delta_zv/100.))).sum()
-            # if not QP.check(zv_k + (100.-i)*delta_zv/100.):
-            #     f_xp[i] = 0
-            # print ((100.-i)/100., QP.check(zv_k + (100-i)*delta_zv/100))
-        # plt.plot(np.linspace(1, 0, 100), f_xp)
-        # plt.grid()
-        # plt.show()
-        testschritt = delta_zv * .0000001
-        DELTA = np.eye(np.shape(zv_k)[0])*0.000001
-        HILF = (zv_k + DELTA)
-        # print(HILF.T[0:1].T)
-        delta_f = np.zeros([np.shape(zv_k)[0], 1])
-        for k in range(0, np.shape(zv_k)[0]):
-            # print (np.square(np.vstack(QP.residual(xk, HILF.T[0:1].T))).sum() - f_x)/np.square(0.00001)
-            delta_f[k] = (np.square(np.vstack(QP.residual(xk, HILF.T[k:k+1].T))).sum() - f_x)/0.000001
-        nabla_f = (np.square(np.vstack(QP.residual(xk, zv_k + testschritt))).sum() - f_x)/np.sqrt(np.square(testschritt).sum())
-        alpha = 0.4
-        beta = 0.6
-        st = 1
-        # print(np.dot(delta_f.T, delta_zv))
-        while (np.isnan(QP.residual_norm(xk, zv_k + st*delta_zv)) or
-            QP.residual_norm(xk, zv_k + st*delta_zv) > f_x + alpha*st*np.dot(delta_f.T, delta_zv)):
-            st = beta*st
-            # print(st)
+        st = schrittweite(QP)
+
+        print('schrittweite', schrittweite_alt() - schrittweite(QP))
+        schrittweite(QP)
+
         if QP.check(xk, zv_k + st*delta_zv):
             print('Valid step possible')
             zv_k += st*delta_zv
@@ -122,4 +148,4 @@ for schritt in range(1):
     # print(zv_k[0])
     # print(np.dot(sys.B, zv_k[0]))
     xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
-    print('next xk',xk)
+    print('next xk', xk)

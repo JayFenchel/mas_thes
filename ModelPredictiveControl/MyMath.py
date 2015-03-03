@@ -132,3 +132,11 @@ def backward_substitution(A, b):
         kh = dim[0] - k - 1
         x[kh] = (b[kh] - np.dot(A[kh, kh+1:], x[kh+1:])) / A[kh, kh]
     return x
+
+def gradient(function, point, schritt=0.001):
+    dim = np.shape(point)[0]
+    grad = np.zeros([dim, 1])
+    for i in range(dim):
+        grad[i] = (function(point+(np.eye(dim)*schritt)[0:dim, [i]])-function(point))/schritt
+
+    return grad

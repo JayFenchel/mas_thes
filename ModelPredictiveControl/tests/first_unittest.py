@@ -140,6 +140,10 @@ class MyTestCase(unittest.TestCase):
         x_b = backward_substitution(self.A.T, self.b)
         self.assertTrue((abs(np.dot(self.A.T, x_b)-self.b)).sum() < 1e-10,
                         'backward_substitution failed')
+        
+    # TODO def test_gradient(self):
+    #     def Quadrat(x):
+    #         return (x*x).sum()
 
     # Test functions of Quadratic Program
     # TODO def test_set_sys_dynamics(self):
