@@ -133,10 +133,22 @@ def backward_substitution(A, b):
         x[kh] = (b[kh] - np.dot(A[kh, kh+1:], x[kh+1:])) / A[kh, kh]
     return x
 
-def gradient(function, point, schritt=0.001):
+def gradient(function, point, args=(), schritt=0.001):
     dim = np.shape(point)[0]
     grad = np.zeros([dim, 1])
     for i in range(dim):
-        grad[i] = (function(point+(np.eye(dim)*schritt)[0:dim, [i]])-function(point))/schritt
-
+        grad[i] = (function(point+(np.eye(dim)*schritt)[0:dim, [i]], *args)-function(point, *args))/schritt
     return grad
+
+def backtracking_line_search(function, point, dir, args=()):
+    # backtracking line search nach: TODO wonach?
+    f_x = function(point, *args)
+    grad_f = gradient(function, point, args, 0.000001)
+    alpha = 0.4
+    beta = 0.6
+    st = 1
+    while (np.isnan(function(point + st*dir, *args)) or
+        function(point + st*dir, *args) > f_x + alpha*st*np.dot(grad_f.T, dir)):
+        st = beta*st
+        # print(st)
+    return st

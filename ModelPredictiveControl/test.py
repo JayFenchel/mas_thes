@@ -165,7 +165,7 @@ for i in range(0, 1, 100):
 print(delta_zv)
 rd, rp = QP.residual(x0, zv_k)
 print(np.square(rd).sum(), np.square(rp).sum())
-rd, rp = QP.residual(x0, zv_k+delta_zv)
+rd, rp = QP.residual(x0, zv_k + delta_zv)
 print(np.square(rd).sum(), np.square(rp).sum())
 
 A = np.array([[  0.23996015,   0., 0.,   0., 0.],

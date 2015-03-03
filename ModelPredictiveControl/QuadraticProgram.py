@@ -142,7 +142,7 @@ class QuadraticProgram:
         # print(lsg-lsg1)
         return lsg
 
-    def residual_norm(self, xk, zv_k):
+    def residual_norm(self, zv_k, xk):
 
         if not self.check(xk, zv_k):
             return np.nan
