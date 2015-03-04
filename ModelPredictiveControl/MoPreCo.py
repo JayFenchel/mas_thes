@@ -4,11 +4,13 @@ __author__ = 'jayf'
 
 import numpy as np
 from ModelPredictiveControl.MyMath import vector_norm
-from ModelPredictiveControl.MyMath import gradient
 from ModelPredictiveControl.MyMath import backtracking_line_search
+from ModelPredictiveControl.MyMath import backtracking_line_search_better
+from ModelPredictiveControl.MyMath import backtracking_line_search_quick_and_dirty
 from ModelPredictiveControl.Systems import SimpleExample
 from ModelPredictiveControl.Systems import AirCraft
 from ModelPredictiveControl.Systems import qp_from_sys
+from time import time
 from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 # import matplotlib.pyplot as plt
 
@@ -74,27 +76,40 @@ zv_k = np.array([[  2.09719785e-01],
                  [ -6.04973336e+03], [  6.49401320e+03], [ -3.01319024e+02], [ -2.77211260e+02], [  9.50242423e+00],
                  [ -4.21055884e+03], [  4.53808858e+03], [ -2.37228200e+02], [ -1.33346052e+02], [  2.02084617e+01]])
 print('startwert valide = ', QP.check(xk, zv_k))  # Validität des Startwerts prüfen
-
+zeit = time()
 for schritt in range(1):
     for i in range(0, 5):
+        zeits = time()
         delta_zv = QP.solve(xk, zv_k)
-        st = backtracking_line_search(QP.residual_norm, zv_k, delta_zv,
+        print('solve', 5*(time()-zeits))
+        zeit1=time()
+        # st = backtracking_line_search(QP.residual_norm, zv_k, delta_zv,
+        #                               args=(xk, ))
+        # print('first', time()-zeit1)
+        # zeit2 = time()
+        # st = backtracking_line_search_quick_and_dirty(QP.residual_norm, zv_k, delta_zv,
+        #                               args=(xk, ))
+        # print('quick and dirty', time()-zeit2)
+        # zeit2 = time()
+        st = backtracking_line_search_better(QP.residual_norm, zv_k, delta_zv,
                                       args=(xk, ))
+        # print('better', time()-zeit2)
         if QP.check(xk, zv_k + st*delta_zv):
             print('Valid step possible')
             zv_k += st*delta_zv
         else:
             st = 0
         # print(zv_k)
-        for i in range (0,T):
-            print(zv_k[i*(m+n):i*(m+n)+m])
+        # for i in range (0,T):
+            # print(zv_k[i*(m+n):i*(m+n)+m])
         rd, rp = QP.residual(xk, zv_k)
         rd_norm = np.square(rd[:]).sum()
         rp_norm = np.square(rp[:]).sum()
         r_norm = rd_norm + rp_norm
-        print(st, rp_norm, rd_norm)
+        # print(st, rp_norm, rd_norm)
     # print(zv_k)
     # print(zv_k[0])
     # print(np.dot(sys.B, zv_k[0]))
     xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
-    print('next xk', xk)
+    # print('next xk', xk)
+print(time()-zeit)

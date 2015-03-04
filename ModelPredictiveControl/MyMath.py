@@ -137,18 +137,56 @@ def gradient(function, point, args=(), schritt=0.001):
     dim = np.shape(point)[0]
     grad = np.zeros([dim, 1])
     for i in range(dim):
-        grad[i] = (function(point+(np.eye(dim)*schritt)[0:dim, [i]], *args)-function(point, *args))/schritt
+        grad[i] = (function(point+(np.eye(dim)*schritt)[0:dim, [i]], *args) - function(point, *args))/schritt
     return grad
 
-def backtracking_line_search(function, point, dir, args=()):
+def gradient_better(function, point, args=(), schritt=0.001):
+    dim = np.shape(point)[0]
+    grad = np.zeros([dim, 1])
+    grad1 = np.zeros([dim, 1])
+    points = (point+(np.eye(dim)*schritt)[:])
+    grad1[:, 0] = (function(point+(np.eye(dim)*schritt)[0:dim, :], *args) - function(point, *args))/schritt
+    # for i in range(dim):
+    #     grad[i] = (function(point+(np.eye(dim)*schritt)[0:dim, [i]], *args) - function(point, *args))/schritt
+    return grad1
+
+def backtracking_line_search(function, point, dir, args=(), step = 0.000001):
     # backtracking line search nach: TODO wonach?
     f_x = function(point, *args)
-    grad_f = gradient(function, point, args, 0.000001)
+    grad_f = gradient(function, point, args, step)
     alpha = 0.4
     beta = 0.6
     st = 1
+    print(np.dot(grad_f.T, dir))
     while (np.isnan(function(point + st*dir, *args)) or
-        function(point + st*dir, *args) > f_x + alpha*st*np.dot(grad_f.T, dir)):
+            function(point + st*dir, *args) > f_x + alpha*st*np.dot(grad_f.T, dir)):
+        st = beta*st
+        # print(st)
+    return st
+
+def backtracking_line_search_quick_and_dirty(function, point, dir, args=(), step = 0.000001):
+    # only use gradient in search direction
+    f_x = function(point, *args)
+    grad_in_dir = function(point+step*dir, *args) - f_x
+    alpha = 0.4
+    beta = 0.6
+    st = 1
+    print(grad_in_dir)
+    while (np.isnan(function(point + st*dir, *args)) or
+            function(point + st*dir, *args) > f_x + alpha*st*grad_in_dir):
+        st = beta*st
+    return st
+
+def backtracking_line_search_better(function, point, dir, args=(), step = 0.000001):
+    # backtracking line search nach: TODO wonach?
+    f_x = function(point, *args)
+    grad_f = gradient_better(function, point, args, step)
+    alpha = 0.4
+    beta = 0.6
+    st = 1
+    print(np.dot(grad_f.T, dir))
+    while (np.isnan(function(point + st*dir, *args)) or
+            function(point + st*dir, *args) > f_x + alpha*st*np.dot(grad_f.T, dir)):
         st = beta*st
         # print(st)
     return st

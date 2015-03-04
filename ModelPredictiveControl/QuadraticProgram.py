@@ -110,7 +110,7 @@ class QuadraticProgram:
     def form_d(self, xk, zv_k):
         # Form d for further use
         h = self.h_of_xk(xk)
-        d = np.zeros([np.shape(self.P)[0], 1])
+        d = np.zeros([np.shape(self.P)[0], np.shape(zv_k)[1]])
         d[:] = 1/(h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
         return d
 
@@ -147,7 +147,7 @@ class QuadraticProgram:
         if not self.check(xk, zv_k):
             return np.nan
 
-        return np.square(np.vstack(self.residual(xk, zv_k))).sum()
+        return np.square(np.vstack(self.residual(xk, zv_k))).sum(0)
 
     def residual(self, xk, zv_k):
 
