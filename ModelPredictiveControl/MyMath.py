@@ -143,12 +143,12 @@ def gradient(function, point, args=(), schritt=0.001):
 def gradient_better(function, point, args=(), schritt=0.001):
     dim = np.shape(point)[0]
     grad = np.zeros([dim, 1])
-    grad1 = np.zeros([dim, 1])
-    points = (point+(np.eye(dim)*schritt)[:])
-    grad1[:, 0] = (function(point+(np.eye(dim)*schritt)[0:dim, :], *args) - function(point, *args))/schritt
-    # for i in range(dim):
-    #     grad[i] = (function(point+(np.eye(dim)*schritt)[0:dim, [i]], *args) - function(point, *args))/schritt
-    return grad1
+    grad[:, 0] = (function(point+(np.eye(dim)*schritt)[0:dim, :], *args) - function(point, *args))/schritt
+    return grad
+
+def hessian(functionfunction, point, args=(), schritt=0.001):
+    hess = 0    
+    return hess
 
 def backtracking_line_search(function, point, dir, args=(), step = 0.000001):
     # backtracking line search nach: TODO wonach?
