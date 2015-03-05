@@ -48,12 +48,14 @@ class QuadraticProgram:
 
     def set_ref_trajectory(self, x_ref):
         end = min(np.shape(x_ref)[1], self.T)
+        u_ref=np.zeros([self.m, 1])
         for i in range(end):
-            self.z_ref[i*(self.n+self.m):(i+1)*(self.n+self.m)] = 0, x_ref[:, i]
+            self.z_ref[i*(self.n+self.m):(i+1)*(self.n+self.m)] = np.vstack([u_ref, x_ref[:, i:i+1]])
         for i in range(end, self.T):  # wird nur ausgeführt, wenn T>Anzahl der Referenzpunkte
-            self.self.z_ref[i*(self.n+self.m):(i+1)*(self.n+self.m)] = 0, x_ref[:, -1]
+            self.z_ref[i*(self.n+self.m):(i+1)*(self.n+self.m)] = np.vstack([u_ref, x_ref[:, -1:]])
         # übrige Werte hinterlegen
         self.ref_update = x_ref[end:np.shape(x_ref)[1]]
+
     def update_ref_trajectory(self):
         pass
 

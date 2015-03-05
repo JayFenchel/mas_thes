@@ -146,6 +146,8 @@ def qp_from_sys():
     Ff = Kx
 
     qp.set_constraints(Fu, fu, Fx, fx, Ff, ff)
+    x_ref = np.array([[0], [0], [0], [200], [0]])
+    qp.set_ref_trajectory(x_ref)
     return qp
 
 
