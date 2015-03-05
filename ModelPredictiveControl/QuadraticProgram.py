@@ -26,6 +26,7 @@ class QuadraticProgram:
         self.g = np.zeros([T*(m+n), 1])
         self.r = np.zeros([m, 1])
         self.S = np.zeros_like(self.B)
+        self.z_ref = np.zeros([T*(m+n), 1])
 
         self.Fx = None
         self.f = None
@@ -44,6 +45,17 @@ class QuadraticProgram:
             self.C[i*n:(i+1)*n, m+(i-1)*(m+n):m+i*(m+n)+n] = np.hstack([-A, -B, np.eye(n, n)])
 
         self.b = np.zeros([T*n, 1])  # TODO add disturbance if not zero
+
+    def set_ref_trajectory(self, x_ref):
+        end = min(np.shape(x_ref)[1], self.T)
+        for i in range(end):
+            self.z_ref[i*(self.n+self.m):(i+1)*(self.n+self.m)] = 0, x_ref[:, i]
+        for i in range(end, self.T):  # wird nur ausgeführt, wenn T>Anzahl der Referenzpunkte
+            self.self.z_ref[i*(self.n+self.m):(i+1)*(self.n+self.m)] = 0, x_ref[:, -1]
+        # übrige Werte hinterlegen
+        self.ref_update = x_ref[end:np.shape(x_ref)[1]]
+    def update_ref_trajectory(self):
+        pass
 
     def set_weighting(self, Q, q, R, r, S, Qf, qf):
 
@@ -151,8 +163,12 @@ class QuadraticProgram:
 
     def residual(self, xk, zv_k):
 
+        z_soll = np.zeros_like(zv_k[0:self.T*(self.m+self.n)])
+        for i in range(self.m + 3, self.T*(self.m+self.n), self.m+self.n):
+            z_soll[i] = 100
+        # print(z_soll)
         d = self.form_d(xk, zv_k)
-        rd = (2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g
+        rd = (2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)] - self.z_ref) + self.g
              + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):]))
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
