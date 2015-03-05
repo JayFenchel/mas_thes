@@ -146,8 +146,17 @@ def gradient_better(function, point, args=(), schritt=0.001):
     grad[:, 0] = (function(point+(np.eye(dim)*schritt)[0:dim, :], *args) - function(point, *args))/schritt
     return grad
 
-def hessian(functionfunction, point, args=(), schritt=0.001):
-    hess = 0    
+# def hessian(args=(), schritt=0.001):
+#     vec1 = np.array([[0.1, 0.], [0., 0.1]])
+#     vec2 = np.array([[[0.1], [0.]], [[0.], [0.1]]])
+#     print(vec1+vec2)
+#     print('stop')
+#     dim = np.shape(point)[0]
+#     grad = np.zeros([dim, 1])
+#     function_values = function(point+(np.eye(dim)*schritt)[0:dim, :], *args)
+
+    grad[:, 0] = (function_values - function(point, *args))/schritt
+    hess = 0
     return hess
 
 def backtracking_line_search(function, point, dir, args=(), step = 0.000001):
@@ -190,3 +199,5 @@ def backtracking_line_search_better(function, point, dir, args=(), step = 0.0000
         st = beta*st
         # print(st)
     return st
+
+# hessian()
