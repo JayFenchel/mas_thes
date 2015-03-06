@@ -180,13 +180,13 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue((self.test_qp.z_ref == ref_z_ref_2).all())
         self.assertTrue((self.test_qp.ref_update == ref_update_2).all())
 
-        print(self.test_qp.z_ref)
+        # print(self.test_qp.z_ref)
         self.test_qp.update_ref_trajectory()
-        print(self.test_qp.z_ref)
+        # print(self.test_qp.z_ref)
         self.test_qp.update_ref_trajectory()
-        print(self.test_qp.z_ref)
+        # print(self.test_qp.z_ref)
         self.test_qp.update_ref_trajectory()
-        print(self.test_qp.z_ref)
+        # print(self.test_qp.z_ref)
 
     def test_set_constraints(self):
 

@@ -77,7 +77,7 @@ zv_k = np.array([[  2.09719785e-01],
                  [ -4.21055884e+03], [  4.53808858e+03], [ -2.37228200e+02], [ -1.33346052e+02], [  2.02084617e+01]])
 print('startwert valide = ', QP.check(xk, zv_k))  # Validität des Startwerts prüfen
 zeit = time()
-for schritt in range(40):
+for schritt in range(15):
     for i in range(0, 6):
         zeits = time()
         delta_zv = QP.solve(xk, zv_k)
