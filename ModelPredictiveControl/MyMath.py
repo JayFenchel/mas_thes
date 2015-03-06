@@ -73,6 +73,7 @@ def form_Y(Phi, A, B, T, n, m):
 
     # TODO find ungenauigkeit, irgendwo ist vllt noch ein kleiner fehler
     Y = np.zeros([T*n, T*n])
+    L_Y = np.zeros_like(Y)
     L_Phi = np.zeros_like(Phi)
     L_Phi[0:m, 0:m] = cholesky(Phi[0:m, 0:m])
 
@@ -87,6 +88,7 @@ def form_Y(Phi, A, B, T, n, m):
                 r0 = L_Phi[0:m, 0:m]
                 Y[0:n, 0:n] = np.dot(B, backward_substitution(r0.T, forward_substitution(r0, B.T)))\
                               + backward_substitution(bl_i.T, forward_substitution(bl_i, np.eye(n+m, n)))[0:n]
+                L_Y[0:n, 0:n] = cholesky(Y[0:n, 0:n])
             # Y[i, i], i > 0
             elif i == j:
                 bl_i_m1 = L_Phi[m+(i-1)*(m+n):m+i*(m+n), m+(i-1)*(m+n):m+i*(m+n)]
@@ -106,7 +108,6 @@ def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m):
     # L_Phi = cholesky(Phi)
 
     Y, L_Phi = form_Y(Phi, A, B, T, n, m)
-    # TODO berechne L_Phi nur mit den cholesky Faktorisierungen der Blöcke in Phi
     beta = -rp + np.dot(C, backward_substitution(L_Phi.T, forward_substitution(L_Phi, rd)))
 
     # L_Y = np.zeros_like(Y)
