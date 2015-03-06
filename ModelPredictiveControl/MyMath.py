@@ -69,15 +69,19 @@ def solve_lin_gs(A, b):
     x = backward_substitution(Rtilde, ctilde)
     return x
 
-def form_Y(L_Phi, A, B, T, n, m):
+def form_Y(Phi, A, B, T, n, m):
 
     # TODO find ungenauigkeit, irgendwo ist vllt noch ein kleiner fehler
     Y = np.zeros([T*n, T*n])
+    L_Phi = np.zeros_like(Phi)
+    L_Phi[0:m, 0:m] = cholesky(Phi[0:m, 0:m])
 
     for i in range(0, T):
+        L_Phi[m+i*(m+n):m+(i+1)*(m+n), m+i*(m+n):m+(i+1)*(m+n)] =\
+                cholesky(Phi[m+i*(m+n):m+(i+1)*(m+n), m+i*(m+n):m+(i+1)*(m+n)])
+        bl_i = L_Phi[m+i*(m+n):m+(i+1)*(m+n), m+i*(m+n):m+(i+1)*(m+n)]
         for j in range(i, i+2):
-            bl_i_m1 = L_Phi[m+(i-1)*(m+n):m+i*(m+n), m+(i-1)*(m+n):m+i*(m+n)]
-            bl_i = L_Phi[m+i*(m+n):m+(i+1)*(m+n), m+i*(m+n):m+(i+1)*(m+n)]
+
             # Y[0, 0]
             if i == 0 and j == 0:
                 r0 = L_Phi[0:m, 0:m]
@@ -85,6 +89,7 @@ def form_Y(L_Phi, A, B, T, n, m):
                               + backward_substitution(bl_i.T, forward_substitution(bl_i, np.eye(n+m, n)))[0:n]
             # Y[i, i], i > 0
             elif i == j:
+                bl_i_m1 = L_Phi[m+(i-1)*(m+n):m+i*(m+n), m+(i-1)*(m+n):m+i*(m+n)]
                 Y[i*n:(i+1)*n, i*n:(i+1)*n] = (np.dot(np.hstack([A, B]), backward_substitution(bl_i_m1.T,
                                                                     forward_substitution(bl_i_m1, np.vstack([A.T, B.T]))))
                                                + backward_substitution(bl_i.T,
@@ -94,13 +99,14 @@ def form_Y(L_Phi, A, B, T, n, m):
                 Y[i*n:(i+1)*n, j*n:(j+1)*n] = (backward_substitution(bl_i.T,
                                                                     forward_substitution(bl_i, np.vstack([-A.T, -B.T]))))[0:5]
                 Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
-    return Y
+    return Y, L_Phi
 
 def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m):
 
-    L_Phi = cholesky(Phi)
+    # L_Phi = cholesky(Phi)
 
-    Y = form_Y(L_Phi, A, B, T, n, m)
+    Y, L_Phi = form_Y(Phi, A, B, T, n, m)
+    # TODO berechne L_Phi nur mit den cholesky Faktorisierungen der Blöcke in Phi
     beta = -rp + np.dot(C, backward_substitution(L_Phi.T, forward_substitution(L_Phi, rd)))
 
     # L_Y = np.zeros_like(Y)
