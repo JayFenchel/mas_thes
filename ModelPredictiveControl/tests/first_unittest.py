@@ -149,6 +149,7 @@ class MyTestCase(unittest.TestCase):
     # TODO def test_set_sys_dynamics(self):
     # TODO def test_set_weighting(self):
     # TODO def test_residual_norm(self):
+
     def test_set_ref_trajectory(self):
         x_ref_1 = np.array([[1],
                             [2],
@@ -164,14 +165,28 @@ class MyTestCase(unittest.TestCase):
         ref_z_ref_1 = np.array([[0], [0], [1], [2], [3], [4], [5],
                                 [0], [0], [1], [2], [3], [4], [5],
                                 [0], [0], [1], [2], [3], [4], [5]])
+        ref_update_1 = np.array([[1, 1]])
         ref_z_ref_2 = np.array([[0], [0], [1], [2], [3], [4], [5],
                                 [0], [0], [2], [2], [3], [4], [5],
                                 [0], [0], [3], [3], [4], [4], [5]])
+        ref_update_2 = np.array([[4, 4, 4, 4, 5],
+                                 [5, 5, 5, 5, 5]])
         self.test_qp.set_ref_trajectory(x_ref_1)
         self.assertTrue((self.test_qp.z_ref == ref_z_ref_1).all())
+        self.assertTrue((self.test_qp.ref_update == ref_update_1).all())
+
 
         self.test_qp.set_ref_trajectory(x_ref_2)
         self.assertTrue((self.test_qp.z_ref == ref_z_ref_2).all())
+        self.assertTrue((self.test_qp.ref_update == ref_update_2).all())
+
+        print(self.test_qp.z_ref)
+        self.test_qp.update_ref_trajectory()
+        print(self.test_qp.z_ref)
+        self.test_qp.update_ref_trajectory()
+        print(self.test_qp.z_ref)
+        self.test_qp.update_ref_trajectory()
+        print(self.test_qp.z_ref)
 
     def test_set_constraints(self):
 

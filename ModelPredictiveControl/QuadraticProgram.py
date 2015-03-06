@@ -48,15 +48,21 @@ class QuadraticProgram:
 
     def set_ref_trajectory(self, x_ref):
         end = min(np.shape(x_ref)[1], self.T)
-        u_ref=np.zeros([self.m, 1])
+        self.u_ref=np.zeros([self.m, 1])
         for i in range(end):
-            self.z_ref[i*(self.n+self.m):(i+1)*(self.n+self.m)] = np.vstack([u_ref, x_ref[:, i:i+1]])
+            self.z_ref[i*(self.n+self.m):(i+1)*(self.n+self.m)] = np.vstack([self.u_ref, x_ref[:, i:i+1]])
         for i in range(end, self.T):  # wird nur ausgeführt, wenn T>Anzahl der Referenzpunkte
-            self.z_ref[i*(self.n+self.m):(i+1)*(self.n+self.m)] = np.vstack([u_ref, x_ref[:, -1:]])
+            self.z_ref[i*(self.n+self.m):(i+1)*(self.n+self.m)] = np.vstack([self.u_ref, x_ref[:, -1:]])
         # übrige Werte hinterlegen
         self.ref_update = x_ref[end:np.shape(x_ref)[1]]
 
     def update_ref_trajectory(self):
+        self.z_ref[:-(self.n+self.m)] = self.z_ref[self.n+self.m:]
+        if np.shape(self.ref_update)[0] > 0:
+            self.z_ref[-(self.n+self.m):] = np.vstack([self.u_ref, self.ref_update[0:1].T])
+            print(self.ref_update)
+            self.ref_update = np.delete(self.ref_update, 0, 0)
+            print(self.ref_update)
         pass
 
     def set_weighting(self, Q, q, R, r, S, Qf, qf):
