@@ -76,21 +76,23 @@ def form_Y(L_Phi, A, B, T, n, m):
 
     for i in range(0, T):
         for j in range(i, i+2):
+            bl_i_m1 = L_Phi[m+(i-1)*(m+n):m+i*(m+n), m+(i-1)*(m+n):m+i*(m+n)]
+            bl_i = L_Phi[m+i*(m+n):m+(i+1)*(m+n), m+i*(m+n):m+(i+1)*(m+n)]
             # Y[0, 0]
             if i == 0 and j == 0:
-                Y[0:n, 0:n] = np.dot(B, backward_substitution(L_Phi.T[0:m, 0:m], forward_substitution(L_Phi[0:m, 0:m], B.T)))\
-                              + backward_substitution(L_Phi.T[m:m+n+m, m:m+n+m],
-                                                      forward_substitution(L_Phi[m:m+n+m, m:m+n+m], np.eye(n+m, n)))[0:n]
+                r0 = L_Phi[0:m, 0:m]
+                Y[0:n, 0:n] = np.dot(B, backward_substitution(r0.T, forward_substitution(r0, B.T)))\
+                              + backward_substitution(bl_i.T, forward_substitution(bl_i, np.eye(n+m, n)))[0:n]
             # Y[i, i], i > 0
             elif i == j:
-                Y[i*n:(i+1)*n, i*n:(i+1)*n] = (np.dot(np.hstack([A, B]), backward_substitution(L_Phi.T[m+(i-1)*(m+n):m+i*(m+n), m+(i-1)*(m+n):m+i*(m+n)],
-                                                                    forward_substitution(L_Phi[m+(i-1)*(m+n):m+i*(m+n), m+(i-1)*(m+n):m+i*(m+n)], np.vstack([A.T, B.T]))))
-                                               + backward_substitution(L_Phi.T[m+i*(m+n):m+i*(m+n)+n+m, m+i*(m+n):m+i*(m+n)+n+m],
-                                                                        forward_substitution(L_Phi[m+i*(m+n):m+i*(m+n)+n+m, m+i*(m+n):m+i*(m+n)+n+m], np.eye(n+m, n)))[0:n])
+                Y[i*n:(i+1)*n, i*n:(i+1)*n] = (np.dot(np.hstack([A, B]), backward_substitution(bl_i_m1.T,
+                                                                    forward_substitution(bl_i_m1, np.vstack([A.T, B.T]))))
+                                               + backward_substitution(bl_i.T,
+                                                                        forward_substitution(bl_i, np.eye(n+m, n)))[0:n])
             # Y[i, j] = Y[j, i]
             elif i != j and j <= T-1:
-                Y[i*n:(i+1)*n, j*n:(j+1)*n] = (backward_substitution(L_Phi.T[m+i*(m+n):m+(i+1)*(m+n), m+i*(m+n):m+(i+1)*(m+n)],
-                                                                    forward_substitution(L_Phi[m+i*(m+n):m+(i+1)*(m+n), m+i*(m+n):m+(i+1)*(m+n)], np.vstack([-A.T, -B.T]))))[0:5]
+                Y[i*n:(i+1)*n, j*n:(j+1)*n] = (backward_substitution(bl_i.T,
+                                                                    forward_substitution(bl_i, np.vstack([-A.T, -B.T]))))[0:5]
                 Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
     return Y
 
