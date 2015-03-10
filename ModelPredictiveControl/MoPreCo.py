@@ -3,6 +3,7 @@
 __author__ = 'jayf'
 
 import numpy as np
+# import cProfile
 from ModelPredictiveControl.MyMath import vector_norm
 from ModelPredictiveControl.MyMath import backtracking_line_search
 from ModelPredictiveControl.MyMath import backtracking_line_search_better
@@ -15,6 +16,7 @@ from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 # import matplotlib.pyplot as plt
 
 # TODO Profiling, mach das mal
+# profiler = cProfile.Profile()
 
 sys = AirCraft()
 # QP1 = QuadraticProgram(sys)
@@ -77,6 +79,7 @@ zv_k = np.array([[  2.09719785e-01],
                  [ -4.21055884e+03], [  4.53808858e+03], [ -2.37228200e+02], [ -1.33346052e+02], [  2.02084617e+01]])
 print('startwert valide = ', QP.check(xk, zv_k))  # Validität des Startwerts prüfen
 zeit = time()
+# profiler.enable()
 for schritt in range(15):
     for i in range(0, 6):
         zeits = time()
@@ -113,3 +116,5 @@ for schritt in range(15):
     xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
     print('next xk', xk)
 print(time()-zeit)
+# profiler.disable()
+# profiler.dump_stats('profile')
