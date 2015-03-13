@@ -81,7 +81,8 @@ def qp_from_sys():
     B = Bd
     n = Ad.shape[1]  # columns in A
     m = Bd.shape[1]  # columns in B
-    qp = QuadraticProgram(10, n, m)
+    T = 10  # Prädiktionshorizont
+    qp = QuadraticProgram(T, n, m)
 
     delta_t = 0.5
 
@@ -144,8 +145,11 @@ def qp_from_sys():
     ff[3] = 1
     ff[7] = 1
     Ff = Kx
+    
+    Ff_qc = np.zeros([T*(n+m), T*(n+m)])
+    alpha = 1
 
-    qp.set_constraints(Fu, fu, Fx, fx, Ff, ff)
+    qp.set_constraints(Fu, fu, Fx, fx, Ff, ff, Ff_qc=Ff_qc, alpha=alpha)
     x_ref = np.array([[0], [0], [0], [200], [0]])
     qp.set_ref_trajectory(x_ref)
     return qp
