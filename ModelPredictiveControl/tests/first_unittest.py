@@ -87,7 +87,7 @@ class MyTestCase(unittest.TestCase):
         v_test = np.array([[0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1]]).T
         zv_test = np.vstack([z_test, v_test])
         d = self.test_qp.form_d(x_test, zv_test)
-        Phi = self.test_qp.form_Phi(d)
+        Phi = self.test_qp.form_Phi(d, z_test)
         rd, rp = self.test_qp.residual(x_test, zv_test)
         A, B, C = self.test_qp.A, self.test_qp.B, self.test_qp.C
         T, n, m = self.test_qp.T, self.test_qp.n, self.test_qp.m

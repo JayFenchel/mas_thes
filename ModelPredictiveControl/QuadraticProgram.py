@@ -87,11 +87,13 @@ class QuadraticProgram:
         self.g = g
         pass
 
-    def set_constraints(self, Fu, fu, Fx, fx, Ff, ff):
+    def set_constraints(self, Fu, fu, Fx, fx, Ff, ff, Ff_qc=None):
 
         T, n, m = self.T, self.n, self.m
 
         self.Fx = Fx
+
+        self.Ff_qc = Ff_qc
 
         # Inequality constraints
         n_Fu = np.shape(Fu)[0]
@@ -126,16 +128,24 @@ class QuadraticProgram:
     def b_of_xk(self, xk):
         pass
 
+    def P_of_zk(self, zk):
+        P = np.zeros_like(self.P) + self.P  # does not change self.P
+        if self.Ff_qc is not None:
+            P = np.vstack([P, np.dot(zk.T, self.Ff_qc)])
+        return P
+
     def form_d(self, xk, zv_k):
         # Form d for further use
+        P = self.P_of_zk(zv_k[0:self.T*(self.m+self.n)])
         h = self.h_of_xk(xk)
-        d = np.zeros([np.shape(self.P)[0], np.shape(zv_k)[1]])
-        d[:] = 1/(h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
+        d = np.zeros([np.shape(P)[0], np.shape(zv_k)[1]])
+        d[:] = 1/(h[:]-np.dot(P[:], zv_k[0:self.T*(self.m+self.n)]))
         return d
 
-    def form_Phi(self, d):
+    def form_Phi(self, d, zk):
+        P = self.P_of_zk(2*zk)
         Phi = 2*self.H\
-              + self.kappa*np.dot(np.dot(self.P.T, matrix_diag(d*d)), self.P)
+              + self.kappa*np.dot(np.dot(P.T, matrix_diag(d*d)), P)  # *2 siehe Zettel
         return Phi
 
     def solve(self, xk, zv_k):
@@ -148,7 +158,7 @@ class QuadraticProgram:
         self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
 
         d = self.form_d(xk, zv_k)
-        Phi = self.form_Phi(d)
+        Phi = self.form_Phi(d, zv_k[0:self.T*(self.m+self.n)])
 
         rd, rp = self.residual(xk, zv_k)
 
@@ -176,7 +186,7 @@ class QuadraticProgram:
         # print(z_soll)
         d = self.form_d(xk, zv_k)
         rd = (2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)] - self.z_ref) + self.g
-             + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):]))
+             + self.kappa*np.dot(self.P_of_zk(2*zv_k[0:self.T*(self.m+self.n)]).T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):]))
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
         return rd, rp
@@ -185,11 +195,11 @@ class QuadraticProgram:
         h = np.zeros_like(self.h) + self.h
         h[0:np.shape(self.Fx)[0]] = self.f - np.dot(self.Fx, xk)
 
-        d = np.zeros([np.shape(self.P)[0], 1])
-        d[:] = 1/(h[:]-np.dot(self.P[:], zv_k[0:self.T*(self.m+self.n)]))
+        d = np.zeros([np.shape(self.P_of_zk(zv_k[0:self.T*(self.m+self.n)]))[0], 1])
+        d[:] = 1/(h[:]-np.dot(self.P_of_zk(zv_k[0:self.T*(self.m+self.n)])[:], zv_k[0:self.T*(self.m+self.n)]))
 
         # print 'term12',np.square(2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d)).sum()
-        rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P.T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
+        rd = 2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)]) + self.g + self.kappa*np.dot(self.P_of_zk(2*zv_k[0:self.T*(self.m+self.n)]).T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):])
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
 
         # if not self.check(xk, zv_k):
