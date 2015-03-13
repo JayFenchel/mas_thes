@@ -87,7 +87,7 @@ class QuadraticProgram:
         self.g = g
         pass
 
-    def set_constraints(self, Fu, fu, Fx, fx, Ff, ff, Ff_qc=None):
+    def set_constraints(self, Fu, fu, Fx, fx, Ff, ff, Ff_qc=None, alpha=None):
 
         T, n, m = self.T, self.n, self.m
 
@@ -115,6 +115,8 @@ class QuadraticProgram:
         for i in range(0, T):
             h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
         h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(ff)[0]] = ff
+        if alpha is not None:
+            h = np.vstack([h, alpha])
         self.h = h
 
     def h_of_xk(self, xk):
@@ -144,8 +146,12 @@ class QuadraticProgram:
 
     def form_Phi(self, d, zk):
         P = self.P_of_zk(2*zk)
+        if self.Ff_qc is not None:
+            term_for_qc = d[-1]*2*self.Ff_qc
+        else:
+            term_for_qc = 0
         Phi = 2*self.H\
-              + self.kappa*np.dot(np.dot(P.T, matrix_diag(d*d)), P)  # *2 siehe Zettel
+              + self.kappa*(np.dot(np.dot(P.T, matrix_diag(d*d)), P) + term_for_qc)  # *2 siehe Zettel
         return Phi
 
     def solve(self, xk, zv_k):
