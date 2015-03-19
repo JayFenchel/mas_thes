@@ -198,7 +198,7 @@ def backtracking_line_search_quick_and_dirty(function, point, dir, args=(), step
 def backtracking_line_search_better(function, point, dir, args=(), step = 0.000001):
     # backtracking line search nach: TODO wonach?
     f_x = function(point, *args)
-    grad_f = gradient_better(function, point, args, step)
+    grad_f = gradient(function, point, args, step)
     alpha = 0.4
     beta = 0.6
     st = 1

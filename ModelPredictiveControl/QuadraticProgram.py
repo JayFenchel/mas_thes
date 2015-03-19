@@ -134,20 +134,20 @@ class QuadraticProgram:
         P = np.zeros([np.shape(self.P)[0], np.shape(self.P)[1]])
         P += self.P  # does not change self.P
         if self.Ff_qc is not None:
-            P_neu = np.dstack([np.vstack([P, np.dot(zk.T, self.Ff_qc)[:]])])
+            P = np.vstack([P, np.dot(zk.T, self.Ff_qc)[:]])
 
-        return P_neu
+        return P
 
     def form_d(self, xk, zv_k):
         # Form d for further use
-        P = self.P_of_zk(zv_k[0:self.T*(self.m+self.n)])[:, :,  0]
+        P = self.P_of_zk(zv_k[0:self.T*(self.m+self.n)])
         h = self.h_of_xk(xk)
         d = np.zeros([np.shape(P)[0], np.shape(zv_k)[1]])
         d[:] = 1/(h[:]-np.dot(P[:], zv_k[0:self.T*(self.m+self.n)]))
         return d
 
     def form_Phi(self, d, zk):
-        P = self.P_of_zk(2*zk)[:, :, 0]
+        P = self.P_of_zk(2*zk)
         if self.Ff_qc is not None:
             term_for_qc = d[-1]*2*self.Ff_qc
         else:
@@ -217,7 +217,7 @@ class QuadraticProgram:
 
     def check(self, xk, zv_k):
         h = self.h_of_xk(xk)
-        return ((np.dot(self.P_of_zk(zv_k[0:self.T*(self.m+self.n)])[:, :, 0], zv_k[0:self.T*(self.m+self.n)]) - h) < 0).all()
+        return ((np.dot(self.P_of_zk(zv_k[0:self.T*(self.m+self.n)]), zv_k[0:self.T*(self.m+self.n)]) - h) < 0).all()
 
 
 
