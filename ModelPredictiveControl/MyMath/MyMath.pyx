@@ -142,6 +142,8 @@ def backward_substitution(A, b):
         x[kh] = (b[kh] - np.dot(A[kh, kh+1:], x[kh+1:])) / A[kh, kh]
     return x
 
+# TODO Anpassungen in Quadratic Programm, damit gradient_better wieder genutzt
+# werden kann
 def gradient(function, point, args=(), schritt=0.001):
     dim = np.shape(point)[0]
     grad = np.zeros([dim, 1])
