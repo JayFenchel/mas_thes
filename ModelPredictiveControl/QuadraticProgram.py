@@ -122,8 +122,6 @@ class QuadraticProgram:
         if alpha is not None:
             self.h = np.vstack([self.h, alpha])
 
-        pass
-
     def add_socc(self):
         # add second-order cone constraint
         pass
