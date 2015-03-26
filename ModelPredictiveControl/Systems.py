@@ -149,8 +149,7 @@ def qp_from_sys():
     Ff_qc = np.zeros([T*(n+m), T*(n+m)])
     alpha = 1
 
-    qp.set_constraints(Fu, fu, Fx, fx, Ff, ff)
-    qp.add_qc(Ff_qc=Ff_qc, alpha=alpha)
+    qp.set_constraints(Fu, fu, Fx, fx, Ff, ff, Ff_qc=Ff_qc, alpha=alpha)
     x_ref = np.array([[0], [0], [0], [200], [0]])
     qp.set_ref_trajectory(x_ref)
     return qp
