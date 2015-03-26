@@ -122,8 +122,15 @@ class QuadraticProgram:
         if alpha is not None:
             self.h = np.vstack([self.h, alpha])
 
-    def add_socc(self):
+    def add_socc(self, socc_A=None, socc_b=None, socc_c=None, socc_d=None):
         # add second-order cone constraint
+        if socc_d is not None:
+            self.h = np.vstack([self.h, socc_d])
+
+        self.socc_A = socc_A
+        self.socc_b = socc_b
+        self.socc_c = socc_c
+
         pass
 
     def h_of_xk(self, xk):
@@ -142,6 +149,9 @@ class QuadraticProgram:
         P += self.P  # does not change self.P
         if self.Ff_qc is not None:
             P = np.vstack([P, np.dot(zk.T, self.Ff_qc)[:]])
+        if self.socc_A is not None and self.socc_b is not None and self.socc_c is not None:
+            _A_ = self._A_of_socc_A_b(zk)
+            P = np.vstack([P, _A_ - self.socc_c])
 
         return P
 
