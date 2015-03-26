@@ -87,13 +87,11 @@ class QuadraticProgram:
         self.g = g
         pass
 
-    def set_constraints(self, Fu, fu, Fx, fx, Ff, ff, Ff_qc=None, alpha=None):
+    def set_constraints(self, Fu, fu, Fx, fx, Ff, ff):
 
         T, n, m = self.T, self.n, self.m
 
         self.Fx = Fx
-
-        self.Ff_qc = Ff_qc
 
         # Inequality constraints
         n_Fu = np.shape(Fu)[0]
@@ -115,9 +113,20 @@ class QuadraticProgram:
         for i in range(0, T):
             h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
         h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(ff)[0]] = ff
-        if alpha is not None:
-            h = np.vstack([h, alpha])
         self.h = h
+
+    def add_qc(self, Ff_qc=None, alpha=None):
+        # add quadratic constraint
+        # TODO auf ausführliche Form, siehe Zettel erweitern
+        self.Ff_qc = Ff_qc
+        if alpha is not None:
+            self.h = np.vstack([self.h, alpha])
+
+        pass
+
+    def add_socc(self):
+        # add second-order cone constraint
+        pass
 
     def h_of_xk(self, xk):
         h = np.zeros_like(self.h) + self.h  # does not change self.h
