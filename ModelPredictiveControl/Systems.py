@@ -153,6 +153,8 @@ def qp_from_sys():
     qp.add_qc(Ff_qc=Ff_qc, alpha=alpha)
     x_ref = np.array([[0], [0], [0], [200], [0]])
     qp.set_ref_trajectory(x_ref)
+
+    qp.add_socc()
     return qp
 
 
