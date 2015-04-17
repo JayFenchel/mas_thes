@@ -31,6 +31,8 @@ class QuadraticProgram:
         self.Fx = None
         self.f = None
         # TODO Instance attributes als None initieren und abfragen, ob gesetzt
+        self.Ff_qc = None
+        self.socc_A = None
 
     def set_sys_dynamics(self, A, B):
 
