@@ -155,7 +155,7 @@ class QuadraticProgram:
             P = np.vstack([P, np.dot(zk.T, self.Ff_qc)[:]])
         if self.socc_A is not None and self.socc_b is not None and self.socc_c is not None:
             _A_ = self._A_of_socc_A_b(zk)
-            P = np.vstack([P, _A_ - self.socc_c])
+            P = np.vstack([P, _A_])
 
         return P
 
