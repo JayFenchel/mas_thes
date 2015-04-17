@@ -146,7 +146,10 @@ class QuadraticProgram:
 
 
     def _A_of_socc_A_b(self, zk):
-        return -2*(self.socc_d*self.socc_c.T + np.dot(self.socc_c.T*self.socc_c.T, zk) + np.dot(self.socc_A.T, np.dot(self.socc_A, zk) + self.socc_b))
+        return 2*(-self.socc_d*self.socc_c.T - np.dot(self.socc_c.T*self.socc_c.T, zk) + np.dot(self.socc_A.T, np.dot(self.socc_A, zk) + self.socc_b))
+
+    def d_A_dz_of_socc_A_b(self, zk):
+        return 2*(-self.socc_c.T*self.socc_c.T + np.dot(self.socc_A.T, self.socc_A))
 
     def P_of_zk(self, zk):
         P = np.zeros([np.shape(self.P)[0], np.shape(self.P)[1]])
