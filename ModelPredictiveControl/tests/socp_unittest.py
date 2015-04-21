@@ -196,7 +196,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue((self.test_qp.P_of_zk(None) == self.ref_P).all(), 'False P-matrix')
 
         ref_h = np.array([[1, 3, 5, 1, 3, 5, 1, 3, 5, 0.5, 1, 1.5]]).T
-        self. assertTrue((self.test_qp.h == ref_h).all(), 'False h-vector')
+        self. assertTrue((self.test_qp.h_of_xk(np.array([[0], [0], [0], [0], [0]])) == ref_h).all(), 'False h-vector')
 
         x_test = np.array([[5, 1, 4, 2, 3]]).T
         z_test = np.array([[9, 0, 8, 1, 7, 2, 6, 3, 5, 4, 0, 9, 0, 8, 1, 7, 2,
