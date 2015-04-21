@@ -38,10 +38,10 @@ class SOCP:
         self.z_ref = np.zeros([T*(m+n), 1])  # for test case
         self.ref_update = None
     # TODO
-        self.Ff_qc = None
-        self.alpha = None
-        self.socc_A = None
-        self.socc_d = None
+        self.F_end_qc = None
+        self.alpha_end = None
+        self.socc_A_end = None
+        self.socc_d_end = None
 
     def set_sys_dynamics(self, A, B):
 
@@ -109,19 +109,19 @@ class SOCP:
         self.f = fx + fu
         self.ff = ff
 
-    def add_qc(self, Ff_qc=None, alpha=None):
+    def add_end_qc(self, F_end_qc=None, alpha_end=None):
 
         # TODO auf ausführliche Form, siehe Zettel erweitern
-        self.alpha = alpha
-        self.Ff_qc = Ff_qc
+        self.alpha_end = alpha_end
+        self.F_end_qc = F_end_qc
 
 
-    def add_socc(self, socc_A=None, socc_b=None, socc_c=None, socc_d=None):
+    def add_end_socc(self, socc_A=None, socc_b=None, socc_c=None, socc_d=None):
 
-        self.socc_A = socc_A
-        self.socc_b = socc_b
-        self.socc_c = socc_c
-        self.socc_d = socc_d
+        self.socc_A_end = socc_A
+        self.socc_b_end = socc_b
+        self.socc_c_end = socc_c
+        self.socc_d_end = socc_d
 
         pass
 
@@ -136,11 +136,11 @@ class SOCP:
 
         h[0:np.shape(self.Fx)[0]] -= np.dot(self.Fx, xk)
         # add quadratic constraint
-        if self.alpha is not None:
-            h = np.vstack([h, self.alpha])
+        if self.alpha_end is not None:
+            h = np.vstack([h, self.alpha_end])
         # add second-order cone constraint
-        if self.socc_d is not None:
-            h = np.vstack([h, self.socc_d*self.socc_d])
+        if self.socc_d_end is not None:
+            h = np.vstack([h, self.socc_d_end*self.socc_d_end])
         return h
 
     def g_of_xk(self, xk):
@@ -152,11 +152,11 @@ class SOCP:
     def _A_of_socc_A_b(self, zk):
         # TODO [0:5] nur als Behelf, um die Dimensionen richtig zu machen
         _A_ = np.zeros([(self.m + self.n) * self.T, 1]) # Muss eine ganze Zeile für P werden
-        _A_[-5:] = 2*(-self.socc_d*self.socc_c - np.dot(self.socc_c.T, zk[-5:])*self.socc_c + np.dot(self.socc_A.T, np.dot(self.socc_A, zk[-5:]) + self.socc_b))
+        _A_[-5:] = 2*(-self.socc_d_end*self.socc_c_end - np.dot(self.socc_c_end.T, zk[-5:])*self.socc_c_end + np.dot(self.socc_A_end.T, np.dot(self.socc_A_end, zk[-5:]) + self.socc_b_end))
         return _A_.T
 
     def d_A_dz_of_socc_A_b(self, zk):
-        return 2*(-self.socc_c.T*self.socc_c.T + np.dot(self.socc_A.T, self.socc_A))
+        return 2*(-self.socc_c_end.T*self.socc_c_end.T + np.dot(self.socc_A_end.T, self.socc_A_end))
 
     def P_of_zk(self, zk):
 
@@ -170,9 +170,9 @@ class SOCP:
             P[i*n_Fu:(i+1)*n_Fu, m+(i-1)*(m+n):m+i*(m+n)] = Hilf
 
         P[T*n_Fu:T*n_Fu+np.shape(self.Ff)[0], m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = self.Ff
-        if self.Ff_qc is not None:
-            P = np.vstack([P, np.dot(zk.T, self.Ff_qc)[:]]) #  bei socc nur zk[-5:] genommen, um auf die Zeile in P zu kommen
-        if self.socc_A is not None and self.socc_b is not None and self.socc_c is not None:
+        if self.F_end_qc is not None:
+            P = np.vstack([P, np.dot(zk.T, self.F_end_qc)[:]]) #  bei socc nur zk[-5:] genommen, um auf die Zeile in P zu kommen
+        if self.socc_A_end is not None and self.socc_b_end is not None and self.socc_c_end is not None:
             _A_ = self._A_of_socc_A_b(zk)
             P = np.vstack([P, _A_])
 
@@ -188,8 +188,8 @@ class SOCP:
 
     def form_Phi(self, d, zk):
         P = self.P_of_zk(2*zk)
-        if self.Ff_qc is not None:
-            term_for_qc = d[-1]*2*self.Ff_qc
+        if self.F_end_qc is not None:
+            term_for_qc = d[-1]*2*self.F_end_qc
         else:
             term_for_qc = 0
         Phi = 2*self.H\
