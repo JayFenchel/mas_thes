@@ -127,6 +127,7 @@ def qp_from_sys():
     e_lb = [[-ex2], [-ey3], [-ex5], [0]]
     e_ub = [[ex2], [ey3], [ex5], [0]]
     # constraint matrices
+    # TODO Matrizen ohne 0 Zeilen, um zu den Input constraints zu passen
     Kx = np.array([[0, -1., 0., 0., 0.],
           [128.2, -128.2, 0, 0., 0.],
           [0., 0., 0., 0., 1.],

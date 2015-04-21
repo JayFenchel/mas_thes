@@ -103,17 +103,8 @@ class SOCP:
         T, n, m = self.T, self.n, self.m
 
         self.Fx = Fx
-
-        # Inequality constraints
-        n_Fu = np.shape(Fu)[0]
-        P = np.zeros([T*n_Fu+np.shape(Ff)[0], T*(n+m)])
-        P[0:n_Fu, 0:m] = Fu
-        for i in range(1, T):
-            Hilf = np.hstack([Fx, Fu])
-            P[i*n_Fu:(i+1)*n_Fu, m+(i-1)*(m+n):m+i*(m+n)] = Hilf
-
-        P[T*n_Fu:T*n_Fu+np.shape(Ff)[0], m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = Ff
-        self.P = P
+        self.Fu = Fu
+        self.Ff = Ff
 
         f = np.vstack([fx, fu]) # stacken - anderer branch
         f = fx + fu  # TODO fraglich
@@ -164,35 +155,47 @@ class SOCP:
     #
     # def d_A_dz_of_socc_A_b(self, zk):
     #     return 2*(-self.socc_c.T*self.socc_c.T + np.dot(self.socc_A.T, self.socc_A))
-    #
-    # def P_of_zk(self, zk):
-    #     P = np.zeros([np.shape(self.P)[0], np.shape(self.P)[1]])
-    #     P += self.P  # does not change self.P
-    #     if self.Ff_qc is not None:
-    #         P = np.vstack([P, np.dot(zk.T, self.Ff_qc)[:]]) #  bei socc nur zk[-5:] genommen, um auf die Zeile in P zu kommen
-    #     if self.socc_A is not None and self.socc_b is not None and self.socc_c is not None:
-    #         _A_ = self._A_of_socc_A_b(zk)
-    #         P = np.vstack([P, _A_])
-    #
-    #     return P
-    #
-    # def form_d(self, xk, zv_k):
-    #     # Form d for further use
-    #     P = self.P_of_zk(zv_k[0:self.T*(self.m+self.n)])
-    #     h = self.h_of_xk(xk)
-    #     d = np.zeros([np.shape(P)[0], np.shape(zv_k)[1]])
-    #     d[:] = 1/(h[:]-np.dot(P[:], zv_k[0:self.T*(self.m+self.n)]))
-    #     return d
-    #
-    # def form_Phi(self, d, zk):
-    #     P = self.P_of_zk(2*zk)
-    #     if self.Ff_qc is not None:
-    #         term_for_qc = d[-1]*2*self.Ff_qc
-    #     else:
-    #         term_for_qc = 0
-    #     Phi = 2*self.H\
-    #           + self.kappa*(np.dot(np.dot(P.T, matrix_diag(d*d)), P) + term_for_qc)  # *2 siehe Zettel
-    #     return Phi
+
+    def P_of_zk(self, zk):
+
+        T, n, m = self.T, self.n, self.m
+        # Inequality constraints
+        n_Fu = np.shape(self.Fu)[0]
+        P = np.zeros([T*n_Fu+np.shape(self.Ff)[0], T*(n+m)])
+        P[0:n_Fu, 0:m] = self.Fu
+        for i in range(1, T):
+            Hilf = np.hstack([self.Fx, self.Fu])
+            P[i*n_Fu:(i+1)*n_Fu, m+(i-1)*(m+n):m+i*(m+n)] = Hilf
+
+        P[T*n_Fu:T*n_Fu+np.shape(self.Ff)[0], m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = self.Ff
+        self.P = P
+        P = np.zeros([np.shape(self.P)[0], np.shape(self.P)[1]])
+        P += self.P  # does not change self.P
+        if self.Ff_qc is not None:
+            P = np.vstack([P, np.dot(zk.T, self.Ff_qc)[:]]) #  bei socc nur zk[-5:] genommen, um auf die Zeile in P zu kommen
+        if self.socc_A is not None and self.socc_b is not None and self.socc_c is not None:
+            _A_ = self._A_of_socc_A_b(zk)
+            P = np.vstack([P, _A_])
+
+        return P
+
+    def form_d(self, xk, zv_k):
+        # Form d for further use
+        P = self.P_of_zk(zv_k[0:self.T*(self.m+self.n)])
+        h = self.h_of_xk(xk)
+        d = np.zeros([np.shape(P)[0], np.shape(zv_k)[1]])
+        d[:] = 1/(h[:]-np.dot(P[:], zv_k[0:self.T*(self.m+self.n)]))
+        return d
+
+    def form_Phi(self, d, zk):
+        P = self.P_of_zk(2*zk)
+        if self.Ff_qc is not None:
+            term_for_qc = d[-1]*2*self.Ff_qc
+        else:
+            term_for_qc = 0
+        Phi = 2*self.H\
+              + self.kappa*(np.dot(np.dot(P.T, matrix_diag(d*d)), P) + term_for_qc)  # *2 siehe Zettel
+        return Phi
 
     def solve(self, xk, zv_k):
 

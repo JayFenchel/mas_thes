@@ -193,7 +193,7 @@ class MyTestCase(unittest.TestCase):
         self.test_qp.set_lin_constraints(self.Fu, self.fu, self.Fx, self.fx,
                                      self.Ff, self.ff)
 
-        self.assertTrue((self.test_qp.P == self.ref_P).all(), 'False P-matrix')
+        self.assertTrue((self.test_qp.P_of_zk(None) == self.ref_P).all(), 'False P-matrix')
 
         ref_h = np.array([[1, 3, 5, 1, 3, 5, 1, 3, 5, 0.5, 1, 1.5]]).T
         self. assertTrue((self.test_qp.h == ref_h).all(), 'False h-vector')
