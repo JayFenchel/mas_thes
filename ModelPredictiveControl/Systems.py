@@ -4,7 +4,7 @@ __author__ = 'jayf'
 
 import numpy as np
 from numpy import diag
-from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
+from ModelPredictiveControl.SOCP import SOCP
 
 
 class SimpleExample:
@@ -82,7 +82,7 @@ def qp_from_sys():
     n = Ad.shape[1]  # columns in A
     m = Bd.shape[1]  # columns in B
     T = 10  # Prädiktionshorizont
-    qp = QuadraticProgram(T, n, m)
+    qp = SOCP(T, n, m)
 
     delta_t = 0.5
 
@@ -149,7 +149,7 @@ def qp_from_sys():
     Ff_qc = np.zeros([T*(n+m), T*(n+m)])
     alpha = 1
 
-    qp.set_constraints(Fu, fu, Fx, fx, Ff, ff)
+    qp.set_lin_constraints(Fu, fu, Fx, fx, Ff, ff)
     qp.add_qc(Ff_qc=Ff_qc, alpha=alpha)
     x_ref = np.array([[0], [0], [0], [200], [0]])
     qp.set_ref_trajectory(x_ref)
