@@ -165,6 +165,11 @@ class SOCP:
         _A_[-5:] = 2*(-self.socc_d_end*self.socc_c_end - np.dot(self.socc_c_end.T, zk[-5:])*self.socc_c_end + np.dot(self.socc_A_end.T, np.dot(self.socc_A_end, zk[-5:]) + self.socc_b_end))
         return _A_.T
 
+    def _A_of_socc_A_b_new(self, zk):
+        # TODO [0:5] nur als Behelf, um die Dimensionen richtig zu machen
+        _A_ = 2*(-self.socc_d*self.socc_c - np.dot(self.socc_c.T, zk[-5:])*self.socc_c + np.dot(self.socc_A.T, np.dot(self.socc_A, zk[-5:]) + self.socc_b))
+        return _A_.T
+
     def d_A_dz_of_socc_A_b(self, zk):
         return 2*(-self.socc_c_end.T*self.socc_c_end.T + np.dot(self.socc_A_end.T, self.socc_A_end))
 
@@ -172,11 +177,18 @@ class SOCP:
 
         T, n, m = self.T, self.n, self.m
         # Inequality constraints
-        n_Fu = np.shape(self.Fu)[0]
+        # add socc line to Fu
+        if self.socc_A is not None and self.socc_b is not None and self.socc_c is not None:
+            Fx = np.vstack([self.Fx, self._A_of_socc_A_b_new(zk)])
+            Fu = np.vstack([self.Fu, np.zeros([1, np.shape(self.Fu)[1]])])
+        else:
+            Fx = self.Fx
+            Fu = self.Fu
+        n_Fu = np.shape(Fu)[0]
         P = np.zeros([T*n_Fu+np.shape(self.Ff)[0], T*(n+m)])
-        P[0:n_Fu, 0:m] = self.Fu
+        P[0:n_Fu, 0:m] = Fu
         for i in range(1, T):
-            Hilf = np.hstack([self.Fx, self.Fu])
+            Hilf = np.hstack([Fx, Fu])
             P[i*n_Fu:(i+1)*n_Fu, m+(i-1)*(m+n):m+i*(m+n)] = Hilf
 
         P[T*n_Fu:T*n_Fu+np.shape(self.Ff)[0], m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = self.Ff
@@ -198,6 +210,7 @@ class SOCP:
 
     def form_Phi(self, d, zk):
         P = self.P_of_zk(2*zk)
+        #TODO add Term for socp
         if self.F_end_qc is not None:
             term_for_qc = d[-1]*2*self.F_end_qc
         else:
