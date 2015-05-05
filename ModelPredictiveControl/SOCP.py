@@ -42,6 +42,8 @@ class SOCP:
         self.alpha_end = None
         self.socc_A_end = None
         self.socc_d_end = None
+        self.socc_A = None
+        self.socc_d = None
 
     def set_sys_dynamics(self, A, B):
 
@@ -123,22 +125,30 @@ class SOCP:
         self.socc_c_end = socc_c
         self.socc_d_end = socc_d
 
-        pass
+    def add_socc(self, socc_A=None, socc_b=None, socc_c=None, socc_d=None):
+
+        self.socc_A = socc_A
+        self.socc_b = socc_b
+        self.socc_c = socc_c
+        self.socc_d = socc_d
 
     def h_of_xk(self, xk):
 
         T, n, m = self.T, self.n, self.m
-
-        h = np.zeros([T*np.shape(self.f)[0]+np.shape(self.ff)[0], 1])
+        if self.socc_d is not None:
+            f = np.vstack([self.f, self.socc_d])
+        else:
+            f = self.f
+        h = np.zeros([T*np.shape(f)[0]+np.shape(self.ff)[0], 1])
         for i in range(0, T):
-            h[i*np.shape(self.f)[0]:(i+1)*np.shape(self.f)[0]] = self.f
-        h[T*np.shape(self.f)[0]:T*np.shape(self.f)[0]+np.shape(self.ff)[0]] = self.ff
+            h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
+        h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(self.ff)[0]] = self.ff
 
         h[0:np.shape(self.Fx)[0]] -= np.dot(self.Fx, xk)
-        # add quadratic constraint
+        # add quadratic constraint (end)
         if self.alpha_end is not None:
             h = np.vstack([h, self.alpha_end])
-        # add second-order cone constraint
+        # add second-order cone constraint (end)
         if self.socc_d_end is not None:
             h = np.vstack([h, self.socc_d_end*self.socc_d_end])
         return h

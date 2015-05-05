@@ -166,6 +166,7 @@ def qp_from_sys():
                       [0]])
     socc_d = np.array([[3]])
 
+    qp.add_socc(socc_A=socc_A, socc_b=socc_b, socc_c=socc_c, socc_d=socc_d)
     qp.add_end_socc(socc_A=socc_A, socc_b=socc_b, socc_c=socc_c, socc_d=socc_d)
     return qp
 
