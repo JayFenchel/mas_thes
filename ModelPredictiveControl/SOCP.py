@@ -44,6 +44,7 @@ class SOCP:
         self.socc_d_end = None
         self.socc_A = None
         self.socc_d = None
+        self.socc = None
 
     def set_sys_dynamics(self, A, B):
 
@@ -125,6 +126,14 @@ class SOCP:
             self.socc_b = socc_b
             self.socc_c = socc_c
             self.socc_d = socc_d
+            if self.socc is not None:
+                self.socc.append([socc_A, socc_b, socc_c, socc_d])
+            else:
+                self.socc = [[socc_A, socc_b, socc_c, socc_d]]
+            for socc in self.socc:
+                print(socc[3])
+            print('done')
+
         elif type == 'end':
             self.socc_A_end = socc_A
             self.socc_b_end = socc_b
@@ -167,9 +176,13 @@ class SOCP:
         _A_[-5:] = 2*(-self.socc_d_end*self.socc_c_end - np.dot(self.socc_c_end.T, zk[-5:])*self.socc_c_end + np.dot(self.socc_A_end.T, np.dot(self.socc_A_end, zk[-5:]) + self.socc_b_end))
         return _A_.T
 
-    def _A_of_socc_A_b_new(self, zk):
+    # new line in P matrix corresponding to a second order cone constraint
+    def _A_of_socc(self, socc, zk):
+        # TODO test _A_of_socc
+        socc_A, socc_b, socc_c, socc_d = socc[0], socc[1], socc[2], socc[3]
         # TODO [0:5] nur als Behelf, um die Dimensionen richtig zu machen
-        _A_ = 2*(-self.socc_d*self.socc_c - np.dot(self.socc_c.T, zk[-5:])*self.socc_c + np.dot(self.socc_A.T, np.dot(self.socc_A, zk[-5:]) + self.socc_b))
+        _A_ = 2*(-socc_d*socc_c - np.dot(socc_c.T, zk[-5:])*socc_c
+                 + np.dot(socc_A.T, np.dot(socc_A, zk[-5:]) + socc_b))
         return _A_.T
 
     def d_A_dz_of_socc_A_b(self, zk):
@@ -180,12 +193,12 @@ class SOCP:
         T, n, m = self.T, self.n, self.m
         # Inequality constraints
         # add socc line to Fu
-        if self.socc_A is not None and self.socc_b is not None and self.socc_c is not None:
-            Fx = np.vstack([self.Fx, self._A_of_socc_A_b_new(zk)])
-            Fu = np.vstack([self.Fu, np.zeros([1, np.shape(self.Fu)[1]])])
-        else:
-            Fx = self.Fx
-            Fu = self.Fu
+        Fx = self.Fx  # Vorsicht, dass self.Fx nicht verändert wird (vstack sollte save sein)
+        Fu = self.Fu
+        if self.socc is not None:
+            for socc in self.socc:
+                Fx = np.vstack([Fx, self._A_of_socc(socc, zk)])
+                Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
         n_Fu = np.shape(Fu)[0]
         P = np.zeros([T*n_Fu+np.shape(self.Ff)[0], T*(n+m)])
         P[0:n_Fu, 0:m] = Fu
