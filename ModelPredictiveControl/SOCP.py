@@ -117,20 +117,22 @@ class SOCP:
         self.alpha_end = alpha_end
         self.F_end_qc = F_end_qc
 
-
-    def add_end_socc(self, socc_A=None, socc_b=None, socc_c=None, socc_d=None):
-
-        self.socc_A_end = socc_A
-        self.socc_b_end = socc_b
-        self.socc_c_end = socc_c
-        self.socc_d_end = socc_d
-
-    def add_socc(self, socc_A=None, socc_b=None, socc_c=None, socc_d=None):
-
-        self.socc_A = socc_A
-        self.socc_b = socc_b
-        self.socc_c = socc_c
-        self.socc_d = socc_d
+    # Adding a second order cone constraint (type='end' for final constraints)
+    def add_socc(self, type='trajectory', socc_A=None, socc_b=None,
+                 socc_c=None, socc_d=None):
+        if type == 'trajectory':
+            self.socc_A = socc_A
+            self.socc_b = socc_b
+            self.socc_c = socc_c
+            self.socc_d = socc_d
+        elif type == 'end':
+            self.socc_A_end = socc_A
+            self.socc_b_end = socc_b
+            self.socc_c_end = socc_c
+            self.socc_d_end = socc_d
+        else:
+            print('SOCC: type is not known')
+            exit()
 
     def h_of_xk(self, xk):
 
