@@ -146,10 +146,10 @@ class SOCP:
     def h_of_xk(self, xk):
 
         T, n, m = self.T, self.n, self.m
-        if self.socc_d is not None:
-            f = np.vstack([self.f, self.socc_d])
-        else:
-            f = self.f
+        f = self.f  # Vorsicht, dass self.Fx nicht verändert wird (vstack sollte save sein)
+        if self.socc is not None:
+            for socc in self.socc:
+                f = np.vstack([f, socc[3]])  # socc_d anhängen
         h = np.zeros([T*np.shape(f)[0]+np.shape(self.ff)[0], 1])
         for i in range(0, T):
             h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
@@ -179,6 +179,7 @@ class SOCP:
     # new line in P matrix corresponding to a second order cone constraint
     def _A_of_socc(self, socc, zk):
         # TODO test _A_of_socc
+        # TODO Konstante Terme nur einmal berechnen
         socc_A, socc_b, socc_c, socc_d = socc[0], socc[1], socc[2], socc[3]
         # TODO [0:5] nur als Behelf, um die Dimensionen richtig zu machen
         _A_ = 2*(-socc_d*socc_c - np.dot(socc_c.T, zk[-5:])*socc_c
