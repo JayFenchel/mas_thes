@@ -42,6 +42,8 @@ class SOCP:
         self.alpha_end = None
         self.socc_A_end = None
         self.socc_d_end = None
+        self.qc = None
+        self.qc_end = None
         self.socc_end = None
         self.socc = None
 
@@ -116,6 +118,10 @@ class SOCP:
         # TODO auf ausführliche Form, siehe Zettel erweitern
         self.alpha_end = alpha_end
         self.F_end_qc = F_end_qc
+        if self.qc_end is not None:
+            self.qc_end.append([F_end_qc, alpha_end])
+        else:
+            self.qc_end = [[F_end_qc, alpha_end]]
 
     # Adding a second order cone constraint (type='end' for final constraints)
     def add_socc(self, type='trajectory', socc_A=None, socc_b=None,
@@ -127,10 +133,10 @@ class SOCP:
                 self.socc = [[socc_A, socc_b, socc_c, socc_d]]
 
         elif type == 'end':
-            self.socc_A_end = socc_A
-            self.socc_b_end = socc_b
-            self.socc_c_end = socc_c
-            self.socc_d_end = socc_d
+            # self.socc_A_end = socc_A
+            # self.socc_b_end = socc_b
+            # self.socc_c_end = socc_c
+            # self.socc_d_end = socc_d
             if self.socc_end is not None:
                 self.socc_end.append([socc_A, socc_b, socc_c, socc_d])
             else:
@@ -177,6 +183,11 @@ class SOCP:
                  + np.dot(socc_A.T, np.dot(socc_A, zk[-5:]) + socc_b))
         return _A_.T
 
+    def _A_of_qc(self, qc, zk):
+        # return 2*z.T*Ff_alpha
+        # TODO richtige Berechnung, richtige angabe in system.py
+        pass
+
     def d_A_dz_of_socc_A_b(self, zk):
         return 2*(-self.socc_c_end.T*self.socc_c_end.T + np.dot(self.socc_A_end.T, self.socc_A_end))
 
@@ -193,10 +204,12 @@ class SOCP:
                 Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
 
         Ff = self.Ff
+        # if self.qc_end is not None:
+        #     for qc in self.qc_end:
+        #         Ff = np.vstack([Ff, self._A_of_qc(qc, zk)])
         if self.socc_end is not None:
             for socc in self.socc_end:
-                _A_ = self._A_of_socc(socc, zk)
-                Ff = np.vstack([Ff, _A_])
+                Ff = np.vstack([Ff, self._A_of_socc(socc, zk)])
 
         n_Fu = np.shape(Fu)[0]
         P = np.zeros([T*n_Fu+np.shape(Ff)[0], T*(n+m)])
