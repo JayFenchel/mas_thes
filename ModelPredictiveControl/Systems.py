@@ -155,11 +155,11 @@ def qp_from_sys():
     x_ref = np.array([[0], [0], [0], [200], [0]])
     qp.set_ref_trajectory(x_ref)
 
-    socc_A = np.array([[0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0]])
+    socc_A = np.array([[1, 0, 0, 0, 0],
+                       [1, 0, 0, 0, 0]])
     socc_b = np.array([[1],
                        [1]])
-    socc_c = np.array([[0],
+    socc_c = np.array([[1],
                       [0],
                       [0],
                       [0],
@@ -168,6 +168,8 @@ def qp_from_sys():
 
     qp.add_socc(socc_A=socc_A, socc_b=socc_b, socc_c=socc_c, socc_d=socc_d)
     qp.add_socc(socc_A=socc_A, socc_b=socc_b, socc_c=socc_c, socc_d=socc_d)
+    qp.add_socc(type='end', socc_A=socc_A, socc_b=socc_b, socc_c=socc_c,
+                socc_d=socc_d)
     qp.add_socc(type='end', socc_A=socc_A, socc_b=socc_b, socc_c=socc_c,
                 socc_d=socc_d)
     return qp
