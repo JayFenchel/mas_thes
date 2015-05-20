@@ -65,6 +65,7 @@ class SimpleExample:
 # class Systems:
     # def __init__(self):
     #     self.QP = QuadraticProgram
+
 def qp_from_new_sys():
     mm = io.loadmat('data/data_matrix.mat')  # load system matrices
 
@@ -73,17 +74,50 @@ def qp_from_new_sys():
     Bd = mm['Bsys']
     (n, m) = np.array(Bd).shape  # system dimensions
     T = 5  # prediction horizon
-    delta_t = 0.5
+    dt = 0.5
     qp = SOCP(T, n, m)
     qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
 
-    # Weighting matrices
+    # weighting matrices
     Q = mm['Q_total']
     R = mm['R_total']
     P = Q  # terminal weighting
-
     qp.set_weighting(Q=Q, R=R, Qf=P)
 
+    # input constraints
+    eui = 0.262  # rad (15 degrees). Elevator angle.
+    u_lb = -eui
+    u_ub = eui
+    Ku = np.array([[0.],
+                   [0.],
+                   [-1.],
+                   [0.],
+                   [0.],
+                   [1.],])
+
+    fu = np.zeros([np.shape(Ku)[0], 1])
+    fu[np.shape(Ku)[0]/2-1] = -(u_lb)
+    fu[np.shape(Ku)[0]-1] = (u_ub)
+
+    # mixed constraints
+    ex2 = 0.349  # rad/s (20 degrees). Pitch angle constraint.
+    ex5 = 0.524 * dt  # rad/s * dt input slew rate constraint in discrete time
+    ey3 = 30.
+
+    # bounds
+    e_lb = [[-ex2], [-ex5], [0]]
+    e_ub = [[ex2], [ex5], [0]]
+    fx = np.ones([2*3, 1])
+    fx[0:3] = - np.array(e_lb)
+    fx[3:2*3] = np.array(e_ub)
+
+    (ncx, dummy) = np.array(e_ub).shape
+    # constraint matrices
+    Kx = np.zeros((ncx*2, n))
+
+    qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kx, ff=fx)
+
+    return qp
 
 def qp_from_sys():
     # discrete-time system
