@@ -192,6 +192,9 @@ def qp_from_sys():
           [-128.2, 128.2, 0, 0., 0.],
           [0., 0., 0., 0., -1.],
           [0., 0., 0., 0., 0.]])
+    (ncx, dummy) = np.array(e_ub).shape
+    # constraint matrices
+    Kx = np.zeros((ncx*2, n))
     Fx = Kx
     fx = np.ones([2*4, 1])
     fx [0:4] = - np.array(e_lb)
