@@ -114,6 +114,10 @@ def qp_from_new_sys():
     (ncx, dummy) = np.array(e_ub).shape
     # constraint matrices
     Kx = np.zeros((ncx*2, n))
+    # Kx[0, 6] = -1
+    # Kx[3, 6] = 1
+    # Kx[1, 24] = 1
+    # Kx[4, 24] = -1
 
     qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kx, ff=fx)
 

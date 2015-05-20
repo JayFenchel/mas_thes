@@ -119,6 +119,8 @@ class SOCP:
 
     def set_lin_constraints(self, Fu, fu, Fx, fx, Ff, ff):
 
+        ff[2] = .1
+        ff[5] = .1  #TODO Werte raus aus SOCP file
         self.Fx = Fx
         self.Fu = Fu
         self.Ff = Ff
