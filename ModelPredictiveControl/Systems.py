@@ -3,6 +3,7 @@
 __author__ = 'jayf'
 
 import numpy as np
+from scipy import io
 from numpy import diag
 from ModelPredictiveControl.SOCP import SOCP
 
@@ -64,6 +65,22 @@ class SimpleExample:
 # class Systems:
     # def __init__(self):
     #     self.QP = QuadraticProgram
+def qp_from_new_sys():
+    mm = io.loadmat('data/data_matrix.mat')  # load system matrices
+
+    # discrete-time system
+    Ad = mm['Asys']
+    Bd = mm['Bsys']
+    (n, m) = np.array(Bd).shape  # system dimensions
+    T = 5  # prediction horizon
+    delta_t = 0.5
+    qp = SOCP(T, n, m)
+    qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
+
+    # Weighting matrices
+    Q = mm['Q_total']
+    R = mm['R_total']
+    P = Q  # terminal weighting
 
 def qp_from_sys():
     # discrete-time system
@@ -93,7 +110,7 @@ def qp_from_sys():
     q = np.zeros([n, 1])
     R = np.array(diag([471.65]))
     r = np.zeros([m, 1])
-    P = Q  # TODO Was ist P, terminal weighting?
+    P = Q  # terminal weighting
     Qf = P
     qf = np.zeros([n, 1])
     qf = qf
