@@ -99,7 +99,7 @@ def form_Y(Phi, A, B, T, n, m):
             # Y[i, j] = Y[j, i]
             elif i != j and j <= T-1:
                 Y[i*n:(i+1)*n, j*n:(j+1)*n] = (backward_substitution(bl_i.T,
-                                                                    forward_substitution(bl_i, np.vstack([-A.T, -B.T]))))[0:5]
+                                                                    forward_substitution(bl_i, np.vstack([-A.T, -B.T]))))[0:n]
                 Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
     return Y, L_Phi
 

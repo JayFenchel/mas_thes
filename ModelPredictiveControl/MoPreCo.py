@@ -115,7 +115,7 @@ for schritt in range(15):
     # print(zv_k)
     # print(zv_k[0])
     # print(np.dot(sys.B, zv_k[0]))
-    xk, zv_k[0:(n+m)*(T-1)] = np.dot(sys.A, xk) + sys.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
+    xk, zv_k[0:(n+m)*(T-1)] = np.dot(QP.A, xk) + QP.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
     print('next xk', xk)
 print(time()-zeit)
 # profiler.disable()
