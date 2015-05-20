@@ -82,9 +82,22 @@ class SOCP:
             self.z_ref[-(self.n+self.m):] = np.vstack([self.u_ref, self.ref_update[0:1].T])
             self.ref_update = np.delete(self.ref_update, 0, 0)
 
-    def set_weighting(self, Q, q, R, r, S, Qf, qf):
+    def set_weighting(self, Q=None, q=None, R=None, r=None, S=None,
+                      Qf=None, qf=None):
 
         T, n, m = self.T, self.n, self.m
+        # if None: set_zero(right_dimension)
+        if q is None:
+            q = np.zeros([n, 1])
+        if r is None:
+            r = np.zeros([m, 1])
+        if S is None:
+            S = np.zeros([n, m])
+        if qf is None:
+            qf = np.zeros([n, 1])
+        if Q is None or R is None or Qf is None:
+            print('Some important weighting matrices are not defined!')
+            exit()
 
         self.r = r
         self.S = S
