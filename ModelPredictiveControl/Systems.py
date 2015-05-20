@@ -82,6 +82,9 @@ def qp_from_new_sys():
     R = mm['R_total']
     P = Q  # terminal weighting
 
+    qp.set_weighting(Q=Q, R=R, Qf=P)
+
+
 def qp_from_sys():
     # discrete-time system
     Ad = np.array([[  0.23996015,   0., 0.17871287,   0., 0.],
@@ -111,12 +114,10 @@ def qp_from_sys():
     R = np.array(diag([471.65]))
     r = np.zeros([m, 1])
     P = Q  # terminal weighting
-    Qf = P
     qf = np.zeros([n, 1])
-    qf = qf
     S = np.zeros_like(Bd)  # no combined weighting
 
-    qp.set_weighting(Q, q, R, r, S, Qf, qf)
+    qp.set_weighting(Q=Q, q=q, R=R, r=r, S=S, Qf=P, qf=qf)
 
     # input constraints
     eui = 0.262  # rad (15 degrees). Elevator angle.
