@@ -79,8 +79,8 @@ def qp_from_new_sys():
     qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
 
     # weighting matrices
-    Q = mm['Q_total']
-    R = mm['R_total']
+    Q = mm['Q_total']+0.00001*np.eye(n, n)
+    R = mm['R_total']+0.00001*np.eye(m, m)
     P = Q  # terminal weighting
     qp.set_weighting(Q=Q, R=R, Qf=P)
 
@@ -120,6 +120,13 @@ def qp_from_new_sys():
     # Kx[4, 24] = -1
 
     qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kx, ff=fx)
+
+    x_ref = np.array([[0.], [0.], [0.], [0.], [0.], [0.],
+                      [0.], [0.], [0.], [0.], [0.], [0.],
+                      [0.], [0.], [0.], [0.], [0.], [0.],
+                      [200.], [0.], [0.], [0.], [0.], [0.],
+                      [0.], [0.], [0.], [0.], [0.], [0.]])
+    qp.set_ref_trajectory(x_ref)
 
     return qp
 
