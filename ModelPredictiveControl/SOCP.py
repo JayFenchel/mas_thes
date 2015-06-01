@@ -6,6 +6,8 @@ import numpy as np
 # from scipy import linalg
 from ModelPredictiveControl.MyMath import matrix_diag
 from ModelPredictiveControl.MyMath import solve_lin_gs_structured
+from ModelPredictiveControl.MyMath import householder
+from ModelPredictiveControl.MyMath import backward_substitution
 
 class SOCP:
 
@@ -272,8 +274,11 @@ class SOCP:
         Phi = self.form_Phi(d, zv_k[0:self.T*(self.m+self.n)])
 
         rd, rp = self.residual(xk, zv_k)
-        # SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.zeros([self.C.shape[0], self.C.shape[0]])])])
+        SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.zeros([self.C.shape[0], self.C.shape[0]])])])
         # lsg = linalg.solve(SS, -np.vstack([rd, rp]))
+        q, r = householder(SS) # TODO housholder trafo scheint hier nicht richtig zu funktionieren -> Test schreiben
+        # TODO Ausgabe bei Div durch 0 in housholder
+        lsg1 = backward_substitution(r, np.dot(q.T, -np.vstack([rd, rp])))
         lsg = solve_lin_gs_structured(Phi, rd, rp, self.A, self.B, self.C, T, n, m)
         return lsg
 
