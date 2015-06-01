@@ -68,6 +68,7 @@ class SimpleExample:
 
 def qp_from_new_sys():
     mm = io.loadmat('data/data_matrix.mat')  # load system matrices
+    socp = io.loadmat('data/socp_matrices.mat')
 
     # discrete-time system
     Ad = mm['Asys']
@@ -128,6 +129,14 @@ def qp_from_new_sys():
                       [0.], [0.], [0.], [0.], [0.], [0.]])
     qp.set_ref_trajectory(x_ref)
 
+    help = socp['V21']
+    V21 = help[30:60, 30:60]
+
+    help = socp['M21']
+    M21 = np.array([help[0, 30:60]])
+    c = socp['c_max']
+
+    qp.add_socc(socc_A=np.array(V21), socc_c=M21.T, socc_b=np.zeros_like(M21.T), socc_d=c)
     return qp
 
 def qp_from_sys():

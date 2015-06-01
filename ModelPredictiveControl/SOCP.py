@@ -194,9 +194,9 @@ class SOCP:
         # TODO test _A_of_socc
         # TODO Konstante Terme nur einmal berechnen
         socc_A, socc_b, socc_c, socc_d = socc[0], socc[1], socc[2], socc[3]
-        # TODO [0:5] nur als Behelf, um die Dimensionen richtig zu machen eigentlich jede Zeile mit den richtigen Einträgen aus z multiplizieren
-        _A_ = 2*(-socc_d*socc_c - np.dot(socc_c.T, zk[-5:])*socc_c
-                 + np.dot(socc_A.T, np.dot(socc_A, zk[-5:]) + socc_b))
+        # TODO [0:n] nur als Behelf, um die Dimensionen richtig zu machen eigentlich jede Zeile mit den richtigen Einträgen aus z multiplizieren
+        _A_ = 2*(-socc_d*socc_c - np.dot(socc_c.T, zk[-self.n:])*socc_c
+                 + np.dot(socc_A.T, np.dot(socc_A, zk[-self.n:]) + socc_b))
         return _A_.T
 
     def _A_of_qc(self, qc, zk):
