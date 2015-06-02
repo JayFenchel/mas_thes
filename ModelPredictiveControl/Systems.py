@@ -80,8 +80,8 @@ def qp_from_new_sys():
     qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
 
     # weighting matrices
-    Q = mm['Q_total']+0.00001*np.eye(n, n)
-    R = mm['R_total']+0.00001*np.eye(m, m)
+    Q = mm['Q_total']
+    R = mm['R_total']
     P = Q  # terminal weighting
     qp.set_weighting(Q=Q, R=R, Qf=P)
 

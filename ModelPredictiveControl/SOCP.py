@@ -279,7 +279,7 @@ class SOCP:
         q, r = householder(SS) # TODO housholder trafo scheint hier nicht richtig zu funktionieren -> Test schreiben
         # TODO Ausgabe bei Div durch 0 in housholder
         lsg1 = backward_substitution(r, np.dot(q.T, -np.vstack([rd, rp])))
-        lsg = solve_lin_gs_structured(Phi, rd, rp, self.A, self.B, self.C, T, n, m, reg=0)
+        lsg = solve_lin_gs_structured(Phi, rd, rp, self.A, self.B, self.C, T, n, m, reg=0.00001)
         return lsg
 
     def residual_norm(self, zv_k, xk):
