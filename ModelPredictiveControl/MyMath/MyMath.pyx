@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 __author__ = 'jayf'
+# Build with: python3.4 setup.py build_ext --inplace
 
 import numpy as np
 
@@ -103,10 +104,12 @@ def form_Y(Phi, A, B, T, n, m):
                 Y[j*n:(j+1)*n].T[i*n:(i+1)*n] = Y[i*n:(i+1)*n].T[j*n:(j+1)*n].T
     return Y, L_Phi
 
-def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m):
+def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m, reg=0):
+    # reg=epsilon_for_regularization, reg=0 => no regularization
 
     # L_Phi = cholesky(Phi)
-
+    # regularization (+epsilon*I)
+    Phi += reg*np.eye(np.shape(Phi)[0])  # Phi has to be quadratic
     Y, L_Phi = form_Y(Phi, A, B, T, n, m)
     beta = -rp + np.dot(C, backward_substitution(L_Phi.T, forward_substitution(L_Phi, rd)))
 
@@ -117,6 +120,8 @@ def solve_lin_gs_structured(Phi, rd, rp, A, B, C, T, n, m):
     #     L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n] = np.linalg.solve(L_Y[(i-1)*n:(i)*n].T[(i-1)*n:(i)*n], Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n].T)
     #     L_Y[i*n:(i+1)*n].T[i*n:(i+1)*n] = cholesky(Y[i*n:(i+1)*n].T[i*n:(i+1)*n] - np.dot(L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n].T, L_Y[i*n:(i+1)*n].T[(i-1)*n:(i)*n]))
 
+    # regularization (-epsilon*I)
+    Y += reg*np.eye(np.shape(Y)[0])
     # TODO einezelne Blöcke in L_Y berechnen sollte schneller gehen
     L_Y = cholesky(Y)
 
