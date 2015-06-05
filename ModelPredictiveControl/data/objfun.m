@@ -2,6 +2,8 @@ function [ f_val ] = objfun( U )
 %OBJFUN Summary of this function goes here
 %   Detailed explanation goes here
 load data_matrix.mat
+ref = zeros(30, 1);
+ref(19) = 200;
 
 % f_val = U(31:60)'*Q_total*U(31:60)...
 %     + U(61:90)'*Q_total*U(61:90)...
@@ -17,9 +19,8 @@ load data_matrix.mat
 f_val = 0;
 for i=1:5
     x = U(30*(i)+1:30*(i+1));
-    x(19) = x(19) - 200;
     u = U(180+i);
-    f_val = f_val + x'*Q_total*x + u'*R_total*u;
+    f_val = f_val + (x-ref)'*Q_total*(x-ref) + u'*R_total*u;
 end
 
 end
