@@ -5,6 +5,7 @@ load myproblem_bounds.mat
 load data_matrix.mat
 
 problem = optimproblem
+problem.options.MaxIter = 20
 
 steps = 25
 x = zeros(185, steps);
