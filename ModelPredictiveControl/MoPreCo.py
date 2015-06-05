@@ -122,8 +122,13 @@ for schritt in range(schritte):
     # print(zv_k)
     # print(zv_k[0])
     # print(np.dot(sys.B, zv_k[0]))
-    xk, zv_k[0:(n+m)*(T-1)] = np.dot(QP.A, xk) + QP.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
-    # TODO z und v einzeln shiften
+
+    # neues xk berechnen
+    xk = np.dot(QP.A, xk) + QP.B*zv_k[0]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
+    # z_k shiften  # TODO startpunkt verschiebung genau anschauen
+    zv_k[0:(n+m)*(T-1)] = zv_k[n+m:(n+m)*T]
+    # # v_k shiften
+    # zv_k[(n+m)*T:(n+m)*T+n*(T-1)] = zv_k[(n+m)*T+n:(n+m)*T+n*T]
     print('next xk', xk)
 print(time()-zeit)
 # profiler.disable()
