@@ -36,7 +36,7 @@ x0 = np.array([[0.], [0.], [0.], [0.], [0.], [0.],
                [0.], [0.], [0.], [0.], [0.], [0.]])
 u0 = np.array([[0.]])
 z0 = np.eye(T*(n+m), 1)*0
-v0 = np.eye(T*n, 1)*0
+v0 = np.eye(T*n, 1)*0 + 1
 
 # # Startwere SimpleSys
 # x0 = np.array([[0], [1], [0]])
@@ -127,8 +127,8 @@ for schritt in range(schritte):
     xk = np.dot(QP.A, xk) + QP.B*zv_k[0]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
     # z_k shiften  # TODO startpunkt verschiebung genau anschauen
     zv_k[0:(n+m)*(T-1)] = zv_k[n+m:(n+m)*T]
-    # # v_k shiften
-    # zv_k[(n+m)*T:(n+m)*T+n*(T-1)] = zv_k[(n+m)*T+n:(n+m)*T+n*T]
+    # v_k shiften
+    zv_k[(n+m)*T:(n+m)*T+n*(T-1)] = zv_k[(n+m)*T+n:(n+m)*T+n*T]
     print('next xk', xk)
 print(time()-zeit)
 # profiler.disable()
