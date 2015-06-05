@@ -86,7 +86,10 @@ zv_k = zv_k0
 print('startwert valide = ', QP.check(xk, zv_k))  # Validität des Startwerts prüfen
 zeit = time()
 # profiler.enable()
-for schritt in range(15):
+schritte = 25
+x_out = np.zeros([np.shape(xk)[0], schritte])
+for schritt in range(schritte):
+    x_out[:, schritt:schritt+1] = xk
     for i in range(0, 6):
         zeits = time()
         delta_zv = QP.solve(xk, zv_k)
@@ -120,7 +123,9 @@ for schritt in range(15):
     # print(zv_k[0])
     # print(np.dot(sys.B, zv_k[0]))
     xk, zv_k[0:(n+m)*(T-1)] = np.dot(QP.A, xk) + QP.B*zv_k[0], zv_k[n+m:(n+m)*T]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
+    # TODO z und v einzeln shiften
     print('next xk', xk)
 print(time()-zeit)
 # profiler.disable()
 # profiler.dump_stats('profile')
+print(x_out)
