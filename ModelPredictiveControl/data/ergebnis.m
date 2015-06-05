@@ -4,15 +4,15 @@ clear all
 load myproblem_bounds.mat
 load data_matrix.mat
 
-problem = optimproblem
-problem.options.MaxIter = 20
+problem = optimproblem;
+problem.options.MaxIter = 20;
 
 steps = 25
 x = zeros(185, steps);
 for i=1:steps
     step = i
     [x(:, i)] = fmincon(problem);
-    problem.x0(1:30) = Asys*problem.x0(1:30) + Bsys*problem.x0(181);
+    problem.x0(1:30) = Asys*x(1:30, i) + Bsys*x(181, i);
     problem.x0(31:150) = x(61:180, i);
     problem.x0(151:180) = x(151:180, i);
     problem.x0(181:184) = x(182:185, i);
@@ -37,4 +37,4 @@ figure(1)
     hold on
     grid on
     plot(E_matlab)
-    plot(E_python)
+    plot(E_python, 'r')
