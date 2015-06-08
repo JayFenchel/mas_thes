@@ -169,7 +169,8 @@ class SOCP:
         f = self.f  # Vorsicht, dass self.Fx nicht verändert wird (vstack sollte save sein)
         if self.socc is not None:
             for socc in self.socc:
-                f = np.vstack([f, socc[3]])  # socc_d anhängen TODO d² ?
+                for i in range(0, T):
+                    f = np.vstack([f, socc[3]])  # socc_d anhängen TODO d² ?
         h = np.zeros([T*np.shape(f)[0]+np.shape(self.ff)[0], 1])
         for i in range(0, T):
             h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
@@ -192,13 +193,13 @@ class SOCP:
         pass
 
     # new line in P matrix corresponding to a second order cone constraint
-    def _A_of_socc(self, socc, zk):
+    def _A_of_socc(self, socc, xk_):
         # TODO test _A_of_socc
         # TODO Konstante Terme nur einmal berechnen
         socc_A, socc_b, socc_c, socc_d = socc[0], socc[1], socc[2], socc[3]
         # TODO [0:n] nur als Behelf, um die Dimensionen richtig zu machen eigentlich jede Zeile mit den richtigen Einträgen aus z multiplizieren
-        _A_ = 2*(-socc_d*socc_c - np.dot(socc_c.T, zk[-self.n:])*socc_c
-                 + np.dot(socc_A.T, np.dot(socc_A, zk[-self.n:]) + socc_b))
+        _A_ = 2*(-socc_d*socc_c - np.dot(socc_c.T, xk_)*socc_c
+                 + np.dot(socc_A.T, np.dot(socc_A, xk_) + socc_b))
         return _A_.T
 
     def _A_of_qc(self, qc, zk):
@@ -218,8 +219,9 @@ class SOCP:
         Fu = self.Fu
         if self.socc is not None:
             for socc in self.socc:
-                Fx = np.vstack([Fx, self._A_of_socc(socc, zk)])
-                Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
+                for i in range(0, T):
+                    Fx = np.vstack([Fx, self._A_of_socc(socc, zk[i*(n+m)+m:i*(n+m)+m+n])])
+                    Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
 
         Ff = self.Ff
         # if self.qc_end is not None:
