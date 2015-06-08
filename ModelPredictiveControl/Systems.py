@@ -136,7 +136,8 @@ def qp_from_new_sys():
     M21 = np.array([help[0, 30:60]])
     c = socp['c_max']
 
-    qp.add_socc(socc_A=np.array(V21), socc_c=M21.T, socc_b=np.zeros_like(M21.T), socc_d=c)
+    qp.add_socc(socc_A=np.array(V21), socc_c=M21.T,
+                socc_b=np.zeros_like(M21.T), socc_d=c)
     return qp
 
 def qp_from_sys():
