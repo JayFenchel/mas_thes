@@ -66,6 +66,13 @@ class SimpleExample:
     # def __init__(self):
     #     self.QP = QuadraticProgram
 
+def reorder(a, T, n, m):
+    b = np.zeros_like(a)
+    for i in range(0, T):
+        b[:, i*(n+m):i*(n+m)+m] = a[:, n*T+i*m:n*T+(i+1)*m]
+        b[:, i*(n+m)+m:i*(n+m)+m+n] = a[:, i*n:(i+1)*n]
+    return b
+
 def qp_from_new_sys():
     mm = io.loadmat('data/data_matrix.mat')  # load system matrices
     socp = io.loadmat('data/socp_matrices.mat')
@@ -129,6 +136,11 @@ def qp_from_new_sys():
                       [0.], [0.], [0.], [0.], [0.], [0.]])
     qp.set_ref_trajectory(x_ref)
 
+    # V21 = reorder(socp['V21'][30:60, 30:], T, n, m)
+    # V22 = reorder(socp['V22'][60:90, 30:], T, n, m)
+    # V23 = reorder(socp['V22'][90:120, 30:], T, n, m)
+    # V24 = reorder(socp['V22'][120:150, 30:], T, n, m)
+    # V25 = reorder(socp['V22'][150:180, 30:], T, n, m)
     help = socp['V21']
     V21 = help[30:60, 30:60]
 
