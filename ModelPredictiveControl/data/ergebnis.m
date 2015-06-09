@@ -1,28 +1,28 @@
 close all
 clear all
-
-load myproblem_bounds.mat
-load data_matrix.mat
-
-problem = optimproblem;
-problem.options.MaxIter = 10;
-
-steps = 2
-x = zeros(185, steps);
-for i=1:steps
-    step = i
-    [x(:, i)] = fmincon(problem);
-    problem.x0(1:30) = Asys*x(1:30, i) + Bsys*x(181, i);
-    problem.x0(31:150) = x(61:180, i);
-    problem.x0(151:180) = x(151:180, i);
-    problem.x0(181:184) = x(182:185, i);
-    problem.x0(185) = x(185, i);
-    problem.lb(1:30) = problem.x0(1:30);
-    problem.ub(1:30) = problem.x0(1:30);
-end
-
-
-E_matlab = x(19, :)
+% 
+% load myproblem_bounds.mat
+% load data_matrix.mat
+% 
+% problem = optimproblem;
+% problem.options.MaxIter = 10;
+% 
+% steps = 2
+% x = zeros(185, steps);
+% for i=1:steps
+%     step = i
+%     [x(:, i)] = fmincon(problem);
+%     problem.x0(1:30) = Asys*x(1:30, i) + Bsys*x(181, i);
+%     problem.x0(31:150) = x(61:180, i);
+%     problem.x0(151:180) = x(151:180, i);
+%     problem.x0(181:184) = x(182:185, i);
+%     problem.x0(185) = x(185, i);
+%     problem.lb(1:30) = problem.x0(1:30);
+%     problem.ub(1:30) = problem.x0(1:30);
+% end
+% 
+% 
+% E_matlab = x(19, :)
 
 % Python Algorithmus (05.06.2015, mittags, 25 steps)
 E_python = [4.00000000e+02   3.99959534e+02   3.98559660e+02   3.85976302e+02...
@@ -41,8 +41,26 @@ E_python2 = [  4.00000000e+02   3.99550153e+02   3.88544475e+02   3.60211002e+02
     2.09672378e+02   2.05956619e+02   2.02701519e+02   2.00341091e+02...
     1.99014695e+02]
 
+E_python3 = [  4.00000000e+02   3.99558373e+02   3.88744415e+02   3.60706300e+02...
+    3.19635751e+02   2.73598199e+02   2.29558054e+02   1.92927299e+02...
+    1.67144749e+02   1.53708039e+02   1.51776724e+02   1.58450435e+02...
+    1.70122261e+02   1.83434800e+02   1.95979246e+02   2.06187093e+02...
+    2.13145046e+02   2.16663391e+02   2.17448000e+02   2.16339278e+02...
+    2.13890894e+02   2.10613542e+02   2.07093115e+02   2.03894650e+02...
+    2.01417933e+02]
+% v shifted, letzten werte neu initialisiert
+E_python4 = [  4.00000000e+02   3.99558373e+02   3.88743339e+02   3.60674664e+02...
+    3.19438268e+02   2.73184597e+02   2.29397603e+02   1.93703759e+02...
+    1.69741147e+02   1.58250819e+02   1.57429281e+02   1.64195963e+02...
+    1.75236421e+02   1.87607948e+02   1.99019577e+02   2.07942596e+02...
+    2.13616483e+02   2.15985427e+02   2.15538883e+02   2.13093042e+02...
+    2.09578760e+02   2.05855350e+02   2.02612856e+02   2.00272963e+02...
+    1.98966789e+02]
+
 figure(1)
     hold on
     grid on
-    plot(E_matlab)
-    plot(E_python, 'r')
+    plot(E_python)
+    plot(E_python2, 'r')
+%     plot(E_python3, 'g')
+    plot(E_python4, 'g')
