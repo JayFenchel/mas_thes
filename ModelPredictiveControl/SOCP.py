@@ -122,8 +122,6 @@ class SOCP:
 
     def set_lin_constraints(self, Fu, fu, Fx, fx, Ff, ff):
 
-        ff[2] = .1
-        ff[5] = .1  #TODO Werte raus aus SOCP file
         self.Fx = Fx
         self.Fu = Fu
         self.Ff = Ff
@@ -169,8 +167,9 @@ class SOCP:
         f = self.f  # Vorsicht, dass self.Fx nicht verändert wird (vstack sollte save sein)
         if self.socc is not None:
             for socc in self.socc:
-                for i in range(0, T):
-                    f = np.vstack([f, socc[3]])  # socc_d anhängen TODO d² ?
+                # for i in range(0, T):
+                #     f = np.vstack([f, socc[3]])
+                f = np.vstack([f, socc[3]])  # socc_d anhängen TODO d² ?
         h = np.zeros([T*np.shape(f)[0]+np.shape(self.ff)[0], 1])
         for i in range(0, T):
             h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
@@ -219,9 +218,11 @@ class SOCP:
         Fu = self.Fu
         if self.socc is not None:
             for socc in self.socc:
-                for i in range(0, T):
-                    Fx = np.vstack([Fx, self._A_of_socc(socc, zk[i*(n+m)+m:i*(n+m)+m+n])])
-                    Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
+                # for i in range(0, T):
+                #     Fx = np.vstack([Fx, self._A_of_socc(socc, zk[i*(n+m)+m:i*(n+m)+m+n])])
+                #     Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
+                Fx = np.vstack([Fx, self._A_of_socc(socc, zk[(T-1)*(n+m)+m:(T-1)*(n+m)+m+n])])
+                Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
 
         Ff = self.Ff
         # if self.qc_end is not None:
