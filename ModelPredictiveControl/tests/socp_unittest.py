@@ -191,7 +191,7 @@ class MyTestCase(unittest.TestCase):
     def test_set_lin_constraints(self):
 
         self.test_qp.set_lin_constraints(self.Fu, self.fu, self.Fx, self.fx,
-                                     self.Ff, self.ff)
+                                         self.Ff, self.ff)
 
         self.assertTrue((self.test_qp.P_of_zk(None) == self.ref_P).all(), 'False P-matrix')
 
@@ -215,6 +215,29 @@ class MyTestCase(unittest.TestCase):
         # self.assertTrue((np.vstack(self.test_qp.old_residual(x_test, zv_test)) ==
         #                 np.vstack(self.test_qp.residual(x_test, zv_test))).all(),
         #                 'Residual changed')
+
+    def test_eval_of_nonlin_constraints(self):
+
+        self.test_qp.set_lin_constraints(self.Fu, self.fu, self.Fx, self.fx,
+                                         self.Ff, self.ff)
+
+        socc_A_test =
+        self.test_qp.add_socc(socc_A=socc_A_test, socc_c=M21.T,
+                socc_b=np.zeros_like(M21.T), socc_d=c)
+
+        z_test = np.array([[9, 0, 8, 1, 7, 2, 6, 3, 5, 4, 0, 9, 0, 8, 1, 7, 2,
+                            6, 3, 5, 4]]).T
+        ref_P = np.zeros([np.shape(self.ref_P)[0]+self.test_qp.T-1, np.shape(self.ref_P)[1]])
+        # TODO auch extra Zeile nach erstem Fu?
+        ref_P[0:6] = self.ref_P[0:6]
+        ref_p[6] =
+        ref_P[7:10] = self.ref_P[6:9]
+        ref_p[10] =
+        ref_P[11:14] = self.ref_P[9:12]
+        self.assertTrue((self.test_qp.P_of_zk(z_test) == ref_P).all(),
+                        'P-matrix does not changed in the right way')
+        print(ref_P)
+
 
 if __name__ == '__main__':
     unittest.main()

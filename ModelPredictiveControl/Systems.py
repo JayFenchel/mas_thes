@@ -157,6 +157,7 @@ def qp_from_new_sys():
 
     qp.add_socc(socc_A=np.array(V21), socc_c=M21.T,
                 socc_b=np.zeros_like(M21.T), socc_d=c)
+    # TODO add same socc as type 'end'
     return qp
 
 def qp_from_sys():
