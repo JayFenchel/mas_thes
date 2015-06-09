@@ -138,6 +138,8 @@ for schritt in range(schritte):
                         + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
     # v_k shiften
     zv_k[(n+m)*T:(n+m)*T+n*(T-1)] = zv_k[(n+m)*T+n:(n+m)*T+n*T]
+    # neues v_k[T] hinten anhängen
+    zv_k[(n+m)*T+n*(T-1):(n+m)*T+n*(T)] = np.ones([n, 1])*100
     print('next xk', xk)
 print(time()-zeit)
 # profiler.disable()
