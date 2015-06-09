@@ -36,7 +36,7 @@ x0 = np.array([[0.], [0.], [0.], [0.], [0.], [0.],
                [0.], [0.], [0.], [0.], [0.], [0.]])
 u0 = np.array([[0.]])
 z0 = np.eye(T*(n+m), 1)*0
-v0 = np.eye(T*n, 1)*0 + 1
+v0 = np.ones([T*n, 1])*10
 
 # # Startwere SimpleSys
 # x0 = np.array([[0], [1], [0]])

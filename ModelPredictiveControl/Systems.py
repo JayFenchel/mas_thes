@@ -127,7 +127,14 @@ def qp_from_new_sys():
     # Kx[1, 24] = 1
     # Kx[4, 24] = -1
 
-    qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kx, ff=fx)
+    # keine Platzhalterzeilen für u bounds in den end constraints
+    Kf = np.zeros([4, n])
+    ff = np.zeros([4, 1])
+    # ff[:] = fx[:]
+    ff[0:2] = fx[0:2]
+    ff[2:4] = fx[3:5]  #TODO Werte raus aus SOCP file
+
+    qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kf, ff=ff)
 
     x_ref = np.array([[0.], [0.], [0.], [0.], [0.], [0.],
                       [0.], [0.], [0.], [0.], [0.], [0.],
