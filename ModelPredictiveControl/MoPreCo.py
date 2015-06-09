@@ -87,10 +87,15 @@ print('startwert valide = ', QP.check(xk, zv_k))  # Validität des Startwerts pr
 zeit = time()
 # profiler.enable()
 schritte = 25
+st_tolerance = 0.0466  # 0.6^2
+r_tolerance = 1e-2
 x_out = np.zeros([np.shape(xk)[0], schritte])
 for schritt in range(schritte):
     x_out[:, schritt:schritt+1] = xk
-    for i in range(0, 6):
+    st, rp_norm, rd_norm = 1, 1, 1
+    # Optimize until algorithm fails to go further (st < st_tolerance) or
+    # residual is small enough
+    while st >= st_tolerance and rp_norm+rd_norm >= r_tolerance:
         zeits = time()
         delta_zv = QP.solve(xk, zv_k)
         print('solve', 5*(time()-zeits))
@@ -124,9 +129,13 @@ for schritt in range(schritte):
     # print(np.dot(sys.B, zv_k[0]))
 
     # neues xk berechnen
-    xk = np.dot(QP.A, xk) + QP.B*zv_k[0]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
-    # z_k shiften  # TODO startpunkt verschiebung genau anschauen
+    xk = np.dot(QP.A, xk) + QP.B*zv_k[0:m]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
+    # z_k shiften
     zv_k[0:(n+m)*(T-1)] = zv_k[n+m:(n+m)*T]
+    # neues z_k[T] hinten anhängen, u[T] ist nicht ganz korrekt, aber kein
+    # u[T+1] vorhanden
+    zv_k[(n+m)*(T-1)+m:(n+m)*T] = np.dot(QP.A, zv_k[(n+m)*(T-1)+m:(n+m)*T])\
+                        + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
     # v_k shiften
     zv_k[(n+m)*T:(n+m)*T+n*(T-1)] = zv_k[(n+m)*T+n:(n+m)*T+n*T]
     print('next xk', xk)
