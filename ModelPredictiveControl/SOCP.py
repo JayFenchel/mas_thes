@@ -122,6 +122,18 @@ class SOCP:
 
     def set_lin_constraints(self, Fu, fu, Fx, fx, Ff, ff):
 
+        T, n, m = self.T, self.n, self.m
+        n_Fu = np.shape(Fu)[0]
+
+        P = np.zeros([T*n_Fu+np.shape(Ff)[0], T*(n+m)])
+        P[0:n_Fu, 0:m] = Fu
+        for i in range(1, T):
+            Hilf = np.hstack([Fx, Fu])
+            P[i*n_Fu:(i+1)*n_Fu, m+(i-1)*(m+n):m+i*(m+n)] = Hilf
+
+        P[T*n_Fu:T*n_Fu+np.shape(Ff)[0], m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = Ff
+        self.P = P
+
         self.Fx = Fx
         self.Fu = Fu
         self.Ff = Ff
@@ -224,11 +236,13 @@ class SOCP:
         # add socc line to Fu
         Fx = self.Fx  # Vorsicht, dass self.Fx nicht verändert wird (vstack sollte save sein)
         Fu = self.Fu
+        Ptest = self.P
         if self.socc is not None:
             for socc in self.socc:
-                # for i in range(0, T):
-                #     Fx = np.vstack([Fx, self._A_of_socc(socc, zk[i*(n+m)+m:i*(n+m)+m+n])])
-                #     Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
+                for i in range(0, T-1):  # nur bis T-1, da T Index für socc_end
+                    Ptest = np.vstack([Ptest, np.hstack([np.zeros([1, m+i*(m+n)]), self._A_of_socc(socc, zk[i*(n+m)+m:i*(n+m)+m+n]), np.zeros([1, (T-i-1)*(m+n)])])])
+                    # Fx = np.vstack([Fx, self._A_of_socc(socc, zk[i*(n+m)+m:i*(n+m)+m+n])])
+                    # Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
                 Fx = np.vstack([Fx, self._A_of_socc(socc, zk[(T-1)*(n+m)+m:(T-1)*(n+m)+m+n])])
                 Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
 
@@ -251,7 +265,7 @@ class SOCP:
         if self.F_end_qc is not None:
             P = np.vstack([P, np.dot(zk.T, self.F_end_qc)[:]]) #  bei socc nur zk[-5:] genommen, um auf die Zeile in P zu kommen
 
-        return P
+        return Ptest
 
     def form_d(self, xk, zv_k):
         # Form d for further use
