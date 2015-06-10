@@ -244,7 +244,7 @@ def qp_from_sys():
     alpha = 1
 
     qp.set_lin_constraints(Fu, fu, Fx, fx, Ff, ff)
-    qp.add_end_qc(F_end_qc=Ff_qc, alpha_end=alpha)
+    qp.add_qc(type='end', F_qc=Ff_qc, alpha=alpha)
     x_ref = np.array([[0], [0], [0], [200], [0]])
     qp.set_ref_trajectory(x_ref)
 

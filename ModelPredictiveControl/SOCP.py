@@ -129,15 +129,23 @@ class SOCP:
         self.f = fx + fu
         self.ff = ff
 
-    def add_end_qc(self, F_end_qc=None, alpha_end=None):
-
+    # Adding a quadratic constraint (type='end' for final constraints)
+    def add_qc(self, type='trajectory', F_qc=None, alpha=None):
         # TODO auf ausführliche Form, siehe Zettel erweitern
-        self.alpha_end = alpha_end
-        self.F_end_qc = F_end_qc
-        if self.qc_end is not None:
-            self.qc_end.append([F_end_qc, alpha_end])
-        else:
-            self.qc_end = [[F_end_qc, alpha_end]]
+        if type == 'trajectory':
+            if self.qc is not None:
+                self.qc.append([F_qc, alpha])
+            else:
+                self.qc = [[F_qc, alpha]]
+            pass
+
+        elif type =='end':
+            self.alpha_end = alpha  # Diese 2 Zeilen sollten noch weg
+            self.F_end_qc = F_qc  # und durch die nächsten ersetzt werden
+            if self.qc_end is not None:
+                self.qc_end.append([F_qc, alpha])
+            else:
+                self.qc_end = [[F_qc, alpha]]
 
     # Adding a second order cone constraint (type='end' for final constraints)
     def add_socc(self, type='trajectory', socc_A=None, socc_b=None,
@@ -230,7 +238,7 @@ class SOCP:
         #         Ff = np.vstack([Ff, self._A_of_qc(qc, zk)])
         if self.socc_end is not None:
             for socc in self.socc_end:
-                Ff = np.vstack([Ff, self._A_of_socc(socc, zk)])
+                Ff = np.vstack([Ff, self._A_of_socc(socc, zk[(T-1)*(n+m)+m:(T-1)*(n+m)+m+n])])
 
         n_Fu = np.shape(Fu)[0]
         P = np.zeros([T*n_Fu+np.shape(Ff)[0], T*(n+m)])
