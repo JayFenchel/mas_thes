@@ -32,6 +32,7 @@ class SOCP:
         # Linear constraints
         self.Fx = None
         self.f = None
+        self.ff = None
         # allgemeine constraints
         self.P = None
         self.h = None
@@ -40,11 +41,7 @@ class SOCP:
         self.z_ref = None
         self.z_ref = np.zeros([T*(m+n), 1])  # for test case
         self.ref_update = None
-    # TODO
-        self.F_end_qc = None
-        self.alpha_end = None
-        self.socc_A_end = None
-        self.socc_d_end = None
+        # Nonlinear constraints
         self.qc = None
         self.qc_end = None
         self.socc_end = None
@@ -135,8 +132,6 @@ class SOCP:
         self.P = P
 
         self.Fx = Fx
-        self.Fu = Fu
-        self.Ff = Ff
 
         self.f = fx + fu
         self.ff = ff
@@ -152,8 +147,6 @@ class SOCP:
             pass
 
         elif type =='end':
-            self.alpha_end = alpha  # Diese 2 Zeilen sollten noch weg
-            self.F_end_qc = F_qc  # und durch die nächsten ersetzt werden
             if self.qc_end is not None:
                 self.qc_end.append([F_qc, alpha])
             else:
@@ -169,10 +162,6 @@ class SOCP:
                 self.socc = [[socc_A, socc_b, socc_c, socc_d]]
 
         elif type == 'end':
-            # self.socc_A_end = socc_A
-            # self.socc_b_end = socc_b
-            # self.socc_c_end = socc_c
-            # self.socc_d_end = socc_d
             if self.socc_end is not None:
                 self.socc_end.append([socc_A, socc_b, socc_c, socc_d])
             else:
@@ -184,12 +173,8 @@ class SOCP:
     def h_of_xk(self, xk):
 
         T, n, m = self.T, self.n, self.m
-        f = self.f  # Vorsicht, dass self.Fx nicht verändert wird (vstack sollte save sein)
-        # if self.socc is not None:
-        #     for socc in self.socc:
-        #         # for i in range(0, T):
-        #         #     f = np.vstack([f, socc[3]])
-        #         f = np.vstack([f, socc[3]])  # socc_d anhängen TODO d² ?
+        f = self.f
+        
         h = np.zeros([T*np.shape(f)[0]+np.shape(self.ff)[0], 1])
         for i in range(0, T):
             h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
@@ -243,9 +228,6 @@ class SOCP:
 
         T, n, m = self.T, self.n, self.m
         # Inequality constraints
-        # add socc line to Fu
-        Fx = self.Fx  # Vorsicht, dass self.Fx nicht verändert wird (vstack sollte save sein)
-        Fu = self.Fu
         P = self.P
 
         # add quadratic constraint (end) to P
