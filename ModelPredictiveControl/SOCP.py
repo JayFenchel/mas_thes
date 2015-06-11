@@ -185,11 +185,11 @@ class SOCP:
 
         T, n, m = self.T, self.n, self.m
         f = self.f  # Vorsicht, dass self.Fx nicht verändert wird (vstack sollte save sein)
-        if self.socc is not None:
-            for socc in self.socc:
-                # for i in range(0, T):
-                #     f = np.vstack([f, socc[3]])
-                f = np.vstack([f, socc[3]])  # socc_d anhängen TODO d² ?
+        # if self.socc is not None:
+        #     for socc in self.socc:
+        #         # for i in range(0, T):
+        #         #     f = np.vstack([f, socc[3]])
+        #         f = np.vstack([f, socc[3]])  # socc_d anhängen TODO d² ?
         h = np.zeros([T*np.shape(f)[0]+np.shape(self.ff)[0], 1])
         for i in range(0, T):
             h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
@@ -200,10 +200,15 @@ class SOCP:
         if self.alpha_end is not None:
             h = np.vstack([h, self.alpha_end])
         # add second-order cone constraint (end)
+        h_add = np.zeros([4, 1])
+        if self.socc is not None:
+            for socc in self.socc:
+                for i in range(0, T-1):
+                    h_add[i] = socc[3]
         if self.socc_end is not None:
             for socc in self.socc_end:
                 h = np.vstack([h, socc[3]*socc[3]])
-        return h
+        return np.vstack([h, h_add])
 
     def g_of_xk(self, xk):
         pass
@@ -299,11 +304,13 @@ class SOCP:
         Phi = self.form_Phi(d, zv_k[0:self.T*(self.m+self.n)])
 
         rd, rp = self.residual(xk, zv_k)
-        SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.zeros([self.C.shape[0], self.C.shape[0]])])])
+
+        # SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.zeros([self.C.shape[0], self.C.shape[0]])])])
         # lsg = linalg.solve(SS, -np.vstack([rd, rp]))
-        q, r = householder(SS) # TODO housholder trafo scheint hier nicht richtig zu funktionieren -> Test schreiben
+
+        # q, r = householder(SS) # TODO housholder trafo scheint hier nicht richtig zu funktionieren -> Test schreiben
         # TODO Ausgabe bei Div durch 0 in housholder
-        lsg1 = backward_substitution(r, np.dot(q.T, -np.vstack([rd, rp])))
+        # lsg1 = backward_substitution(r, np.dot(q.T, -np.vstack([rd, rp])))
         lsg = solve_lin_gs_structured(Phi, rd, rp, self.A, self.B, self.C, T, n, m, reg=0.00001)
         return lsg
 
