@@ -174,7 +174,7 @@ class SOCP:
 
         T, n, m = self.T, self.n, self.m
         f = self.f
-        
+
         h = np.zeros([T*np.shape(f)[0]+np.shape(self.ff)[0], 1])
         for i in range(0, T):
             h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
@@ -266,10 +266,12 @@ class SOCP:
     def form_Phi(self, d, zk):
         P = self.P_of_zk(2*zk)
         #TODO add Term for socp
-        if self.F_end_qc is not None:
-            term_for_qc = d[-1]*2*self.F_end_qc
-        else:
-            term_for_qc = 0
+        # add term for qc (end)
+        term_for_qc = 0
+        if self.qc_end is not None:
+            for qc in self.qc_end:
+                term_for_qc += d[-1]*2*qc[0]  # TODO Wirklich Summe über bilden?
+
         Phi = 2*self.H\
               + self.kappa*(np.dot(np.dot(P.T, matrix_diag(d*d)), P) + term_for_qc)  # *2 siehe Zettel
         return Phi
