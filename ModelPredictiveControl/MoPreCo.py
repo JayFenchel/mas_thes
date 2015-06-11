@@ -10,6 +10,7 @@ from ModelPredictiveControl.MyMath import backtracking_line_search_better
 from ModelPredictiveControl.MyMath import backtracking_line_search_quick_and_dirty
 from ModelPredictiveControl.Systems import SimpleExample
 from ModelPredictiveControl.Systems import AirCraft
+from ModelPredictiveControl.Systems import qp_from_test
 from ModelPredictiveControl.Systems import qp_from_sys
 from ModelPredictiveControl.Systems import qp_from_new_sys
 from time import time
@@ -21,8 +22,8 @@ from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 
 # sys = AirCraft()
 # QP1 = QuadraticProgram(sys)
-QP = qp_from_new_sys()
-
+QP = qp_from_test()
+exit()
 n = QP.n
 m = QP.m
 T = QP.T  # Planning horizon

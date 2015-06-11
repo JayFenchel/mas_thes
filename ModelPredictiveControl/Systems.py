@@ -6,6 +6,7 @@ import numpy as np
 from scipy import io
 from numpy import diag
 from ModelPredictiveControl.SOCP import SOCP
+from ModelPredictiveControl.getdata import fromfile
 
 
 class SimpleExample:
@@ -72,6 +73,11 @@ def reorder(a, T, n, m):
         b[:, i*(n+m):i*(n+m)+m] = a[:, n*T+i*m:n*T+(i+1)*m]
         b[:, i*(n+m)+m:i*(n+m)+m+n] = a[:, i*n:(i+1)*n]
     return b
+
+def qp_from_test():
+    filename = 'data/QPTEST.QPS'
+    op = fromfile(filename)
+    print(op)
 
 def qp_from_new_sys():
     mm = io.loadmat('data/data_matrix.mat')  # load system matrices
