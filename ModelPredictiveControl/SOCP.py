@@ -196,19 +196,24 @@ class SOCP:
         h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(self.ff)[0]] = self.ff
 
         h[0:np.shape(self.Fx)[0]] -= np.dot(self.Fx, xk)
-        # add quadratic constraint (end)
-        if self.alpha_end is not None:
-            h = np.vstack([h, self.alpha_end])
-        # add second-order cone constraint (end)
-        h_add = np.zeros([T-1, 1])
+        # add quadratic constraint (end) to h
+        if self.qc_end is not None:
+            for qc in self.qc_end:
+                h = np.vstack([h, qc[1]])
+
+        # add second-order cone constraint to h
         if self.socc is not None:
             for socc in self.socc:
+                h_add = np.zeros([T-1, 1])
                 for i in range(0, T-1):
                     h_add[i] = socc[3]*socc[3]  # TODO d²?
+                h = np.vstack([h, h_add])
+
+        # add second-order cone constraint (end) to h
         if self.socc_end is not None:
             for socc in self.socc_end:
                 h = np.vstack([h, socc[3]*socc[3]])
-        return np.vstack([h, h_add])
+        return h
 
     def g_of_xk(self, xk):
         pass
@@ -242,6 +247,14 @@ class SOCP:
         Fx = self.Fx  # Vorsicht, dass self.Fx nicht verändert wird (vstack sollte save sein)
         Fu = self.Fu
         P = self.P
+
+        # add quadratic constraint (end) to P
+        if self.qc_end is not None:
+            for qc in self.qc_end:
+                P_add = np.dot(zk.T, qc[0])
+                P = np.vstack([P, P_add])
+
+        # add second-order cone constraint to P
         if self.socc is not None:
             for socc in self.socc:
                 P_add = np.zeros([T-1, np.shape(self.P)[1]])
@@ -250,27 +263,13 @@ class SOCP:
                         self._A_of_socc(socc, zk[m+i*(n+m):m+i*(n+m)+n])
                 P = np.vstack([P, P_add])
 
-        Ff = self.Ff
-        # if self.qc_end is not None:
-        #     for qc in self.qc_end:
-        #         Ff = np.vstack([Ff, self._A_of_qc(qc, zk)])
+        # add second-order cone constraint (end) to P
         if self.socc_end is not None:
             for socc in self.socc_end:
                 P_add = np.zeros([1, np.shape(self.P)[1]])
                 P_add[0, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] =\
                     self._A_of_socc(socc, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])
                 P = np.vstack([P, P_add])
-
-        # n_Fu = np.shape(Fu)[0]
-        # P = np.zeros([T*n_Fu+np.shape(Ff)[0], T*(n+m)])
-        # P[0:n_Fu, 0:m] = Fu
-        # for i in range(1, T):
-        #     Hilf = np.hstack([Fx, Fu])
-        #     P[i*n_Fu:(i+1)*n_Fu, m+(i-1)*(m+n):m+i*(m+n)] = Hilf
-        #
-        # P[T*n_Fu:T*n_Fu+np.shape(Ff)[0], m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = Ff
-        if self.F_end_qc is not None:
-            P = np.vstack([P, np.dot(zk.T, self.F_end_qc)[:]]) #  bei socc nur zk[-5:] genommen, um auf die Zeile in P zu kommen
 
         return P
 
