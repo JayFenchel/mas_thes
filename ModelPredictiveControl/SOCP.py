@@ -125,12 +125,12 @@ class SOCP:
         T, n, m = self.T, self.n, self.m
         n_Fu = np.shape(Fu)[0]
 
+        # P matrix with FuFx blocks
         P = np.zeros([T*n_Fu+np.shape(Ff)[0], T*(n+m)])
         P[0:n_Fu, 0:m] = Fu
         for i in range(1, T):
             Hilf = np.hstack([Fx, Fu])
             P[i*n_Fu:(i+1)*n_Fu, m+(i-1)*(m+n):m+i*(m+n)] = Hilf
-
         P[T*n_Fu:T*n_Fu+np.shape(Ff)[0], m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = Ff
         self.P = P
 
@@ -244,12 +244,10 @@ class SOCP:
         Ptest = self.P
         if self.socc is not None:
             for socc in self.socc:
+                P_add = np.zeros([T-1, np.shape(self.P)[1]])
                 for i in range(0, T-1):  # nur bis T-1, da T Index für socc_end
-                    Ptest = np.vstack([Ptest, np.hstack([np.zeros([1, m+i*(m+n)]), self._A_of_socc(socc, zk[i*(n+m)+m:i*(n+m)+m+n]), np.zeros([1, (T-i-1)*(m+n)])])])
-                    # Fx = np.vstack([Fx, self._A_of_socc(socc, zk[i*(n+m)+m:i*(n+m)+m+n])])
-                    # Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
-                Fx = np.vstack([Fx, self._A_of_socc(socc, zk[(T-1)*(n+m)+m:(T-1)*(n+m)+m+n])])
-                Fu = np.vstack([Fu, np.zeros([1, np.shape(self.Fu)[1]])])
+                    P_add[i, m+i*(m+n):m+(i)*(m+n)+n] = self._A_of_socc(socc, zk[i*(n+m)+m:i*(n+m)+m+n])
+                Ptest = np.vstack([Ptest, P_add])
 
         Ff = self.Ff
         # if self.qc_end is not None:
