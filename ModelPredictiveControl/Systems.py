@@ -8,6 +8,7 @@ from numpy import diag
 from ModelPredictiveControl.SOCP import SOCP
 from ModelPredictiveControl.getdata import fromfile
 
+test_dir = 'data/QP-Test-Problems/MAT_Files/'
 
 class SimpleExample:
     def __init__(self):
@@ -75,9 +76,9 @@ def reorder(a, T, n, m):
     return b
 
 def qp_from_test():
-    filename = 'data/QPTEST.QPS'
-    op = fromfile(filename)
-    print(op)
+    data = io.loadmat('%sQPTEST.mat' %test_dir)
+    Q = np.array(data['Q'].data).reshape((data['Q']._shape))
+    print(Q)
 
 def qp_from_new_sys():
     mm = io.loadmat('data/data_matrix.mat')  # load system matrices
