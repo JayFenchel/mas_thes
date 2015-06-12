@@ -1,0 +1,3 @@
+[submodule "ModelPredictiveControl/data/QP-Test-Problems"]
+	path = ModelPredictiveControl/data/QP-Test-Problems
+	url = ../../YimingYAN/QP-Test-Problems.git
