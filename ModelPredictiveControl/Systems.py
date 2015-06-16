@@ -78,10 +78,13 @@ def reorder(a, T, n, m):
 
 def qp_from_test():
     data = io.loadmat('%sCVXQP1_S.mat' %test_dir)
-    if (data['rl'] == data['ru']).all():
+    if not (data['rl'] == data['ru']).all():
+        print('There are mixed inequality constraints')
+        exit()
+    else:
         # equality constraint of the form A*x(t+1) = b
         b = data['rl']
-        A = (data['A']).toarray()
+        A = data['A'].toarray()
 
         n = np.shape(A)[1]
         m = 0
@@ -93,14 +96,21 @@ def qp_from_test():
         #         x(t+1) = Ad*x(t) + Bd*u
         # m=0:    x(t+1) = Ad*x(t)
         # mit Ad = inv(A)*b*inv(x(t))
-        
+
         Ad = np.dot(pinv(A), np.dot(b, pinv(x0)))
         Bd = np.zeros([n, m])
-        qp = SOCP(T, n, m)
+        qp = SOCP(T, n, m, x0=x0)
         qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
-    else:
-        print('There are mixed inequality constraints')
-        exit()
+
+        # weighting matrices
+        Q = data['Q'].toarray()
+        q = data['c']
+        R = np.ones([0, 0])
+        P = Q  # terminal weighting
+        qp.set_weighting(Q=Q, q=q, R=R, Qf=P)
+    return qp
+
+
 
 
 def qp_from_new_sys():
