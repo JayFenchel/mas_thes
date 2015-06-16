@@ -4,6 +4,7 @@ __author__ = 'jayf'
 
 import numpy as np
 from scipy import io
+from scipy.linalg import pinv
 from numpy import diag
 from ModelPredictiveControl.SOCP import SOCP
 from ModelPredictiveControl.getdata import fromfile
@@ -76,9 +77,31 @@ def reorder(a, T, n, m):
     return b
 
 def qp_from_test():
-    data = io.loadmat('%sQPTEST.mat' %test_dir)
-    Q = np.array(data['Q'].data).reshape((data['Q']._shape))
-    print(Q)
+    data = io.loadmat('%sCVXQP1_S.mat' %test_dir)
+    if (data['rl'] == data['ru']).all():
+        # equality constraint of the form A*x(t+1) = b
+        b = data['rl']
+        A = (data['A']).toarray()
+
+        n = np.shape(A)[1]
+        m = 0
+        T = 1
+
+        x0 = np.ones([n, 1])
+
+        #transformed equality constraint of the form:
+        #         x(t+1) = Ad*x(t) + Bd*u
+        # m=0:    x(t+1) = Ad*x(t)
+        # mit Ad = inv(A)*b*inv(x(t))
+        
+        Ad = np.dot(pinv(A), np.dot(b, pinv(x0)))
+        Bd = np.zeros([n, m])
+        qp = SOCP(T, n, m)
+        qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
+    else:
+        print('There are mixed inequality constraints')
+        exit()
+
 
 def qp_from_new_sys():
     mm = io.loadmat('data/data_matrix.mat')  # load system matrices
@@ -248,7 +271,7 @@ def qp_from_sys():
     ff[3] = 1
     ff[7] = 1
     Ff = Kx
-    
+
     Ff_qc = np.zeros([T*(n+m), T*(n+m)])
     alpha = 1
 
