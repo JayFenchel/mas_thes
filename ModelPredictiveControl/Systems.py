@@ -91,6 +91,7 @@ def qp_from_test():
         T = 1
 
         x0 = np.ones([n, 1])
+        u0 = np.zeros([m, 1])
 
         #transformed equality constraint of the form:
         #         x(t+1) = Ad*x(t) + Bd*u
@@ -99,7 +100,7 @@ def qp_from_test():
 
         Ad = np.dot(pinv(A), np.dot(b, pinv(x0)))
         Bd = np.zeros([n, m])
-        qp = SOCP(T, n, m, x0=x0)
+        qp = SOCP(T, n, m, x0=x0, u0=u0)
         qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
 
         # weighting matrices
@@ -123,7 +124,9 @@ def qp_from_new_sys():
     (n, m) = np.array(Bd).shape  # system dimensions
     T = 5  # prediction horizon
     dt = 0.5
-    qp = SOCP(T, n, m)
+    x0 = -socp['X0'][0:30]
+    u0 = np.zeros([m, 1])
+    qp = SOCP(T, n, m, x0=x0, u0=u0)
     qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
 
     # weighting matrices

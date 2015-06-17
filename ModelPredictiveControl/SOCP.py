@@ -11,7 +11,7 @@ from ModelPredictiveControl.MyMath import backward_substitution
 
 class SOCP:
 
-    def __init__(self, T, n, m, x0=None):
+    def __init__(self, T, n, m, x0=None, u0=None):
 
         # Kappa
         self.kappa = 90  # >0 barrier parameter
@@ -20,6 +20,7 @@ class SOCP:
         self.n = n
         self.m = m
         self.x0 = x0
+        self.u0 = u0
         # System declaration
         self.A = np.zeros([n, n])
         self.B = np.zeros([n, m])
