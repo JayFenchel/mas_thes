@@ -50,38 +50,42 @@ r_tolerance = 1e-2
 x_out = np.zeros([np.shape(xk)[0], schritte])
 for schritt in range(schritte):
     x_out[:, schritt:schritt+1] = xk
-    st, rp_norm, rd_norm = 1, 1, 1
-    # Optimize until algorithm fails to go further (st < st_tolerance) or
-    # residual is small enough
-    while st >= st_tolerance and rp_norm+rd_norm >= r_tolerance:
-        zeits = time()
-        delta_zv = QP.solve(xk, zv_k)
-        print('solve', 5*(time()-zeits))
-        zeit1=time()
-        # st = backtracking_line_search(QP.residual_norm, zv_k, delta_zv,
-        #                               args=(xk, ))
-        # print('first', time()-zeit1)
-        # zeit2 = time()
-        # st = backtracking_line_search_quick_and_dirty(QP.residual_norm, zv_k, delta_zv,
-        #                               args=(xk, ))
-        # print('quick and dirty', time()-zeit2)
-        # zeit2 = time()
-        st = backtracking_line_search(QP.residual_norm, zv_k, delta_zv,
-                                      args=(xk, ))
-        # print('better', time()-zeit2)
-        if QP.check(xk, zv_k + st*delta_zv):
-            print('Valid step possible')
-            zv_k += st*delta_zv
-        else:
-            st = 0
-        # print(zv_k)
-        for i in range (0,T):
-            print(zv_k[i*(m+n):i*(m+n)+m])
-        rd, rp = QP.residual(xk, zv_k)
-        rd_norm = np.square(rd[:]).sum()
-        rp_norm = np.square(rp[:]).sum()
-        r_norm = rd_norm + rp_norm
-        print(st, rp_norm, rd_norm)
+    QP.kappa = 90
+    for zweimal in range(2):
+        st, rp_norm, rd_norm = 1, 1, 1
+        # Optimize until algorithm fails to go further (st < st_tolerance) or
+        # residual is small enough
+        while st >= st_tolerance and rp_norm+rd_norm >= r_tolerance:
+            zeits = time()
+            delta_zv = QP.solve(xk, zv_k)
+            print('solve', 5*(time()-zeits))
+            zeit1=time()
+            # st = backtracking_line_search(QP.residual_norm, zv_k, delta_zv,
+            #                               args=(xk, ))
+            # print('first', time()-zeit1)
+            # zeit2 = time()
+            # st = backtracking_line_search_quick_and_dirty(QP.residual_norm, zv_k, delta_zv,
+            #                               args=(xk, ))
+            # print('quick and dirty', time()-zeit2)
+            # zeit2 = time()
+            st = backtracking_line_search(QP.residual_norm, zv_k, delta_zv,
+                                          args=(xk, ))
+            # print('better', time()-zeit2)
+            if QP.check(xk, zv_k + st*delta_zv):
+                print('Valid step possible')
+                zv_k += st*delta_zv
+            else:
+                st = 0
+            # print(zv_k)
+            for i in range (0,T):
+                print(zv_k[i*(m+n):i*(m+n)+m])
+            rd, rp = QP.residual(xk, zv_k)
+            rd_norm = np.square(rd[:]).sum()
+            rp_norm = np.square(rp[:]).sum()
+            r_norm = rd_norm + rp_norm
+            print(st, rp_norm, rd_norm)
+            print(zweimal)
+        QP.kappa *= 0.1
     # print(zv_k)
     # print(zv_k[0])
     # print(np.dot(sys.B, zv_k[0]))
