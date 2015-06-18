@@ -109,10 +109,31 @@ def qp_from_test():
         R = np.ones([0, 0])
         P = Q  # terminal weighting
         qp.set_weighting(Q=Q, q=q, R=R, Qf=P)
+
+        # input constraints
+        Ku = np.zeros([2*n, m])
+        fu = np.zeros([np.shape(Ku)[0], 1])
+
+        # bounds
+        e_lb = data['lb']
+        e_ub = data['ub']
+        if not np.shape(e_lb)[0] == n or not np.shape(e_ub)[0] == n:
+            print('Dimension of bounds are not equal to number of variables')
+            exit()
+        else:
+            fx = np.zeros([2*n, 1])
+            fx[0:n] = -np.array(e_lb)
+            fx[n:2*n] = np.array(e_ub)
+
+            # constraint matrices
+            Kx = np.zeros([2*n, n])
+            Kx[0:n, :] = -np.eye(n)
+            Kx[n:2*n, :] = np.eye(n)
+
+            qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kx, ff=fx)
+
+
     return qp
-
-
-
 
 def qp_from_new_sys():
     mm = io.loadmat('data/data_matrix.mat')  # load system matrices
