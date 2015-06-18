@@ -22,7 +22,7 @@ from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 
 # sys = AirCraft()
 # QP1 = QuadraticProgram(sys)
-QP = qp_from_test()
+QP = qp_from_new_sys()
 # exit()
 n = QP.n
 m = QP.m
@@ -32,23 +32,15 @@ T = QP.T  # Planning horizon
 x0 = np.array([[0.], [0.], [0.], [400.], [0.]])
 
 x0, u0 = QP.x0, QP.u0
-z0 = np.zeros([T*(n+m), 1])
-v0 = np.ones([T*n, 1])*10
 
-# # Startwere SimpleSys
-# x0 = np.array([[0], [1], [0]])
-# u0 = np.array([[0],[0]])
-# z0 = np.eye(T*(n+m), 1)*0
-# v0 = np.eye(T*n, 1)*0
-
-zk = z0
-vk = v0
+z0 = np.zeros([T*(m+n), 1])
 for i in range(0, T):
-    zk[i*(n+m):i*(m+n)+m], zk[i*(m+n)+m:i*(m+n)+m+n] = u0, x0
-zk[0] = 0
-zv_k0 = np.vstack([zk, vk])
+    z0[i*(n+m):i*(m+n)+m], z0[i*(m+n)+m:i*(m+n)+m+n] = u0, x0
+v0 = np.ones([T*n, 1])*10
+zv_0 = np.vstack([z0, v0])
+
 xk = x0
-zv_k = zv_k0
+zv_k = zv_0
 
 print('startwert valide = ', QP.check(xk, zv_k))  # Validität des Startwerts prüfen
 zeit = time()
