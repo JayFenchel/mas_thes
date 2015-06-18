@@ -6,7 +6,6 @@ import numpy as np
 # import cProfile
 from ModelPredictiveControl.MyMath import vector_norm
 from ModelPredictiveControl.MyMath import backtracking_line_search
-from ModelPredictiveControl.MyMath import backtracking_line_search_better
 from ModelPredictiveControl.MyMath import backtracking_line_search_quick_and_dirty
 from ModelPredictiveControl.Systems import SimpleExample
 from ModelPredictiveControl.Systems import AirCraft
@@ -67,7 +66,7 @@ for schritt in range(schritte):
         #                               args=(xk, ))
         # print('quick and dirty', time()-zeit2)
         # zeit2 = time()
-        st = backtracking_line_search_better(QP.residual_norm, zv_k, delta_zv,
+        st = backtracking_line_search(QP.residual_norm, zv_k, delta_zv,
                                       args=(xk, ))
         # print('better', time()-zeit2)
         if QP.check(xk, zv_k + st*delta_zv):

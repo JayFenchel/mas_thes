@@ -176,16 +176,23 @@ def gradient_better(function, point, args=(), schritt=0.001):
     return hess
 
 def backtracking_line_search(function, point, dir, args=(), step = 0.000001):
-    # backtracking line search nach: TODO wonach?
+    # backtracking line search nach:
+    # Boyd, Convex Optimization, Seite 464, Algorithm 9.2
     f_x = function(point, *args)
     grad_f = gradient(function, point, args, step)
     alpha = 0.4
     beta = 0.6
     st = 1
     print(np.dot(grad_f.T, dir))
+    if np.dot(grad_f.T, dir) > 0:
+        # Falls Kostenfunktion in Schrittrichtung am aktuellen Punkt ansteigend
+        print('Gradient is positive, no improvement possible.')
+        alpha = 0  # Funktionswert muss besser werden als aktuell
     while (np.isnan(function(point + st*dir, *args)) or
             function(point + st*dir, *args) > f_x + alpha*st*np.dot(grad_f.T, dir)):
         st = beta*st
+        # Wenn Schrittweite immer kleiner, wahrscheinlich wegen nummerischem
+        # Fehler Werte in Bedingung gleich groß für alpha = 0 Fall
         # print(st)
     return st
 
@@ -200,20 +207,6 @@ def backtracking_line_search_quick_and_dirty(function, point, dir, args=(), step
     while (np.isnan(function(point + st*dir, *args)) or
             function(point + st*dir, *args) > f_x + alpha*st*grad_in_dir):
         st = beta*st
-    return st
-
-def backtracking_line_search_better(function, point, dir, args=(), step = 0.000001):
-    # backtracking line search nach: TODO wonach?
-    f_x = function(point, *args)
-    grad_f = gradient(function, point, args, step)
-    alpha = 0.4
-    beta = 0.6
-    st = 1
-    print(np.dot(grad_f.T, dir))
-    while (np.isnan(function(point + st*dir, *args)) or
-            function(point + st*dir, *args) > f_x + alpha*st*np.dot(grad_f.T, dir)):
-        st = beta*st
-        # print(st)
     return st
 
 # hessian()
