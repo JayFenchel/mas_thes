@@ -29,6 +29,7 @@ T = QP.T  # Planning horizon
 
 # Startwerte AirCraft
 x0 = np.array([[0.], [0.], [0.], [400.], [0.]])
+u0 = np.array([[0.]])
 
 x0, u0 = QP.x0, QP.u0
 
