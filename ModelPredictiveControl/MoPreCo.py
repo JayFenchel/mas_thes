@@ -21,7 +21,7 @@ from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 
 # sys = AirCraft()
 # QP1 = QuadraticProgram(sys)
-QP = qp_from_new_sys()
+QP = qp_from_test()
 # exit()
 n = QP.n
 m = QP.m
@@ -88,17 +88,23 @@ for schritt in range(schritte):
             print(zweimal)
         QP.kappa *= 0.1
     # print(zv_k)
+
+    # Ausgabe kostenfunktionswert test-cases
+    x_k_plus_eins = zv_k[0:m+n]
+    f_von_x = 0.5*np.dot(x_k_plus_eins.T, np.dot(QP.H, x_k_plus_eins))
+    print(f_von_x)
+
     # print(zv_k[0])
     # print(np.dot(sys.B, zv_k[0]))
 
-    # neues xk berechnen
-    xk = np.dot(QP.A, xk) + QP.B*zv_k[0:m]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
-    # z_k shiften
-    zv_k[0:(n+m)*(T-1)] = zv_k[n+m:(n+m)*T]
-    # neues z_k[T] hinten anhängen, u[T] ist nicht ganz korrekt, aber kein
-    # u[T+1] vorhanden
-    zv_k[(n+m)*(T-1)+m:(n+m)*T] = np.dot(QP.A, zv_k[(n+m)*(T-1)+m:(n+m)*T])\
-                        + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
+    # # neues xk berechnen
+    # xk = np.dot(QP.A, xk) + QP.B*zv_k[0:m]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
+    # # z_k shiften
+    # zv_k[0:(n+m)*(T-1)] = zv_k[n+m:(n+m)*T]
+    # # neues z_k[T] hinten anhängen, u[T] ist nicht ganz korrekt, aber kein
+    # # u[T+1] vorhanden
+    # zv_k[(n+m)*(T-1)+m:(n+m)*T] = np.dot(QP.A, zv_k[(n+m)*(T-1)+m:(n+m)*T])\
+    #                     + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
     # v_k shiften
     zv_k[(n+m)*T:(n+m)*T+n*(T-1)] = zv_k[(n+m)*T+n:(n+m)*T+n*T]
     # neues v_k[T] hinten anhängen
