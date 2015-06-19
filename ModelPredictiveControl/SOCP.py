@@ -309,10 +309,6 @@ class SOCP:
 
     def residual(self, xk, zv_k):
 
-        z_soll = np.zeros_like(zv_k[0:self.T*(self.m+self.n)])
-        for i in range(self.m + 3, self.T*(self.m+self.n), self.m+self.n):
-            z_soll[i] = 100
-        # print(z_soll)
         d = self.form_d(xk, zv_k)
         rd = (2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)] - self.z_ref) + self.g
              + self.kappa*np.dot(self.P_of_zk(2*zv_k[0:self.T*(self.m+self.n)]).T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):]))
