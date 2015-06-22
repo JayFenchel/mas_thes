@@ -3,7 +3,7 @@
 __author__ = 'jayf'
 
 import numpy as np
-# from scipy import linalg
+from scipy import linalg
 from ModelPredictiveControl.MyMath import matrix_diag
 from ModelPredictiveControl.MyMath import solve_lin_gs_structured
 from ModelPredictiveControl.MyMath import householder
@@ -25,7 +25,7 @@ class SOCP:
         self.A = np.zeros([n, n])
         self.B = np.zeros([n, m])
         self.C = np.zeros([T*n, T*(n+m)])
-        self.b = np.zeros([T*n, 1])
+        self.b = None
         # Weighting for cost function
         self.H = np.eye(T*(n+m), T*(n+m))
         self.g = np.zeros([T*(m+n), 1])
@@ -60,8 +60,6 @@ class SOCP:
         self.C[0:n, 0:m+n] = np.hstack([-B, np.eye(n, n)])
         for i in range(1, T):
             self.C[i*n:(i+1)*n, m+(i-1)*(m+n):m+i*(m+n)+n] = np.hstack([-A, -B, np.eye(n, n)])
-
-        self.b = np.zeros([T*n, 1])  # TODO add disturbance if not zero
 
     def set_ref_trajectory(self, x_ref):
         # TODO Check dimensions
@@ -206,7 +204,11 @@ class SOCP:
         pass
 
     def b_of_xk(self, xk):
-        pass
+
+        T, n = self.T, self.n
+        b = np.zeros([T*n, 1])  # TODO add disturbance if not zero
+        b[0:n] = np.dot(self.A, xk)
+        return b
 
     # new line in P matrix corresponding to a second order cone constraint
     def _A_of_socc(self, socc, xk_):
@@ -284,7 +286,6 @@ class SOCP:
         n = self.n
         m = self.m
 
-        self.b[0:self.n] = np.dot(self.A, xk)
         self.g[0:m] = self.r + 2*np.dot(self.S.T, xk)
 
         d = self.form_d(xk, zv_k)
@@ -292,13 +293,13 @@ class SOCP:
 
         rd, rp = self.residual(xk, zv_k)
 
-        # SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.zeros([self.C.shape[0], self.C.shape[0]])])])
-        # lsg = linalg.solve(SS, -np.vstack([rd, rp]))
+        SS = np.hstack([np.vstack([Phi, self.C]), np.vstack([self.C.T, np.zeros([self.C.shape[0], self.C.shape[0]])])])
+        lsg = linalg.solve(SS, -np.vstack([rd, rp]))
 
         # q, r = householder(SS) # TODO housholder trafo scheint hier nicht richtig zu funktionieren -> Test schreiben
         # TODO Ausgabe bei Div durch 0 in housholder
         # lsg1 = backward_substitution(r, np.dot(q.T, -np.vstack([rd, rp])))
-        lsg = solve_lin_gs_structured(Phi, rd, rp, self.A, self.B, self.C, T, n, m, reg=0.00001)
+        # lsg = solve_lin_gs_structured(Phi, rd, rp, self.A, self.B, self.C, T, n, m, reg=0.00001)
         return lsg
 
     def residual_norm(self, zv_k, xk):
@@ -309,10 +310,11 @@ class SOCP:
 
     def residual(self, xk, zv_k):
 
+        b = self.b_of_xk(xk)
         d = self.form_d(xk, zv_k)
         rd = (2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)] - self.z_ref) + self.g
              + self.kappa*np.dot(self.P_of_zk(2*zv_k[0:self.T*(self.m+self.n)]).T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):]))
-        rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - self.b
+        rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - b
         return rd, rp
 
     def check(self, xk, zv_k):
