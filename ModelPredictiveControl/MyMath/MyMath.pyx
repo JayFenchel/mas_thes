@@ -183,13 +183,14 @@ def backtracking_line_search(function, point, dir, args=(), step = 0.000001):
     alpha = 0.4
     beta = 0.6
     st = 1
-    print(np.dot(grad_f.T, dir))
-    if np.dot(grad_f.T, dir) > 0:
+    grad_in_dir = np.dot(grad_f.T, dir)
+    print('gradient in search direction = %s' % grad_in_dir)
+    if grad_in_dir > 0:
         # Falls Kostenfunktion in Schrittrichtung am aktuellen Punkt ansteigend
         print('Gradient is positive, no improvement possible.')
         alpha = 0  # Funktionswert muss besser werden als aktuell
     while (np.isnan(function(point + st*dir, *args)) or
-            function(point + st*dir, *args) > f_x + alpha*st*np.dot(grad_f.T, dir)):
+            function(point + st*dir, *args) > f_x + alpha*st*grad_in_dir):
         st = beta*st
         # Wenn Schrittweite immer kleiner, wahrscheinlich wegen nummerischem
         # Fehler Werte in Bedingung gleich groß für alpha = 0 Fall
