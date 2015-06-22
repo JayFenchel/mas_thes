@@ -77,11 +77,15 @@ def reorder(a, T, n, m):
     return b
 
 def qp_from_test():
-    data = io.loadmat('%sCVXQP1_S.mat' %test_dir)
+    data = io.loadmat('%sDUAL1.mat' % test_dir)
     if not (data['rl'] == data['ru']).all():
         print('There are mixed inequality constraints')
         exit()
     else:
+        # read data
+        low_bounds = data['lb']  # lower bounds
+        up_bounds = data['ub']  # upper bounds
+
         # equality constraint of the form A*x(t+1) = b
         b = data['rl']
         A = data['A'].toarray()
@@ -90,7 +94,9 @@ def qp_from_test():
         m = 0
         T = 1
 
-        x0 = np.ones([n, 1])
+        x0 = np.zeros([n, 1])
+        # TODO Fall betrachten in den Bounds = Inf
+        x0[:] = .5*(low_bounds[:] + up_bounds[:])
         u0 = np.zeros([m, 1])
 
         #transformed equality constraint of the form:
@@ -108,22 +114,20 @@ def qp_from_test():
         q = data['c']
         R = np.ones([0, 0])
         P = Q  # terminal weighting
-        qp.set_weighting(Q=Q, q=q, R=R, Qf=P)
+        qp.set_weighting(Q=Q, q=q, R=R, Qf=P, qf=q)
 
         # input constraints
         Ku = np.zeros([2*n, m])
         fu = np.zeros([np.shape(Ku)[0], 1])
 
         # bounds
-        e_lb = data['lb']
-        e_ub = data['ub']
-        if not np.shape(e_lb)[0] == n or not np.shape(e_ub)[0] == n:
+        if not np.shape(low_bounds)[0] == n or not np.shape(up_bounds)[0] == n:
             print('Dimension of bounds are not equal to number of variables')
             exit()
         else:
             fx = np.zeros([2*n, 1])
-            fx[0:n] = -np.array(e_lb)
-            fx[n:2*n] = np.array(e_ub)
+            fx[0:n] = -np.array(low_bounds)
+            fx[n:2*n] = np.array(up_bounds)
 
             # constraint matrices
             Kx = np.zeros([2*n, n])
@@ -133,7 +137,7 @@ def qp_from_test():
             qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kx, ff=fx)
 
 
-    return qp
+    return (qp, A, b)
 
 def qp_from_new_sys():
     mm = io.loadmat('data/data_matrix.mat')  # load system matrices
