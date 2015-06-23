@@ -52,7 +52,7 @@ x_out = np.zeros([np.shape(xk)[0], schritte])
 for schritt in range(schritte):
     x_out[:, schritt:schritt+1] = xk
     QP.kappa = 90
-    for zweimal in range(2):
+    for zweimal in range(6):
         st, rp_norm, rd_norm = 1, 1, 1
         # Optimize until algorithm fails to go further (st < st_tolerance) or
         # residual is small enough
@@ -99,9 +99,9 @@ for schritt in range(schritte):
     print('Value of cost function geändert = %s' % f_von_x)
 
     print('x_k_plus1', x_k_plus_eins)
-    print('Ax-b', np.dot(AA, x_k_plus_eins) - bb)
+    print('Ax-b', np.dot(AA, x_k_plus_eins[0:m]) - bb)
     print('Cx - bofx0', np.dot(QP.C, x_k_plus_eins) - QP.b_of_xk(x0))
-    print('Adx0- xk+1', np.dot(QP.A, x0) - x_k_plus_eins)
+    print('Adx0- xk+1', np.dot(QP.B, x_k_plus_eins[0:m]) + np.dot(QP.A, x0) - x_k_plus_eins[m:])
     print(np.dot(QP.g.T, x_k_plus_eins))
     # print(zv_k[0])
     # print(np.dot(sys.B, zv_k[0]))

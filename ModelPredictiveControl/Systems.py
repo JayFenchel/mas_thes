@@ -77,7 +77,7 @@ def reorder(a, T, n, m):
     return b
 
 def qp_from_test():
-    data = io.loadmat('%sDUAL1.mat' % test_dir)
+    data = io.loadmat('%sCVXQP2_S.mat' % test_dir)
     if not (data['rl'] == data['ru']).all():
         print('There are mixed inequality constraints')
         exit()
@@ -86,58 +86,69 @@ def qp_from_test():
         low_bounds = data['lb']  # lower bounds
         up_bounds = data['ub']  # upper bounds
 
-        # equality constraint of the form A*x(t+1) = b
+        # equality constraint of the form A*u(t) = b
         b = data['rl']
         A = data['A'].toarray()
 
-        n = np.shape(A)[1]
-        m = 0
+        n, m = np.shape(A)
         T = 1
 
-        x0 = np.zeros([n, 1])
+        x0 = .5*b
         # TODO Fall betrachten in den Bounds = Inf
-        x0[:] = .5*(low_bounds[:] + up_bounds[:])
         u0 = np.zeros([m, 1])
+        u0[:] = .5*(low_bounds[:] + up_bounds[:])
 
         #transformed equality constraint of the form:
         #         x(t+1) = Ad*x(t) + Bd*u
         # m=0:    x(t+1) = Ad*x(t)
         # mit Ad = inv(A)*b*inv(x(t))
 
-        Ad = np.dot(pinv(A), np.dot(b, pinv(x0)))
-        Bd = np.zeros([n, m])
+        Ad = -np.eye(n)
+        Bd = A
         qp = SOCP(T, n, m, x0=x0, u0=u0)
         qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
 
         # weighting matrices
-        Q = data['Q'].toarray()
-        q = data['c']
-        R = np.ones([0, 0])
-        P = Q  # terminal weighting
-        qp.set_weighting(Q=Q, q=q, R=R, Qf=P, qf=q)
-
-        # input constraints
-        Ku = np.zeros([2*n, m])
-        fu = np.zeros([np.shape(Ku)[0], 1])
+        Q = np.zeros([n, n])
+        R = data['Q'].toarray()
+        r = data['c']
+        qp.set_weighting(Q=Q, R=R, r=r)
 
         # bounds
-        if not np.shape(low_bounds)[0] == n or not np.shape(up_bounds)[0] == n:
+        if not np.shape(low_bounds)[0] == m or not np.shape(up_bounds)[0] == m:
             print('Dimension of bounds are not equal to number of variables')
             exit()
         else:
-            fx = np.zeros([2*n, 1])
-            fx[0:n] = -np.array(low_bounds)
-            fx[n:2*n] = np.array(up_bounds)
+            # input
+            fu = np.zeros([2*(m+n), 1])
+            fu[n:n+m] = -np.array(low_bounds)
+            fu[2*n+m:2*(n+m)] = np.array(up_bounds)
 
-            # constraint matrices
-            Kx = np.zeros([2*n, n])
+            Ku = np.zeros([2*(m+n), m])
+            Ku[n:n+m, :] = -np.eye(m)
+            Ku[2*n+m:2*(n+m), :] = np.eye(m)
+
+            # state
+            fx = np.zeros([2*(m+n), 1])
+            fx[0:n] = -(x0-0.00001)
+            fx[n+m:2*n+m] = x0+0.00001
+
+            Kx = np.zeros([2*(m+n), n])
             Kx[0:n, :] = -np.eye(n)
-            Kx[n:2*n, :] = np.eye(n)
+            Kx[n+m:2*n+m, :] = np.eye(n)
 
-            qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kx, ff=fx)
+            ff = np.zeros([2*(n), 1])
+            ff[0:n] = -(x0-0.00001)
+            ff[n:2*n] = x0+0.00001
+
+            Kf = np.zeros([2*(n), n])
+            Kf[0:n, :] = -np.eye(n)
+            Kf[n:2*n, :] = np.eye(n)
+
+            qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kf, ff=ff)
 
 
-    return (qp, A, b)
+    return (qp, Bd, 2*x0)
 
 def qp_from_new_sys():
     mm = io.loadmat('data/data_matrix.mat')  # load system matrices
