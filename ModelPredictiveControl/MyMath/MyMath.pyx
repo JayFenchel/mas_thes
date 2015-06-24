@@ -147,15 +147,17 @@ def backward_substitution(A, b):
         x[kh] = (b[kh] - np.dot(A[kh, kh+1:], x[kh+1:])) / A[kh, kh]
     return x
 
-# TODO Anpassungen in Quadratic Programm, damit gradient_better wieder genutzt
-# werden kann
-def gradient(function, point, args=(), schritt=0.001):
+def gradient(function, point, args=(), step=0.001):
     dim = np.shape(point)[0]
+    steps = np.eye(dim)*step
     grad = np.zeros([dim, 1])
     for i in range(dim):
-        grad[i] = (function(point+(np.eye(dim)*schritt)[0:dim, [i]], *args) - function(point, *args))/schritt
+        step_i = steps[0:dim, [i]]
+        grad[i] = (function(point+step_i, *args) - function(point, *args))/step
     return grad
 
+# TODO Anpassungen in Quadratic Programm, damit gradient_better wieder genutzt
+# werden kann
 def gradient_better(function, point, args=(), schritt=0.001):
     dim = np.shape(point)[0]
     grad = np.zeros([dim, 1])
@@ -170,12 +172,12 @@ def gradient_better(function, point, args=(), schritt=0.001):
 #     dim = np.shape(point)[0]
 #     grad = np.zeros([dim, 1])
 #     function_values = function(point+(np.eye(dim)*schritt)[0:dim, :], *args)
+#
+#     grad[:, 0] = (function_values - function(point, *args))/schritt
+#     hess = 0
+#     return hess
 
-    grad[:, 0] = (function_values - function(point, *args))/schritt
-    hess = 0
-    return hess
-
-def backtracking_line_search(function, point, dir, args=(), step = 0.000001):
+def backtracking_line_search(function, point, drect, args=(), step = 1e-08):
     # backtracking line search nach:
     # Boyd, Convex Optimization, Seite 464, Algorithm 9.2
     f_x = function(point, *args)
@@ -183,30 +185,34 @@ def backtracking_line_search(function, point, dir, args=(), step = 0.000001):
     alpha = 0.4
     beta = 0.6
     st = 1
-    grad_in_dir = np.dot(grad_f.T, dir)
+    grad_in_dir = np.dot(grad_f.T, drect)
     print('gradient in search direction = %s' % grad_in_dir)
+    if np.isnan(grad_in_dir):
+        print('Gradient konnte nicht berechnet werden, da delta in den unzulässigen Bereich geht.')
+        exit()
     if grad_in_dir > 0:
         # Falls Kostenfunktion in Schrittrichtung am aktuellen Punkt ansteigend
         print('Gradient is positive, no improvement possible.')
         alpha = 0  # Funktionswert muss besser werden als aktuell
-    while (np.isnan(function(point + st*dir, *args)) or
-            function(point + st*dir, *args) > f_x + alpha*st*grad_in_dir):
-        st = beta*st
+    f_x_step = function(point + st*drect, *args)
+    while np.isnan(f_x_step) or f_x_step > f_x + alpha*st*grad_in_dir:
+        st *= beta
+        f_x_step = function(point + st*drect, *args)
         # Wenn Schrittweite immer kleiner, wahrscheinlich wegen nummerischem
         # Fehler Werte in Bedingung gleich groß für alpha = 0 Fall
         # print(st)
     return st
 
-def backtracking_line_search_quick_and_dirty(function, point, dir, args=(), step = 0.000001):
+def backtracking_line_search_quick_and_dirty(function, point, drect, args=(), step = 0.000001):
     # only use gradient in search direction
     f_x = function(point, *args)
-    grad_in_dir = function(point+step*dir, *args) - f_x
+    grad_in_dir = function(point+step*drect, *args) - f_x
     alpha = 0.4
     beta = 0.6
     st = 1
     print(grad_in_dir)
-    while (np.isnan(function(point + st*dir, *args)) or
-            function(point + st*dir, *args) > f_x + alpha*st*grad_in_dir):
+    while (np.isnan(function(point + st*drect, *args)) or
+            function(point + st*drect, *args) > f_x + alpha*st*grad_in_dir):
         st = beta*st
     return st
 
