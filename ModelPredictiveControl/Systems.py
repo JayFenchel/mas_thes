@@ -77,7 +77,7 @@ def reorder(a, T, n, m):
     return b
 
 def qp_from_test():
-    data = io.loadmat('%sCVXQP2_S.mat' % test_dir)
+    data = io.loadmat('%sQBANDM.mat' % test_dir)
     if not (data['rl'] == data['ru']).all():
         print('There are mixed inequality constraints')
         exit()
@@ -96,7 +96,17 @@ def qp_from_test():
         x0 = .5*b
         # TODO Fall betrachten in den Bounds = Inf
         u0 = np.zeros([m, 1])
-        u0[:] = .5*(low_bounds[:] + up_bounds[:])
+        if (low_bounds > -np.inf).all():
+            if (up_bounds < np.inf).all():
+                u0[:] = .5*(low_bounds[:] + up_bounds[:])
+            else:
+                u0[:] = .5*(low_bounds[:] + low_bounds[:] + 2000)
+        else:
+            if (up_bounds < np.inf).all():
+                u0[:] = .5*(up_bounds[:] -2000 + up_bounds[:])
+            else:
+                u0 = np.zeros([m, 1])
+
 
         #transformed equality constraint of the form:
         #         x(t+1) = Ad*x(t) + Bd*u
