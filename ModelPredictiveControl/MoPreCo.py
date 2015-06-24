@@ -93,10 +93,6 @@ for schritt in range(schritte):
     x_k_plus_eins = zv_k[0:m+n]
     f_von_x = np.dot(QP.g.T, x_k_plus_eins) + .5*np.dot(x_k_plus_eins.T, np.dot(QP.H, x_k_plus_eins))
     print('Value of cost function = %s' % f_von_x)
-    x_k_plus_eins[0] += 0.01
-    x_k_plus_eins[1] += -0.01
-    f_von_x = np.dot(QP.g.T, x_k_plus_eins) + .5*np.dot(x_k_plus_eins.T, np.dot(QP.H, x_k_plus_eins))
-    print('Value of cost function geändert = %s' % f_von_x)
 
     print('x_k_plus1', x_k_plus_eins)
     print('Ax-b', np.dot(AA, x_k_plus_eins[0:m]) - bb)
