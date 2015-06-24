@@ -321,4 +321,4 @@ class SOCP:
 
     def check(self, xk, zv_k):
         h = self.h_of_xk(xk)
-        return ((np.dot(self.P_of_zk(zv_k[0:self.T*(self.m+self.n)]), zv_k[0:self.T*(self.m+self.n)]) - h) < 0).all()
+        return ((np.dot(self.P_of_zk(zv_k[0:self.T*(self.m+self.n)]), zv_k[0:self.T*(self.m+self.n)]) - h) < 1e-08).all()
