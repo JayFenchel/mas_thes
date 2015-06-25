@@ -96,7 +96,10 @@ class SOCP:
         if Qf is None and qf is None:
             Qf, qf = Q, q
         elif Qf is None or qf is None:
-            print('Qf XOR qf is None')
+            if (q == np.zeros([n, 1])).all():
+                qf = q
+            else:
+                print('Qf XOR qf is None, determinate qf = q or qf = 0')
         if Q is None or R is None or Qf is None:
             print('Some important weighting matrices are not defined!')
             exit()
