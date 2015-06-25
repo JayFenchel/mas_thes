@@ -22,6 +22,7 @@ from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 # sys = AirCraft()
 # QP1 = QuadraticProgram(sys)
 QP, AA, bb = qp_from_test()
+# QP = qp_from_new_sys()
 # exit()
 n = QP.n
 m = QP.m
@@ -47,7 +48,7 @@ zeit = time()
 # profiler.enable()
 schritte = 25
 st_tolerance = 0.0466  # 0.6^2
-r_tolerance = 1e-2
+r_tolerance = 1e-4
 x_out = np.zeros([np.shape(xk)[0], schritte])
 for schritt in range(schritte):
     x_out[:, schritt:schritt+1] = xk
