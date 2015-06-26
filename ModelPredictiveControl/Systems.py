@@ -77,7 +77,7 @@ def reorder(a, T, n, m):
     return b
 
 def qp_from_test():
-    data = io.loadmat('%sQBANDM.mat' % test_dir)
+    data = io.loadmat('%sLOTSCHD.mat' % test_dir)
     if not (data['rl'] == data['ru']).all():
         print('There are mixed inequality constraints')
         exit()
@@ -93,7 +93,7 @@ def qp_from_test():
         n, m = np.shape(A)
         T = 1
 
-        x0 = .5*b
+        x0 = b
         # TODO Fall betrachten in den Bounds = Inf
         u0 = np.zeros([m, 1])
         if (low_bounds > -np.inf).all():
@@ -113,7 +113,7 @@ def qp_from_test():
         # m=0:    x(t+1) = Ad*x(t)
         # mit Ad = inv(A)*b*inv(x(t))
 
-        Ad = -np.eye(n)
+        Ad = np.zeros([n, n])
         Bd = A
         qp = SOCP(T, n, m, x0=x0, u0=u0)
         qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
