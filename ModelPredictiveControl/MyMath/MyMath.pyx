@@ -150,10 +150,15 @@ def backward_substitution(A, b):
 def gradient(function, point, args=(), step=0.001):
     dim = np.shape(point)[0]
     steps = np.eye(dim)*step
+    f_x = function(point, *args)
     grad = np.zeros([dim, 1])
     for i in range(dim):
         step_i = steps[0:dim, [i]]
-        grad[i] = (function(point+step_i, *args) - function(point, *args))/step
+        # if point+step_i is not feasible
+        if np.isnan(function(point+step_i, *args)):
+            grad[i] = (f_x - function(point-step_i, *args))/step
+        else:
+            grad[i] = (function(point+step_i, *args) - f_x)/step
     return grad
 
 # TODO Anpassungen in Quadratic Programm, damit gradient_better wieder genutzt
