@@ -88,7 +88,7 @@ for schritt in range(schritte):
             print(st, rp_norm, rd_norm)
             print(zweimal)
         QP.kappa *= 0.1
-    # print(zv_k)
+    print('z_k = %s' %zv_k[:T*(n+m)])
 
     # Ausgabe kostenfunktionswert test-cases
     x_k_plus_eins = zv_k[0:m+n]
@@ -110,7 +110,8 @@ for schritt in range(schritte):
     # # neues z_k[T] hinten anhängen, u[T] ist nicht ganz korrekt, aber kein
     # # u[T+1] vorhanden
     # zv_k[(n+m)*(T-1)+m:(n+m)*T] = np.dot(QP.A, zv_k[(n+m)*(T-1)+m:(n+m)*T])\
-    #                     + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
+    # #                     + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
+
     # v_k shiften
     zv_k[(n+m)*T:(n+m)*T+n*(T-1)] = zv_k[(n+m)*T+n:(n+m)*T+n*T]
     # neues v_k[T] hinten anhängen
