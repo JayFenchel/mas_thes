@@ -3,13 +3,9 @@
 __author__ = 'jayf'
 
 import numpy as np
-from scipy import io
-from scipy.linalg import pinv
 from numpy import diag
-from ModelPredictiveControl.SOCP import SOCP
-from ModelPredictiveControl.getdata import fromfile
+from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 
-test_dir = 'data/QP-Test-Problems/MAT_Files/'
 
 class SimpleExample:
     def __init__(self):
@@ -69,188 +65,6 @@ class SimpleExample:
     # def __init__(self):
     #     self.QP = QuadraticProgram
 
-def reorder(a, T, n, m):
-    b = np.zeros_like(a)
-    for i in range(0, T):
-        b[:, i*(n+m):i*(n+m)+m] = a[:, n*T+i*m:n*T+(i+1)*m]
-        b[:, i*(n+m)+m:i*(n+m)+m+n] = a[:, i*n:(i+1)*n]
-    return b
-
-def qp_from_test():
-    data = io.loadmat('%sLOTSCHD.mat' % test_dir)
-    if not (data['rl'] == data['ru']).all():
-        print('There are mixed inequality constraints')
-        exit()
-    else:
-        # read data
-        low_bounds = data['lb']  # lower bounds
-        up_bounds = data['ub']  # upper bounds
-
-        # equality constraint of the form A*u(t) = b
-        b = data['rl']
-        A = data['A'].toarray()
-
-        n, m = np.shape(A)
-        T = 1
-
-        x0 = b
-        # TODO Fall betrachten in den Bounds = Inf
-        u0 = np.zeros([m, 1])
-        if (low_bounds > -np.inf).all():
-            if (up_bounds < np.inf).all():
-                u0[:] = .5*(low_bounds[:] + up_bounds[:])
-            else:
-                u0[:] = .5*(low_bounds[:] + low_bounds[:] + 2000)
-        else:
-            if (up_bounds < np.inf).all():
-                u0[:] = .5*(up_bounds[:] -2000 + up_bounds[:])
-            else:
-                u0 = np.zeros([m, 1])
-
-
-        #transformed equality constraint of the form:
-        #         x(t+1) = Ad*x(t) + Bd*u
-        # m=0:    x(t+1) = Ad*x(t)
-        # mit Ad = inv(A)*b*inv(x(t))
-
-        Ad = np.zeros([n, n])
-        Bd = A
-        qp = SOCP(T, n, m, x0=x0, u0=u0)
-        qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
-
-        # weighting matrices
-        Q = np.zeros([n, n])
-        R = data['Q'].toarray()
-        r = data['c']
-        qp.set_weighting(Q=Q, R=R, r=r)
-
-        # bounds
-        if not np.shape(low_bounds)[0] == m or not np.shape(up_bounds)[0] == m:
-            print('Dimension of bounds are not equal to number of variables')
-            exit()
-        else:
-            # input
-            fu = np.zeros([2*(m+n), 1])
-            fu[n:n+m] = -np.array(low_bounds)
-            fu[2*n+m:2*(n+m)] = np.array(up_bounds)
-
-            Ku = np.zeros([2*(m+n), m])
-            Ku[n:n+m, :] = -np.eye(m)
-            Ku[2*n+m:2*(n+m), :] = np.eye(m)
-
-            # state
-            fx = np.zeros([2*(m+n), 1])
-            fx[0:n] = -(x0-0.00001)
-            fx[n+m:2*n+m] = x0+0.00001
-
-            Kx = np.zeros([2*(m+n), n])
-            Kx[0:n, :] = -np.eye(n)
-            Kx[n+m:2*n+m, :] = np.eye(n)
-
-            ff = np.zeros([2*(n), 1])
-            ff[0:n] = -(x0-0.00001)
-            ff[n:2*n] = x0+0.00001
-
-            Kf = np.zeros([2*(n), n])
-            Kf[0:n, :] = -np.eye(n)
-            Kf[n:2*n, :] = np.eye(n)
-
-            qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kf, ff=ff)
-
-
-    return (qp, Bd, 2*x0)
-
-def qp_from_new_sys():
-    mm = io.loadmat('data/data_matrix.mat')  # load system matrices
-    socp = io.loadmat('data/socp_matrices.mat')
-
-    # discrete-time system
-    Ad = mm['Asys']
-    Bd = mm['Bsys']
-    (n, m) = np.array(Bd).shape  # system dimensions
-    T = 5  # prediction horizon
-    dt = 0.5
-    x0 = -socp['X0'][0:30]
-    u0 = np.zeros([m, 1])
-    qp = SOCP(T, n, m, x0=x0, u0=u0)
-    qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
-
-    # weighting matrices
-    Q = mm['Q_total']
-    R = mm['R_total']
-    P = Q  # terminal weighting
-    qp.set_weighting(Q=Q, R=R, Qf=P)
-
-    # input constraints
-    eui = 0.262  # rad (15 degrees). Elevator angle.
-    u_lb = -eui
-    u_ub = eui
-    Ku = np.array([[0.],
-                   [0.],
-                   [-1.],
-                   [0.],
-                   [0.],
-                   [1.],])
-
-    fu = np.zeros([np.shape(Ku)[0], 1])
-    fu[np.shape(Ku)[0]/2-1] = -(u_lb)
-    fu[np.shape(Ku)[0]-1] = (u_ub)
-
-    # mixed constraints
-    ex2 = 0.349  # rad/s (20 degrees). Pitch angle constraint.
-    ex5 = 0.524 * dt  # rad/s * dt input slew rate constraint in discrete time
-    ey3 = 30.
-
-    # bounds
-    e_lb = [[-ex2], [-ex5], [0]]
-    e_ub = [[ex2], [ex5], [0]]
-    fx = np.ones([2*3, 1])
-    fx[0:3] = - np.array(e_lb)
-    fx[3:2*3] = np.array(e_ub)
-
-    (ncx, dummy) = np.array(e_ub).shape
-    # constraint matrices
-    Kx = np.zeros((ncx*2, n))
-    # Kx[0, 6] = -1
-    # Kx[3, 6] = 1
-    # Kx[1, 24] = 1
-    # Kx[4, 24] = -1
-
-    # keine Platzhalterzeilen für u bounds in den end constraints
-    Kf = np.zeros([4, n])
-    ff = np.zeros([4, 1])
-    # ff[:] = fx[:]
-    ff[0:2] = fx[0:2]
-    ff[2:4] = fx[3:5]  #TODO Werte raus aus SOCP file
-
-    qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kf, ff=ff)
-
-    x_ref = np.array([[0.], [0.], [0.], [0.], [0.], [0.],
-                      [0.], [0.], [0.], [0.], [0.], [0.],
-                      [0.], [0.], [0.], [0.], [0.], [0.],
-                      [200.], [0.], [0.], [0.], [0.], [0.],
-                      [0.], [0.], [0.], [0.], [0.], [0.]])
-    qp.set_ref_trajectory(x_ref)
-
-    # V21 = reorder(socp['V21'][30:60, 30:], T, n, m)
-    # V22 = reorder(socp['V22'][60:90, 30:], T, n, m)
-    # V23 = reorder(socp['V22'][90:120, 30:], T, n, m)
-    # V24 = reorder(socp['V22'][120:150, 30:], T, n, m)
-    # V25 = reorder(socp['V22'][150:180, 30:], T, n, m)
-    help = socp['V21']
-    V21 = help[30:60, 30:60]
-
-    help = socp['M21']
-    M21 = np.array([help[0, 30:60]])
-    c = socp['c_max']
-
-    qp.add_socc(socc_A=np.array(V21), socc_c=M21.T,
-                socc_b=np.zeros_like(M21.T), socc_d=c)
-    qp.add_socc(type='end', socc_A=np.array(V21), socc_c=M21.T,
-                socc_b=np.zeros_like(M21.T), socc_d=c)
-    # TODO add same socc as type 'end'
-    return qp
-
 def qp_from_sys():
     # discrete-time system
     Ad = np.array([[  0.23996015,   0., 0.17871287,   0., 0.],
@@ -268,7 +82,7 @@ def qp_from_sys():
     n = Ad.shape[1]  # columns in A
     m = Bd.shape[1]  # columns in B
     T = 10  # Prädiktionshorizont
-    qp = SOCP(T, n, m)
+    qp = QuadraticProgram(T, n, m)
 
     delta_t = 0.5
 
@@ -279,11 +93,13 @@ def qp_from_sys():
     q = np.zeros([n, 1])
     R = np.array(diag([471.65]))
     r = np.zeros([m, 1])
-    P = Q  # terminal weighting
+    P = Q  # TODO Was ist P, terminal weighting?
+    Qf = P
     qf = np.zeros([n, 1])
+    qf = qf
     S = np.zeros_like(Bd)  # no combined weighting
 
-    qp.set_weighting(Q=Q, q=q, R=R, r=r, S=S, Qf=P, qf=qf)
+    qp.set_weighting(Q, q, R, r, S, Qf, qf)
 
     # input constraints
     eui = 0.262  # rad (15 degrees). Elevator angle.
@@ -311,7 +127,6 @@ def qp_from_sys():
     e_lb = [[-ex2], [-ey3], [-ex5], [0]]
     e_ub = [[ex2], [ey3], [ex5], [0]]
     # constraint matrices
-    # TODO Matrizen ohne 0 Zeilen, um zu den Input constraints zu passen
     Kx = np.array([[0, -1., 0., 0., 0.],
           [128.2, -128.2, 0, 0., 0.],
           [0., 0., 0., 0., 1.],
@@ -330,33 +145,16 @@ def qp_from_sys():
     ff[3] = 1
     ff[7] = 1
     Ff = Kx
-
+    
     Ff_qc = np.zeros([T*(n+m), T*(n+m)])
     alpha = 1
 
-    qp.set_lin_constraints(Fu, fu, Fx, fx, Ff, ff)
-    qp.add_qc(type='end', F_qc=Ff_qc, alpha=alpha)
+    qp.set_constraints(Fu, fu, Fx, fx, Ff, ff)
+    qp.add_qc(Ff_qc=Ff_qc, alpha=alpha)
     x_ref = np.array([[0], [0], [0], [200], [0]])
     qp.set_ref_trajectory(x_ref)
-
-    socc_A = np.array([[1, 0, 0, 0, 0],
-                       [1, 0, 0, 0, 0]])
-    socc_b = np.array([[1],
-                       [1]])
-    socc_c = np.array([[1],
-                      [0],
-                      [0],
-                      [0],
-                      [0]])
-    socc_d = np.array([[3]])
-
-    qp.add_socc(socc_A=socc_A, socc_b=socc_b, socc_c=socc_c, socc_d=socc_d)
-    qp.add_socc(socc_A=socc_A, socc_b=socc_b, socc_c=socc_c, socc_d=socc_d)
-    qp.add_socc(type='end', socc_A=socc_A, socc_b=socc_b, socc_c=socc_c,
-                socc_d=socc_d)
-    qp.add_socc(type='end', socc_A=socc_A, socc_b=socc_b, socc_c=socc_c,
-                socc_d=socc_d)
     return qp
+
 
 class AirCraft:
     def __init__(self):

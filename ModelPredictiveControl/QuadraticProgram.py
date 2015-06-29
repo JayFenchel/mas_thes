@@ -31,8 +31,6 @@ class QuadraticProgram:
         self.Fx = None
         self.f = None
         # TODO Instance attributes als None initieren und abfragen, ob gesetzt
-        self.Ff_qc = None
-        self.socc_A = None
 
     def set_sys_dynamics(self, A, B):
 
@@ -124,16 +122,8 @@ class QuadraticProgram:
         if alpha is not None:
             self.h = np.vstack([self.h, alpha])
 
-    def add_socc(self, socc_A=None, socc_b=None, socc_c=None, socc_d=None):
+    def add_socc(self):
         # add second-order cone constraint
-        if socc_d is not None:
-            self.h = np.vstack([self.h, socc_d*socc_d])
-
-        self.socc_A = socc_A
-        self.socc_b = socc_b
-        self.socc_c = socc_c
-        self.socc_d = socc_d
-
         pass
 
     def h_of_xk(self, xk):
@@ -147,24 +137,11 @@ class QuadraticProgram:
     def b_of_xk(self, xk):
         pass
 
-
-    def _A_of_socc_A_b(self, zk):
-        # TODO [0:5] nur als Behelf, um die Dimensionen richtig zu machen
-        _A_ = np.zeros([(self.m + self.n) * self.T, 1]) # Muss eine ganze Zeile für P werden
-        _A_[-5:] = 2*(-self.socc_d*self.socc_c - np.dot(self.socc_c.T, zk[-5:])*self.socc_c + np.dot(self.socc_A.T, np.dot(self.socc_A, zk[-5:]) + self.socc_b))
-        return _A_.T
-
-    def d_A_dz_of_socc_A_b(self, zk):
-        return 2*(-self.socc_c.T*self.socc_c.T + np.dot(self.socc_A.T, self.socc_A))
-
     def P_of_zk(self, zk):
         P = np.zeros([np.shape(self.P)[0], np.shape(self.P)[1]])
         P += self.P  # does not change self.P
         if self.Ff_qc is not None:
-            P = np.vstack([P, np.dot(zk.T, self.Ff_qc)[:]]) #  bei socc nur zk[-5:] genommen, um auf die Zeile in P zu kommen
-        if self.socc_A is not None and self.socc_b is not None and self.socc_c is not None:
-            _A_ = self._A_of_socc_A_b(zk)
-            P = np.vstack([P, _A_])
+            P = np.vstack([P, np.dot(zk.T, self.Ff_qc)[:]])
 
         return P
 
