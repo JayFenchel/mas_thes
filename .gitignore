@@ -68,7 +68,6 @@ target/
 *.aux
 *.blg
 *.lof
-*.tex
 *.lot
 *.nlo
 *.out
