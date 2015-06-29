@@ -3,6 +3,7 @@
 Dropbox/
 ODEsolver_oTToCAR/.idea/
 .idea/
+*.directory
 
 ##### Python #####
 
@@ -65,3 +66,14 @@ docs/_build/
 
 # PyBuilder
 target/
+*.aux
+*.blg
+*.lof
+*.lot
+*.nlo
+*.out
+*.toc
+*.bbl
+*.tps
+*.bib
+*.tex.backup
