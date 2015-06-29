@@ -3,6 +3,7 @@
 Dropbox/
 ODEsolver_oTToCAR/.idea/
 .idea/
+*.directory
 
 ##### Python #####
 
@@ -75,3 +76,4 @@ target/
 *.bbl
 *.tps
 *.bib
+*.tex.backup
