@@ -1,0 +1,67 @@
+% \documentclass[a4paper,10pt]{article}
+\documentclass[a4paper,10pt]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\title{Master Thesis - Algorithmus für Tests}
+\author{Heinemann, Hannes}
+\date{29.06.2015}
+
+\pdfinfo{%
+  /Title    (Algorithmus für Tests)
+  /Author   (Heinemann, Hannes)
+  /Keywords (Tests, Algotithmus, Master Thesis)
+}
+
+\begin{document}
+\maketitle
+\section{Anpassung für test cases}
+\label{sec:testcases}
+Der implementierte Algorithmus wie in [Paper:, Section:] beschrieben kann auch verwendet werden, um Optimierungsprobleme zu lösen, die ihren Ursprung nicht in der Anwendung von MPC haben. Dazu sind keine wirklichen Anpassungen des Algorithmus notwendig. Da der Algorithmus allerdings die Struktur der bei MPC auftretenden Matrizen ausnutzt, muss der jeweilige test case so ``transformiert'' werden, dass dieser eine ähnliche Struktur aufweist.
+\subsection{Allgemeine Beschreibung der test cases}
+\label{sec:beschreibungtestcases}
+\subsection{Algorithmus mit T=1}
+\label{sec:algorithust1}
+Um die test cases lösen zu können, muss der Prädiktionshorizont $T=1$ gewählt werden. Die Optimierungsvariable beschränkt sich damit auf
+\begin{equation*}
+  z=\left( u(t), x(t+T) \right)\in\mathbb{R}^{(m+n)}, \quad T=1
+\end{equation*}
+Die strukturierten Matrizen im Algorithmus zum lösen des Optimierungsproblems
+\begin{equation*}\begin{split}
+  \min \quad &z^{T}Hz+g^{T}z\\
+  \text{s.t.} \quad &Pz\leq h,Cz = b 
+\end{split}\end{equation*}
+reduzieren sich damit auf folgende Form:
+\begin{equation*}\begin{split}
+  H&=\begin{bmatrix}
+  R & 0\\ 
+  0 & Q_{f}
+  \end{bmatrix}\\
+  P&=\begin{bmatrix}
+  F_{u} & 0\\ 
+  0 & F_{f}
+  \end{bmatrix}\\
+  C&=\begin{bmatrix}
+  -B & I
+  \end{bmatrix}\\
+  g&=\begin{bmatrix}
+  r+2S^{T}x(t)\\ 
+  q
+  \end{bmatrix}\\
+  h&=\begin{bmatrix}
+  f-F_{x}x(t)\\ 
+  f{f}
+  \end{bmatrix}\\
+  b&=\begin{bmatrix}
+  Ax(t)
+  \end{bmatrix}\\
+\end{split}\end{equation*}
+
+
+
+
+
+
+\end{document}
