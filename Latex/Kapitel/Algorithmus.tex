@@ -9,7 +9,7 @@ Der implementierte Algorithmus wie in [Paper:, Section:] beschrieben kann auch v
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Allgemeine Beschreibung der test cases}%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:beschreibungtestcases}
-Nach [Paper:] haben die test cases folgende Form:
+Nach \cite{MAR97} haben die test cases folgende Form:
 \begin{equation}\begin{split}
   \label{eq:mar}
   \min \quad &\hat{c}^{T}\hat{x}+\frac{1}{2}\hat{x}^{T}\hat{Q}\hat{x}\\
@@ -37,7 +37,7 @@ die Gleichungsnebenbedingungen
 \end{equation*}
 ergeben
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Algorithmus mit T=1}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Algorithmus mit Prädiktionshorizont gleich eins}%%%%%%%%%%%%%%%%%%
 \label{sec:algorithust1}
 Um die test cases lösen zu können, muss der Prädiktionshorizont $T=1$ gewählt werden. Die Optimierungsvariable beschränkt sich damit auf
 \begin{equation*}
@@ -67,10 +67,49 @@ reduzieren sich damit auf folgende Form:
   \end{bmatrix}\\
   h&=\begin{bmatrix}
   f-F_{x}x(t)\\ 
-  f{f}
+  f_{f}
   \end{bmatrix}\\
   b&=\begin{bmatrix}
   Ax(t)
   \end{bmatrix}\\
 \end{split}\end{equation*}
+Um den Algorithmus nun mit den test cases nach \cite{MAR97} zu testen muss
+\begin{equation}
+  H=\frac{1}{2}\hat{Q},\quad g=\hat{c}, \text{nicht korrekt, einzelne Untermatrizen setzen}
+\end{equation}
+gesetzt werden. Die Ungleichungsnebenbedingung
+\begin{equation}
+  F_{u}u(t)+F_{x}x(t)+F_{f}x(t+1) \leq f = f_{u}+f_{x}
+\end{equation}
+ergeben sich zu
+\begin{equation*}\begin{split}
+  F_{u}&=\begin{bmatrix}
+  0 & 0\\ 
+  0 & 0
+  \end{bmatrix}\\
+  F_{x}&=\begin{bmatrix}
+  0 & 0\\ 
+  0 & 0
+  \end{bmatrix}\\
+  F_{f}&=\begin{bmatrix}
+  0 & 0
+  \end{bmatrix}\\
+  f&=\begin{bmatrix}
+  0\\ 
+  0
+  \end{bmatrix}\\
+  f_{f}&=\begin{bmatrix}
+  0\\ 
+  0
+  \end{bmatrix}
+\end{split}\end{equation*}
+Als Gleichungsnebenbedingungen bleibt im implementierten Algorithmus
+\begin{equation}
+  x(t+1) = Ax(t)+Bu(t)
+\end{equation}
+Da allerdings x(t+1) auch zu dem Vektor der Optimierungsvariablen gehört muss
+\begin{equation}
+  \hat{b} = -Ax(t)\quad \text{mit} \quad A=-I
+\end{equation}
+gesetzt werden. Zusätzlich wird mit weiteren Ungleichungsnebenbedingung dafür gesorgt, dass $x(t+1)$ im Optimum nahe der Null liegt. Das bedeutet aber auch, dass in der Auswertung der Güte der eingehaltenen Gleichungsnebenbedingungen auch die Genauigkeit der zusätzlichen Ungleichungsnebenbedingung betrachtet werden muss.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
