@@ -1,0 +1,46 @@
+%Schriftgröße..11pt, fleqn - setzt Gleichungen linksbündig
+\documentclass[11pt,titlepage,bibliography=totoc,listof=totoc,fleqn]{scrreprt}
+%%packages
+\usepackage{bibgerm}					%Inhaltsverzeichnes statt Content als Inhaltsüberschrifft/auch deutsche Datumsdarstellung
+\usepackage[T1]{fontenc}			%die Silbentrennung für die deutsche Sprache funktioniert besser
+\usepackage[latin1]{inputenc}	%Direkte Eingabe von Umlauten
+\usepackage[colorlinks,pdfpagelabels,pdfstartview = FitH,bookmarksopen = true,  
+ 						bookmarksnumbered = true,linkcolor = black,plainpages = false,
+  					hypertexnames = false,citecolor = black] {hyperref}	%Inhaltsverzeichnis verlinkt zu den Kapiteln
+\usepackage{graphicx}
+\usepackage[final]{pdfpages}	%um PDF-Dokumente einbinden zu können
+\usepackage{pdflscape}				%Seite in Querformat
+\usepackage{fancyhdr}					%für Kopf- und Fußzeile
+\usepackage{amsmath}					%für Gleichungsformatierungen (zum Beispiel Zeilenumbruch in Gleichung)
+
+%%Abkürzungsverzeichnis
+\usepackage{nomencl}
+% Befehl umbenennen in abk
+\let\abk\nomenclature
+% Deutsche Überschrift
+\renewcommand{\nomname}{Abkürzungsverzeichnis}
+% Punkte zw. Abkürzung und Erklärung
+\setlength{\nomlabelwidth}{.20\hsize}
+\renewcommand{\nomlabel}[1]{#1 \dotfill}
+% Zeilenabstände verkleinern
+\setlength{\nomitemsep}{-\parsep}
+
+\makenomenclature
+
+
+%%Seitenformatierung							%Werte ausgehend von einem Punkt (nicht ganz) oben links
+%\setlength{\textwidth}{16cm}			%Textbreite
+%\setlength{\textheight}{22.5cm}	%Texthöhe
+\setlength{\topmargin}{-1cm}			%etwas hochgezogen wegen der Kopfzeile
+\setlength{\headsep}{1cm}					%Zwischenraum zwischen Kopfzeile und Text
+%\setlength{\parindent}{0mm}
+%\setlength{\parindent}{0mm}
+
+%\pagestyle{headings}							%Kapitelüberschriften in der Kopfzeile
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{\emph{#1}}{}}
+\fancyhf{}
+\fancyhead[RO]{\thechapter\hspace{2pt} \leftmark}
+\fancyfoot[CO]{\thepage}																%unten(foot) mittig(c) Seitenzahl (o-odd)
+\renewcommand{\headrulewidth}{0.5pt}										%Linien oben
+\renewcommand{\footrulewidth}{0pt}											%und unten
