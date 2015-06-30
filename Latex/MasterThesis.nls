@@ -1,0 +1,8 @@
+\begin{thenomenclature} 
+
+ \nomgroup{A}
+
+  \item [{MPC}]\begingroup Modellprädiktive Regelung\nomeqref {1.0}
+		\nompageref{1}
+
+\end{thenomenclature}
