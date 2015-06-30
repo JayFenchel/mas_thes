@@ -78,10 +78,16 @@ def reorder(a, T, n, m):
 
 def qp_from_test():
     data = io.loadmat('%sLOTSCHD.mat' % test_dir)
-    if not (data['rl'] == data['ru']).all():
-        print('There are mixed inequality constraints')
+    if not (data['rl'] == data['ru']).any():
+        print('There are ONLY mixed inequality constraints')
+        # kein epsilon verwenden
+        exit()
+    elif not (data['rl'] == data['ru']).all():
+        print('There are mixed inequality- and equality constraints')
+        # epsilon verwenden
         exit()
     else:
+        print('There are ONLY equality constraints')
         # read data
         low_bounds = data['lb']  # lower bounds
         up_bounds = data['ub']  # upper bounds
@@ -120,7 +126,7 @@ def qp_from_test():
 
         # weighting matrices
         Q = np.zeros([n, n])
-        R = data['Q'].toarray()
+        R = .5*data['Q'].toarray()
         r = data['c']
         qp.set_weighting(Q=Q, R=R, r=r)
 

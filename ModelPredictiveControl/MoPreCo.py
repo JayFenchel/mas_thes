@@ -92,7 +92,7 @@ for schritt in range(schritte):
 
     # Ausgabe kostenfunktionswert test-cases
     x_k_plus_eins = zv_k[0:m+n]
-    f_von_x = np.dot(QP.g.T, x_k_plus_eins) + .5*np.dot(x_k_plus_eins.T, np.dot(QP.H, x_k_plus_eins))
+    f_von_x = np.dot(QP.g.T, x_k_plus_eins) + np.dot(x_k_plus_eins.T, np.dot(QP.H, x_k_plus_eins))
     print('Value of cost function = %s' % f_von_x)
 
     print('x_k_plus1', x_k_plus_eins)
