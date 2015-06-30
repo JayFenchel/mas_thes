@@ -73,6 +73,5 @@ target/
 *.nlo
 *.out
 *.toc
-*.bbl
 *.tps
 *.tex.backup
