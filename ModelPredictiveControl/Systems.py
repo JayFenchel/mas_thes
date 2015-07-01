@@ -77,39 +77,46 @@ def reorder(a, T, n, m):
     return b
 
 def qp_from_test():
+    epsilon = 1e-06  # um GNB als UNB zu schreiben
+    # read data
     data = io.loadmat('%sLOTSCHD.mat' % test_dir)
-    if not (data['rl'] == data['ru']).any():
+    # bounds
+    low_bounds = data['lb']  # lower bounds
+    up_bounds = data['ub']  # upper bounds
+    # mixed inequality- and equality constraints of the form b_l <= A*x <= b_u
+    b_l = data['rl']
+    b_u = data['ru']
+    A_hat = data['A'].toarray()
+
+    n, m = np.shape(A_hat)
+    T = 1
+
+    if not (b_l == b_u).any():
         print('There are ONLY mixed inequality constraints')
         # kein epsilon verwenden
         exit()
-    elif not (data['rl'] == data['ru']).all():
+    elif not (b_l == b_u).all():
         print('There are mixed inequality- and equality constraints')
         # epsilon verwenden
+        b_l = b_l-epsilon
+        b_u = b_u+epsilon
         exit()
     else:
         print('There are ONLY equality constraints')
-        # read data
-        low_bounds = data['lb']  # lower bounds
-        up_bounds = data['ub']  # upper bounds
-
-        # equality constraint of the form A*u(t) = b
-        b = data['rl']
-        A = data['A'].toarray()
-
-        n, m = np.shape(A)
-        T = 1
-
-        x0 = b
-        # TODO Fall betrachten in den Bounds = Inf
+        if not (b_l == b_u).all():
+            print('Irgendetwas ist vorgefallen')
+        b_hat = b_l
+        x0 = b_hat
+        # TODO Fall betrachten in denen nur einzelne Elemente Bounds = Inf
         u0 = np.zeros([m, 1])
         if (low_bounds > -np.inf).all():
             if (up_bounds < np.inf).all():
                 u0[:] = .5*(low_bounds[:] + up_bounds[:])
             else:
-                u0[:] = .5*(low_bounds[:] + low_bounds[:] + 2000)
+                u0[:] = low_bounds[:] + 10
         else:
             if (up_bounds < np.inf).all():
-                u0[:] = .5*(up_bounds[:] -2000 + up_bounds[:])
+                u0[:] = up_bounds[:] - 10
             else:
                 u0 = np.zeros([m, 1])
 
@@ -120,7 +127,7 @@ def qp_from_test():
         # mit Ad = inv(A)*b*inv(x(t))
 
         Ad = np.zeros([n, n])
-        Bd = A
+        Bd = A_hat
         qp = SOCP(T, n, m, x0=x0, u0=u0)
         qp.set_sys_dynamics(np.array(Ad), np.array(Bd))
 
