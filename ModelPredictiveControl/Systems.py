@@ -79,7 +79,7 @@ def reorder(a, T, n, m):
 def qp_from_test():
     epsilon = 1e-06  # um GNB als UNB zu schreiben
     # read data
-    data = io.loadmat('%sLOTSCHD.mat' % test_dir)
+    data = io.loadmat('%sCVXQP2_S.mat' % test_dir)
     # bounds
     low_bounds = data['lb']  # lower bounds
     up_bounds = data['ub']  # upper bounds

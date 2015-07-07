@@ -175,6 +175,12 @@ class SOCP:
             print('SOCC: type is not known')
             exit()
 
+    def calculate_kappa(self, zk):
+        dim = self.n+self.m
+        cost = np.dot(zk.T, np.dot(self.H, zk)) + np.dot(self.g.T, zk)
+        kappa = 0.01*cost/dim
+        return kappa
+
     def h_of_xk(self, xk):
 
         T, n, m = self.T, self.n, self.m

@@ -52,8 +52,10 @@ r_tolerance = 1e-4
 x_out = np.zeros([np.shape(xk)[0], schritte])
 for schritt in range(schritte):
     x_out[:, schritt:schritt+1] = xk
-    QP.kappa = 90
-    for zweimal in range(6):
+    new_kappa = QP.calculate_kappa(zv_k[:T*(n+m)])
+    print('Calculated kappa for zk = %s' %new_kappa)
+    QP.kappa = new_kappa  # 90
+    for zweimal in range(1):
         st, rp_norm, rd_norm = 1, 1, 1
         # Optimize until algorithm fails to go further (st < st_tolerance) or
         # residual is small enough
@@ -110,7 +112,7 @@ for schritt in range(schritte):
     # # neues z_k[T] hinten anhängen, u[T] ist nicht ganz korrekt, aber kein
     # # u[T+1] vorhanden
     # zv_k[(n+m)*(T-1)+m:(n+m)*T] = np.dot(QP.A, zv_k[(n+m)*(T-1)+m:(n+m)*T])\
-    # #                     + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
+    #                     + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
 
     # v_k shiften
     zv_k[(n+m)*T:(n+m)*T+n*(T-1)] = zv_k[(n+m)*T+n:(n+m)*T+n*T]
