@@ -38,6 +38,11 @@ class SOCP:
         # allgemeine constraints
         self.P = None
         self.h = None
+        # soft constraints
+        self.P_soft = None
+        self.h_soft = None
+        self.Fx_soft = None
+        self.f_soft = None
         # Reference
         self.u_ref = None
         self.z_ref = None
@@ -137,9 +142,26 @@ class SOCP:
         self.P = P
 
         self.Fx = Fx
-
         self.f = fx + fu
         self.ff = ff
+
+    def set_soft_constraints(self, Fu, fu, Fx, fx):
+        # Set soft constraints with use of Kreisselmeier-Steinhauser Function
+
+        T, n, m = self.T, self.n, self.m
+        n_Fu = np.shape(Fu)[0]
+
+        # P_tilde matrix with FuFx blocks
+        P = np.zeros([T*n_Fu, T*(n+m)])
+        P[0:n_Fu, 0:m] = Fu
+        for i in range(1, T):
+            Hilf = np.hstack([Fx, Fu])
+            P[i*n_Fu:(i+1)*n_Fu, m+(i-1)*(m+n):m+i*(m+n)] = Hilf
+        self.P_soft = P
+
+        self.Fx_soft = Fx
+        self.f_soft = fx + fu
+
 
     # Adding a quadratic constraint (type='end' for final constraints)
     def add_qc(self, type='trajectory', F_qc=None, alpha=None):
@@ -211,6 +233,19 @@ class SOCP:
                 h = np.vstack([h, socc[3]*socc[3]])
         return h
 
+    def h_soft_of_xk(self, xk):
+        # for soft constraints
+        T, n, m = self.T, self.n, self.m
+        f = self.f_soft
+
+        h = np.zeros([T*np.shape(f)[0], 1])
+        for i in range(0, T):
+            h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
+
+        h[0:np.shape(self.Fx_soft)[0]] -= np.dot(self.Fx_soft, xk)
+
+        return h
+
     def g_of_xk(self, xk):
         pass
 
@@ -278,6 +313,19 @@ class SOCP:
         d[:] = 1/(h[:]-np.dot(P[:], zv_k[0:self.T*(self.m+self.n)]))
         return d
 
+    def form_d_soft(self, xk, zv_k):
+        P = self.P_soft
+        h = self.h_soft_of_xk(xk)
+        d = np.zeros([np.shape(P)[0], np.shape(zv_k)[1]])
+        d[:] = 1/(1 + np.exp(self.roh*(h[:]-np.dot(P[:], zv_k[0:self.T*(self.m+self.n)]))))
+        return d
+
+    def form_d_soft_dach(self, xk, zv_k):
+        P = self.P_soft
+        h = self.h_soft_of_xk(xk)
+        d = np.zeros([np.shape(P)[0], np.shape(zv_k)[1]])
+        # TODO d_soft_dach formen
+
     def form_Phi(self, d, zk):
         P = self.P_of_zk(2*zk)
         #TODO add Term for socp
@@ -291,6 +339,10 @@ class SOCP:
               + self.kappa*(np.dot(np.dot(P.T, matrix_diag(d*d)), P) + term_for_qc)  # *2 siehe Zettel
         return Phi
 
+    def form_Phi_soft(self, d, zk):
+        # TODO Phi_soft formen
+        pass
+
     def solve(self, xk, zv_k):
 
         T = self.T
@@ -301,6 +353,9 @@ class SOCP:
 
         d = self.form_d(xk, zv_k)
         Phi = self.form_Phi(d, zv_k[0:self.T*(self.m+self.n)])
+        if self.P_soft is not None:
+            d_soft_dach = self.form_d_soft_dach(xk, zv_k)
+            Phi += self.form_Phi_soft(d_soft_dach, zv_k[0:self.T*(self.m+self.n)])
 
         rd, rp = self.residual(xk, zv_k)
 
@@ -326,6 +381,9 @@ class SOCP:
         rd = (2*np.dot(self.H, zv_k[0:self.T*(self.m+self.n)] - self.z_ref) + self.g
              + self.kappa*np.dot(self.P_of_zk(2*zv_k[0:self.T*(self.m+self.n)]).T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):]))
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - b
+        if self.P_soft is not None:  # if there are defined soft constraints
+            d_soft = self.form_d_soft
+            rd = + np.dot(self.P_soft.T, d_soft)
         return rd, rp
 
     def check(self, xk, zv_k):
