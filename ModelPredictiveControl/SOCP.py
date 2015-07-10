@@ -15,6 +15,7 @@ class SOCP:
 
         # Kappa
         self.kappa = 90  # >0 barrier parameter
+        self.roh = 10  # Wert aus paper
         # Dimensions
         self.T = T
         self.n = n
@@ -317,14 +318,17 @@ class SOCP:
         P = self.P_soft
         h = self.h_soft_of_xk(xk)
         d = np.zeros([np.shape(P)[0], np.shape(zv_k)[1]])
-        d[:] = 1/(1 + np.exp(self.roh*(h[:]-np.dot(P[:], zv_k[0:self.T*(self.m+self.n)]))))
+        e_term = np.exp(self.roh*(h[:]-np.dot(P[:], zv_k[0:self.T*(self.m+self.n)])))
+        d[:] = 1/(1 + e_term)
         return d
 
     def form_d_soft_dach(self, xk, zv_k):
         P = self.P_soft
         h = self.h_soft_of_xk(xk)
         d = np.zeros([np.shape(P)[0], np.shape(zv_k)[1]])
-        # TODO d_soft_dach formen
+        e_term = np.exp(self.roh*(h[:]-np.dot(P[:], zv_k[0:self.T*(self.m+self.n)])))
+        d[:] = e_term*1/((1 + e_term)*(1 + e_term))
+        return d
 
     def form_Phi(self, d, zk):
         P = self.P_of_zk(2*zk)
@@ -340,8 +344,8 @@ class SOCP:
         return Phi
 
     def form_Phi_soft(self, d, zk):
-        # TODO Phi_soft formen
-        pass
+        Phi = self.roh*(np.dot(np.dot(self.P_soft.T, matrix_diag(d)), self.P_soft))
+        return Phi
 
     def solve(self, xk, zv_k):
 
@@ -382,8 +386,8 @@ class SOCP:
              + self.kappa*np.dot(self.P_of_zk(2*zv_k[0:self.T*(self.m+self.n)]).T, d) + np.dot(self.C.T, zv_k[self.T*(self.m+self.n):]))
         rp = np.dot(self.C, zv_k[0:self.T*(self.m+self.n)]) - b
         if self.P_soft is not None:  # if there are defined soft constraints
-            d_soft = self.form_d_soft
-            rd = + np.dot(self.P_soft.T, d_soft)
+            d_soft = self.form_d_soft(xk, zv_k)
+            rd += np.dot(self.P_soft.T, d_soft)
         return rd, rp
 
     def check(self, xk, zv_k):
