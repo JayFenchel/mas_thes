@@ -21,8 +21,8 @@ from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 
 # sys = AirCraft()
 # QP1 = QuadraticProgram(sys)
-QP, AA, bb = qp_from_test()
-# QP = qp_from_new_sys()
+# QP, AA, bb = qp_from_test()
+QP = qp_from_new_sys()
 # exit()
 n = QP.n
 m = QP.m
@@ -92,27 +92,27 @@ for schritt in range(schritte):
         QP.kappa *= 0.1
     print('z_k = %s' %zv_k[:T*(n+m)])
 
-    # Ausgabe kostenfunktionswert test-cases
-    x_k_plus_eins = zv_k[0:m+n]
-    f_von_x = np.dot(QP.g.T, x_k_plus_eins) + np.dot(x_k_plus_eins.T, np.dot(QP.H, x_k_plus_eins))
-    print('Value of cost function = %s' % f_von_x)
+    # # Ausgabe kostenfunktionswert test-cases
+    # x_k_plus_eins = zv_k[0:m+n]
+    # f_von_x = np.dot(QP.g.T, x_k_plus_eins) + np.dot(x_k_plus_eins.T, np.dot(QP.H, x_k_plus_eins))
+    # print('Value of cost function = %s' % f_von_x)
+    #
+    # print('x_k_plus1', x_k_plus_eins)
+    # print('Ax-b', np.dot(AA, x_k_plus_eins[0:m]) - bb)
+    # print('Cx - bofx0', np.dot(QP.C, x_k_plus_eins) - QP.b_of_xk(x0))
+    # print('Adx0- xk+1', np.dot(QP.B, x_k_plus_eins[0:m]) + np.dot(QP.A, x0) - x_k_plus_eins[m:])
+    # print(np.dot(QP.g.T, x_k_plus_eins))
+    # # print(zv_k[0])
+    # # print(np.dot(sys.B, zv_k[0]))
 
-    print('x_k_plus1', x_k_plus_eins)
-    print('Ax-b', np.dot(AA, x_k_plus_eins[0:m]) - bb)
-    print('Cx - bofx0', np.dot(QP.C, x_k_plus_eins) - QP.b_of_xk(x0))
-    print('Adx0- xk+1', np.dot(QP.B, x_k_plus_eins[0:m]) + np.dot(QP.A, x0) - x_k_plus_eins[m:])
-    print(np.dot(QP.g.T, x_k_plus_eins))
-    # print(zv_k[0])
-    # print(np.dot(sys.B, zv_k[0]))
-
-    # # neues xk berechnen
-    # xk = np.dot(QP.A, xk) + QP.B*zv_k[0:m]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
-    # # z_k shiften
-    # zv_k[0:(n+m)*(T-1)] = zv_k[n+m:(n+m)*T]
-    # # neues z_k[T] hinten anhängen, u[T] ist nicht ganz korrekt, aber kein
-    # # u[T+1] vorhanden
-    # zv_k[(n+m)*(T-1)+m:(n+m)*T] = np.dot(QP.A, zv_k[(n+m)*(T-1)+m:(n+m)*T])\
-    #                     + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
+    # neues xk berechnen
+    xk = np.dot(QP.A, xk) + QP.B*zv_k[0:m]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
+    # z_k shiften
+    zv_k[0:(n+m)*(T-1)] = zv_k[n+m:(n+m)*T]
+    # neues z_k[T] hinten anhängen, u[T] ist nicht ganz korrekt, aber kein
+    # u[T+1] vorhanden
+    zv_k[(n+m)*(T-1)+m:(n+m)*T] = np.dot(QP.A, zv_k[(n+m)*(T-1)+m:(n+m)*T])\
+                        + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
 
     # v_k shiften
     zv_k[(n+m)*T:(n+m)*T+n*(T-1)] = zv_k[(n+m)*T+n:(n+m)*T+n*T]

@@ -169,6 +169,7 @@ def qp_from_test():
             Kf[n:2*n, :] = np.eye(n)
 
             qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kf, ff=ff)
+            qp.set_soft_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx)
 
 
     return (qp, Bd, 2*x0)
@@ -236,7 +237,8 @@ def qp_from_new_sys():
     ff[0:2] = fx[0:2]
     ff[2:4] = fx[3:5]  #TODO Werte raus aus SOCP file
 
-    qp.set_lin_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx, Ff=Kf, ff=ff)
+    qp.set_lin_constraints(Fu=np.zeros_like(Ku), fu=fu, Fx=np.zeros_like(Kx), fx=fx, Ff=np.zeros_like(Kf), ff=ff)
+    qp.set_soft_constraints(Fu=Ku, fu=fu, Fx=Kx, fx=fx)
 
     x_ref = np.array([[0.], [0.], [0.], [0.], [0.], [0.],
                       [0.], [0.], [0.], [0.], [0.], [0.],
