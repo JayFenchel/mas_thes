@@ -3,11 +3,19 @@
 \chapter{Algorithmus}
 \label{chap:algorithmus}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Erweiterung für Second Order Cone Problems}%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:ErweiterungSOCP}
-Um mit dem effizienten Algorithmus aus \cite{BOY10} auch kompliziertere/komplexere [TODO] Probleme, hier speziell Second Order Cone Problems (SOCP\abk{SOCP}{Second Order Cone Problem}) zu lösen, wurde der Algorithmus wie gleich folgt erweitert. Dabei wurde speziell darauf geachtet nicht die Struktur der entstehenden Matrizen zu verändern, sodass diese auch weiterhin ausgenutzt werden kann. Allerdings sind für ein SOCP nun die Matrizen für die Ungleichungsnebenbedingungen nicht mehr konstant sondern hängen von $x(k)$ ab, sodass sie in jedem MPC Schritt angepasst werden müssen, was einen erhöhten Rechenaufwand bedeutet.
+\section{Erweiterung für nichtlineare Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:ErweiterungNonlincon}
+Um mit dem effizienten Algorithmus aus \cite{BOY10} auch kompliziertere/komplexere [TODO] Probleme, in Kapitel \ref{sec:ErweiterungSOCP} Second Order Cone Problems (SOCP\abk{SOCP}{Second Order Cone Problem}), bzw in Kapitel \ref{sec:ErweiterungQP} Quadratic Programs (QP\abk{QP}{Quadratic Program}) zu lösen, wurde der Algorithmus wie gleich folgt erweitert. Dabei wurde speziell darauf geachtet nicht die Struktur der entstehenden Matrizen zu verändern, sodass diese auch weiterhin ausgenutzt werden kann. Allerdings sind für ein SOCP bzw QP nun die Matrizen für die Ungleichungsnebenbedingungen nicht mehr konstant sondern hängen von $z(k)$ ab, sodass sie in jedem MPC Schritt angepasst werden müssen, was einen erhöhten Rechenaufwand bedeutet.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{SOCP Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Erweiterung für Quadratic Problems}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:ErweiterungQP}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Erweiterung für Second Order Cone Problems}%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:ErweiterungSOCP}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{SOCP Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:SOCPFormulierung}
 Zusäliche Ungleichungsnebenbedingung sieht wie folgt aus [TODO: woher \cite{BOY04}]:
 \begin{equation}
