@@ -75,3 +75,4 @@ target/
 *.toc
 *.tps
 *.tex.backup
+*.bib.backup
