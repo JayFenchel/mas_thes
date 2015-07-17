@@ -9,11 +9,22 @@ Um mit dem effizienten Algorithmus aus \cite{BOY10} auch kompliziertere/komplexe
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Erweiterung für Quadratic Problems}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:ErweiterungQP}
-
+Einführendes zu QPs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{QP-Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:QPFormulierung}
+Zusäliche Ungleichungsnebenbedingung sieht wie folgt aus:
+\begin{equation}
+ x^{T}\Gamma x+\beta^{T}x\leq\alpha
+\end{equation}
+Mit $x=z$ ergeben sich die zusätzlichen $j$ Funktionen für die logarithmic barrier function somit zu
+\begin{equation}
+ -f_{j}(z) = \alpha - z^{T}\Gamma z - \beta^{T}z
+\end{equation}
+Für den Algorithmus wird nun weiterhin die Ableitung (Gradient und Hessian) der logarithmic barrier function $\phi(z)$ benötigt, die aus unter anderem $\nabla f_{k}(z)$ und $\nabla^{2} f_{k}(z)$ gebildet werden.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Erweiterung für Second Order Cone Problems}%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:ErweiterungSOCP}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{SOCP Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:SOCPFormulierung}
