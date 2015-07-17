@@ -7,9 +7,20 @@
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
+\bibitem[BV04]{BOY04}
+\textsc{Boyd}, Stephen ; \textsc{Vandenberghe}, Lieven:
+\newblock \emph{Convex Optimization}.
+\newblock University Press, 2004
+
 \bibitem[MM97]{MAR97}
 \textsc{Maros}, István ; \textsc{Mészáros}, Csaba:
 \newblock A Repository of Convex Quadratic Programming Problems.
 \newblock   (1997)
+
+\bibitem[WB10]{BOY10}
+\textsc{Wang}, Yang ; \textsc{Boyd}, Stephen:
+\newblock Fast Model Predictive Control Using Online optimization.
+\newblock {In: }\emph{IEEE Transactions on Control Systems Technology} 18
+  (2010), Nr. 2, S. 267--278
 
 \end{thebibliography}
