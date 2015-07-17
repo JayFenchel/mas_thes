@@ -3,6 +3,44 @@
 \chapter{Algorithmus}
 \label{chap:algorithmus}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Erweiterung für Second Order Cone Problems}%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:ErweiterungSOCP}
+Um mit dem effizienten Algorithmus aus \cite{BOY10} auch kompliziertere/komplexere [TODO] Probleme, hier speziell Second Order Cone Problems (SOCP\abk{SOCP}{Second Order Cone Problem}) zu lösen, wurde der Algorithmus wie gleich folgt erweitert. Dabei wurde speziell darauf geachtet nicht die Struktur der entstehenden Matrizen zu verändern, sodass diese auch weiterhin ausgenutzt werden kann. Allerdings sind für ein SOCP nun die Matrizen für die Ungleichungsnebenbedingungen nicht mehr konstant sondern hängen von $x(k)$ ab, sodass sie in jedem MPC Schritt angepasst werden müssen, was einen erhöhten Rechenaufwand bedeutet.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{SOCP Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:SOCPFormulierung}
+Zusäliche Ungleichungsnebenbedingung sieht wie folgt aus [TODO: woher \cite{BOY04}]:
+\begin{equation}
+ \label{eq:SOCPUNB}
+ \left \|Ax+b  \right \|_{2} \leq c^{T}x+d
+\end{equation}
+Als generalized inequality nimmt Gleichung \ref{eq:SOCPUNB} leicht andere Form an:
+\begin{equation}
+ \left \|Ax+b  \right \|_{2}^2 \leq \left (c^{T}x+d  \right )^{2}
+\end{equation}
+Im folgenden lässt sich die Ungleichungsnebenbedingung so leichter umformen und ableiten, speziell hebt sich so später ein Wurzelterm auf. Mit $x=z$ ergeben sich die zusätzlichen $j$ Funktionen für die logarithmic barrier function somit zu
+\begin{equation}
+ -f_{j}\left (x  \right )=\left (c_{j}^{T}x+d_{j} \right )^{2}-\left \|A_{j}x+b_{j}  \right \|_{2}^2
+\end{equation}
+Alle $k$ barrier function Funktionen lassen sich zu
+\begin{equation}
+ -f_{k}\left (z  \right )
+ = -\begin{bmatrix}f_{i}\\f_{j}\end{bmatrix}_{k}
+ =\begin{bmatrix}h_{i}\\0\end{bmatrix}_{k} - \begin{bmatrix}p_{i}\\
+ \left (\left\|A_{j}z+b_{j}\right \|_{2}^{2} - \left(c_{j}^{T}z+d_{j}\right )^{2} \right )z^{-1} \end{bmatrix}_{k}z
+\end{equation}
+zusammenfassen. Für den Algorithmus wird nun weiterhin die Ableitung (Gradient und Hessian) der logarithmic barrier function $\phi(z)$ benötigt, die aus unter anderem $\nabla f_{k}(z)$ und $\nabla^{2} f_{k}(z)$ gebildet werden.
+\begin{equation}
+ \nabla f_{k}\left (z  \right )=\begin{bmatrix}p_{i}\\ -2\left(\left(c_{j}^{T}z + d_{j}\right )c_{j} - A_{j}^{T} \left(A_{j}z + b_{j} \right )\right)\end{bmatrix}_{k}
+\end{equation}
+\begin{equation}
+ \nabla^{2} f_{k}\left (z  \right )=\begin{bmatrix}0\\ -2 \left( c_{j}^{T}c_{j} - A_{j}^{T} A_{j}  \right)\end{bmatrix}_{k}
+\end{equation}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Anpassung für test cases}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:testcases}
 Der implementierte Algorithmus wie in [Paper:, Section:] beschrieben kann auch verwendet werden, um Optimierungsprobleme zu lösen, die ihren Ursprung nicht in der Anwendung von MPC haben. Dazu sind keine wirklichen Anpassungen des Algorithmus notwendig. Da der Algorithmus allerdings die Struktur der bei MPC auftretenden Matrizen ausnutzt, muss der jeweilige test case so ``transformiert'' werden, dass dieser eine ähnliche Struktur aufweist.
