@@ -3,30 +3,61 @@
 \chapter{Algorithmus}
 \label{chap:algorithmus}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Erweiterung für nichtlineare Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Erweiterung für nichtlineare Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:ErweiterungNonlincon}
-Um mit dem effizienten Algorithmus aus \cite{BOY10} auch kompliziertere/komplexere [TODO] Probleme, in Kapitel \ref{sec:ErweiterungSOCP} Second Order Cone Problems (SOCP\abk{SOCP}{Second Order Cone Problem}), bzw in Kapitel \ref{sec:ErweiterungQP} Quadratic Programs (QP\abk{QP}{Quadratic Program}) zu lösen, wurde der Algorithmus wie gleich folgt erweitert. Dabei wurde speziell darauf geachtet nicht die Struktur der entstehenden Matrizen zu verändern, sodass diese auch weiterhin ausgenutzt werden kann. Allerdings sind für ein SOCP bzw QP nun die Matrizen für die Ungleichungsnebenbedingungen nicht mehr konstant sondern hängen von $z(k)$ ab, sodass sie in jedem MPC Schritt angepasst werden müssen, was einen erhöhten Rechenaufwand bedeutet.
+Um mit dem effizienten Algorithmus aus \cite{BOY10} auch kompliziertere/komplexere [TODO] Probleme, in Kapitel \ref{sec:ErweiterungSOCP} Second Order Cone Problems (SOCP\abk{SOCP}{Second Order Cone Problem}), bzw in Kapitel \ref{sec:ErweiterungQCQP} Quadratic Programs/Problems mit Quadratic Constraints (QCQP\abk{QCQP}{Quadratic Constrained Quadratic Program}) zu lösen, wurde der Algorithmus wie gleich folgt erweitert. Dabei wurde speziell darauf geachtet nicht die Struktur der entstehenden Matrizen zu verändern, sodass diese auch weiterhin ausgenutzt werden kann. Allerdings sind für ein SOCP bzw QCQP nun die Matrizen für die Ungleichungsnebenbedingungen nicht mehr konstant sondern hängen von $z(k)$ ab, sodass sie in jedem MPC Schritt angepasst werden müssen, was einen erhöhten Rechenaufwand bedeutet.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Erweiterung für Quadratic Problems}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:ErweiterungQP}
-Einführendes zu QPs
+\subsection{Erweiterung für Quadratic Problems mit quadratic Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:ErweiterungQCQP}
+Einführendes zu QCQPs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{QP-Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:QPFormulierung}
+\subsubsection{QCQP-Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:QCQPFormulierung}
 Zusäliche Ungleichungsnebenbedingung sieht wie folgt aus:
 \begin{equation}
  x^{T}\Gamma x+\beta^{T}x\leq\alpha
 \end{equation}
-Mit $x=z$ ergeben sich die zusätzlichen $j$ Funktionen für die logarithmic barrier function somit zu
+Mit $x=z$ kommen somit zu den $lT+l_{f}$ ursprünglichen mit den linearen Ungleichungsnebenbedingungen assoziierten Funktionen zusätzliche $p$ Funktionen für die logarithmic barrier function hinzu
 \begin{equation}
- -f_{j}(z) = \alpha - z^{T}\Gamma z - \beta^{T}z
+ -f_{j}(z) = \alpha_{j} - z^{T}\Gamma_{j} z - \beta_{j}^{T}z, \quad j=1\dots p
 \end{equation}
 Für den Algorithmus wird nun weiterhin die Ableitung (Gradient und Hessian) der logarithmic barrier function $\phi(z)$ benötigt, die aus unter anderem $\nabla f_{k}(z)$ und $\nabla^{2} f_{k}(z)$ gebildet werden.
+\begin{equation}
+ \nabla f_{j}\left (z  \right )=2z^{T}\Gamma_{j}+\beta_{j}^{T}
+\end{equation}
+\begin{equation}
+ \nabla^{2} f_{j}\left (z  \right )=2\Gamma_{j}
+\end{equation}
+Daraus ergibt sich der Gradient der barrier function $\phi(z)$ zu
+\begin{equation}
+ \nabla\phi\left ( z \right )=\sum_{k=1}^{lT+f_{f}+p}
+ \frac{1}{\begin{bmatrix} h_{i}\\\alpha_{j} \end{bmatrix}_{k} -\begin{bmatrix} p_{i}^{T}\\\beta_{j}^{T}+z^{T}\Gamma_{j} \end{bmatrix}_{k}z}
+ \begin{bmatrix} p_{i}^{T}\\\beta_{j}^{T}+2z^{T}\Gamma_{j} \end{bmatrix}_{k}
+\end{equation}
+Mit
+\begin{equation}
+ \hat{P}(z)=\begin{bmatrix} P\\ \beta_{1}^{T}+z^{T}\Gamma_{1}\\ \vdots\\ \beta_{p}^{T}+z^{T}\Gamma_{p} \end{bmatrix},\quad \hat{h} = \begin{bmatrix} h\\ \alpha_{1}^{T}\\ \vdots\\ \alpha_{p}^{T}\end{bmatrix}
+\end{equation}
+lässt sich das auch einfacher schreiben:
+\begin{equation}
+	\nabla\phi\left ( z \right )=\hat{P}^{T}(2z)\hat{d}
+\end{equation}
+Wobei
+\begin{equation}
+	\hat{d}_{k}=\frac{1}{\hat{h}_{k}-\hat{p}_{k}(z)}
+\end{equation}
+und $\hat{p}_{k}(2z)$ die Zeilen in $\hat{P}(2z)$ sein sollen.
+Um $\Phi$ zu bilden wird noch die zweite Ableitung von der barrier function benötigt
+\begin{equation}
+	\nabla^{2}\phi(z)=\hat{P}(2z)\text{diag}(\hat{d})^{2}\hat{P}(2z)+\sum_{j=1}^{p}\left (\hat{d}_{(lT+l_{f})+j}2\Gamma_{j}  \right )
+\end{equation}
+Die Berechnungen der Ableitungen haben also analog Struktur wie \cite{BOY10} bis auf den zusätzlichen Term, der bei der Hessian hinzukommt.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Erweiterung für Second Order Cone Problems}%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Erweiterung für Second Order Cone Problems}%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:ErweiterungSOCP}
+Bei der Ungleichungsnebenbedingungen für die Second Order Cone Constraints lässt sich die Berechnung leider nicht so Überschaubar darstellen, da hier Funktion und Ableitung nicht mehr so schön ähnlich sind. Die Anpassungen müssen daher wie folgt aussehen.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{SOCP Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{SOCP Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:SOCPFormulierung}
 Zusäliche Ungleichungsnebenbedingung sieht wie folgt aus [TODO: woher \cite{BOY04}]:
 \begin{equation}
@@ -45,17 +76,16 @@ Alle $k$ barrier function Funktionen lassen sich zu
 \begin{equation}
  -f_{k}\left (z  \right )
  = -\begin{bmatrix}f_{i}\\f_{j}\end{bmatrix}_{k}
- =\begin{bmatrix}h_{i}\\0\end{bmatrix}_{k} - \begin{bmatrix}p_{i}\\
+ =\begin{bmatrix}h_{i}\\0\end{bmatrix}_{k} - \begin{bmatrix}p_{i}^{T}\\
  \left (\left\|A_{j}z+b_{j}\right \|_{2}^{2} - \left(c_{j}^{T}z+d_{j}\right )^{2} \right )z^{-1} \end{bmatrix}_{k}z
 \end{equation}
 zusammenfassen. Für den Algorithmus wird nun weiterhin die Ableitung (Gradient und Hessian) der logarithmic barrier function $\phi(z)$ benötigt, die aus unter anderem $\nabla f_{k}(z)$ und $\nabla^{2} f_{k}(z)$ gebildet werden.
 \begin{equation}
- \nabla f_{k}\left (z  \right )=\begin{bmatrix}p_{i}\\ -2\left(\left(c_{j}^{T}z + d_{j}\right )c_{j} - A_{j}^{T} \left(A_{j}z + b_{j} \right )\right)\end{bmatrix}_{k}
+ \nabla f_{k}\left (z  \right )=\begin{bmatrix}p_{i}^{T}\\ -2\left(\left(c_{j}^{T}z + d_{j}\right )c_{j} - A_{j}^{T} \left(A_{j}z + b_{j} \right )\right)\end{bmatrix}_{k}
 \end{equation}
 \begin{equation}
  \nabla^{2} f_{k}\left (z  \right )=\begin{bmatrix}0\\ -2 \left( c_{j}^{T}c_{j} - A_{j}^{T} A_{j}  \right)\end{bmatrix}_{k}
 \end{equation}
-
 
 
 
