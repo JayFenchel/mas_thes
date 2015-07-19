@@ -163,22 +163,21 @@ class SOCP:
         self.Fx_soft = Fx
         self.f_soft = fx + fu
 
-
     # Adding a quadratic constraint (type='end' for final constraints)
-    def add_qc(self, type='trajectory', F_qc=None, alpha=None):
+    def add_qc(self, type='trajectory', gamma=None, beta=None, alpha=None):
         # TODO auf ausführliche Form, siehe Zettel erweitern
         if type == 'trajectory':
             if self.qc is not None:
-                self.qc.append([F_qc, alpha])
+                self.qc.append([gamma, beta, alpha])
             else:
-                self.qc = [[F_qc, alpha]]
+                self.qc = [[gamma, beta, alpha]]
             pass
 
-        elif type =='end':
+        elif type == 'end':
             if self.qc_end is not None:
-                self.qc_end.append([F_qc, alpha])
+                self.qc_end.append([gamma, beta, alpha])
             else:
-                self.qc_end = [[F_qc, alpha]]
+                self.qc_end = [[gamma, beta, alpha]]
 
     # Adding a second order cone constraint (type='end' for final constraints)
     def add_socc(self, type='trajectory', socc_A=None, socc_b=None,
