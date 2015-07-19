@@ -214,10 +214,15 @@ class SOCP:
         h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(self.ff)[0]] = self.ff
 
         h[0:np.shape(self.Fx)[0]] -= np.dot(self.Fx, xk)
+        # add quadratic constraint to h
+        if self.qc is not None:
+            for qc in self.qc:
+                h = np.vstack([h, qc[2]])
+
         # add quadratic constraint (end) to h
         if self.qc_end is not None:
             for qc in self.qc_end:
-                h = np.vstack([h, qc[1]])
+                h = np.vstack([h, qc[2]])
 
         # add second-order cone constraint to h
         if self.socc is not None:
