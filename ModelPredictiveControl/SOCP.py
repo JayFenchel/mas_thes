@@ -351,16 +351,34 @@ class SOCP:
         return d
 
     def form_Phi(self, d, zk):
+
+        T, n, m = self.T, self.n, self.m
         P = self.P_of_zk(2*zk)
         #TODO add Term for socp
         # add term for qc (end)
-        term_for_qc = 0
+        term_for_qc = np.zeros([T*(n+m), T*(n+m)])
+        if self.qc is not None:
+            for qc in self.qc:
+                for i in range(0, T-1):  # nur bis T-1, da T Index für qc_end
+                    d_k = 1/(qc[2] - np.dot(
+                        qc[1].T + np.dot(zk[m+i*(n+m):m+i*(n+m)+n].T, qc[0]),
+                        zk[m+i*(n+m):m+i*(n+m)+n]))
+                    # nur passender  nxn-Block für jeweile (T-1) x_k
+                    term_for_qc[m+i*(n+m):m+i*(n+m)+n, m+i*(n+m):m+i*(n+m)+n] +=\
+                        d_k*2*qc[0]
+
+        term_for_qc_end = np.zeros([T*(n+m), T*(n+m)])
         if self.qc_end is not None:
             for qc in self.qc_end:
-                term_for_qc += d[-1]*2*qc[0]  # TODO Wirklich Summe über bilden?
+                d_k = 1/(qc[2] - np.dot(
+                    qc[1].T + np.dot(zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n].T, qc[0]),
+                    zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]))
+                term_for_qc_end[m+(T-1)*(n+m):m+(T-1)*(n+m)+n, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] +=\
+                    d_k*2*qc[0]  # nur unterer rechter Block nxn bei end_qc
 
         Phi = 2*self.H\
-              + self.kappa*(np.dot(np.dot(P.T, matrix_diag(d*d)), P) + term_for_qc)  # *2 siehe Zettel
+              + self.kappa*(np.dot(np.dot(P.T, matrix_diag(d*d)), P) +
+                            term_for_qc + term_for_qc_end)  # *2 siehe Zettel
         return Phi
 
     def form_Phi_soft(self, d, zk):
