@@ -165,7 +165,7 @@ class SOCP:
 
     # Adding a quadratic constraint (type='end' for final constraints)
     def add_qc(self, type='trajectory', gamma=None, beta=None, alpha=None):
-        # TODO auf ausführliche Form, siehe Zettel erweitern
+        # TODO Was machen wenn eine Matrix/ein Vektor None?
         if type == 'trajectory':
             if self.qc is not None:
                 self.qc.append([gamma, beta, alpha])
@@ -217,7 +217,10 @@ class SOCP:
         # add quadratic constraint to h
         if self.qc is not None:
             for qc in self.qc:
-                h = np.vstack([h, qc[2]])
+                h_add = np.zeros([T-1, 1])
+                for i in range(0, T-1):
+                    h_add[i] = qc[2]
+                h = np.vstack([h, h_add])
 
         # add quadratic constraint (end) to h
         if self.qc_end is not None:
@@ -285,10 +288,23 @@ class SOCP:
         # Inequality constraints
         P = self.P
 
+        # add quadratic constraint to P
+        if self.qc is not None:
+            for qc in self.qc:
+                P_add = np.zeros([T-1, np.shape(self.P)[1]])
+                for i in range(0, T-1):  # nur bis T-1, da T Index für qc_end
+                    P_add[i, m+i*(m+n):m+i*(m+n)+n] =\
+                        qc[1].T + np.dot(zk[m+i*(n+m):m+i*(n+m)+n].T, qc[0])
+                        # TODO obige Zeile als Funktion auslagern
+                P = np.vstack([P, P_add])
+
         # add quadratic constraint (end) to P
         if self.qc_end is not None:
             for qc in self.qc_end:
-                P_add = np.dot(zk.T, qc[0])
+                P_add = np.zeros([1, np.shape(self.P)[1]])
+                P_add[0, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] =\
+                    qc[1].T + np.dot(zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n].T, qc[0])
+                    # TODO obige Zeile als Funktion auslagern
                 P = np.vstack([P, P_add])
 
         # add second-order cone constraint to P
