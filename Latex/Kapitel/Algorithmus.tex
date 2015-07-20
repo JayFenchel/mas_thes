@@ -51,7 +51,7 @@ Um $\Phi$ zu bilden wird noch die zweite Ableitung von der barrier function benö
 \begin{equation}
 	\nabla^{2}\phi(z)=\hat{P}(2z)\text{diag}(\hat{d})^{2}\hat{P}(2z)+\sum_{j=1}^{p}\left (\hat{d}_{(lT+l_{f})+j}2\Gamma_{j}  \right )
 \end{equation}
-Die Berechnungen der Ableitungen haben also analog Struktur wie \cite{BOY10} bis auf den zusätzlichen Term, der bei der Hessian hinzukommt.
+Die Berechnungen der Ableitungen haben also analog Struktur wie \cite{BOY10} bis auf den zusätzlichen Term, der bei der Hessian hinzukommt. Aber da dieser Term in der Implementierung nicht durch die Multiplikation einer großen Matrix $Gamma$ mit $z$ sonder identischer Teilmatrizen $Gamma_{k}$ mit den $T$ $x_{k}$ ist sicher gestellt das keine größeren Blöcke als $n\times n$ an den richtigen Stellen erzeugt werden. Das bedeutet, dass auch hier die Struktur der Matrix $\Phi$ nicht verändert wird.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Erweiterung für Second Order Cone Problems}%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:ErweiterungSOCP}
