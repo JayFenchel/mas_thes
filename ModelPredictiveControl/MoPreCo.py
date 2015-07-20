@@ -22,7 +22,7 @@ from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 # sys = AirCraft()
 # QP1 = QuadraticProgram(sys)
 # QP, AA, bb = qp_from_test()
-QP = qp_from_new_sys()
+QP = qp_from_sys()
 # exit()
 n = QP.n
 m = QP.m
@@ -32,7 +32,7 @@ T = QP.T  # Planning horizon
 x0 = np.array([[0.], [0.], [0.], [400.], [0.]])
 u0 = np.array([[0.]])
 
-x0, u0 = QP.x0, QP.u0
+# x0, u0 = QP.x0, QP.u0
 
 z0 = np.zeros([T*(m+n), 1])
 for i in range(0, T):
