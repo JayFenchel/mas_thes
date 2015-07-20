@@ -76,13 +76,14 @@ Alle $k$ barrier function Funktionen lassen sich zu
 \begin{equation}
  -f_{k}\left (z  \right )
  = -\begin{bmatrix}f_{i}\\f_{j}\end{bmatrix}_{k}
- =\begin{bmatrix}h_{i}\\0\end{bmatrix}_{k} - \begin{bmatrix}p_{i}^{T}\\
- \left (\left\|A_{j}z+b_{j}\right \|_{2}^{2} - \left(c_{j}^{T}z+d_{j}\right )^{2} \right )z^{-1} \end{bmatrix}_{k}z
+ =\begin{bmatrix}h_{i}\\0\end{bmatrix}_{k} - \begin{bmatrix}p_{i}^{T}z\\
+ \left (\left\|A_{j}z+b_{j}\right \|_{2}^{2} - \left(c_{j}^{T}z+d_{j}\right )^{2} \right ) \end{bmatrix}_{k}
 \end{equation}
 zusammenfassen. Für den Algorithmus wird nun weiterhin die Ableitung (Gradient und Hessian) der logarithmic barrier function $\phi(z)$ benötigt, die aus unter anderem $\nabla f_{k}(z)$ und $\nabla^{2} f_{k}(z)$ gebildet werden.
 \begin{equation}
- \nabla f_{k}\left (z  \right )=\begin{bmatrix}p_{i}^{T}\\ -2\left(\left(c_{j}^{T}z + d_{j}\right )c_{j} - A_{j}^{T} \left(A_{j}z + b_{j} \right )\right)\end{bmatrix}_{k}
+ \nabla f_{k}\left (z  \right )=\begin{bmatrix}p_{i}^{T}\\ \left (-2\left(\left(c_{j}^{T}z + d_{j}\right )c_{j} - A_{j}^{T} \left(A_{j}z + b_{j} \right )\right) \right)^{T}\end{bmatrix}_{k}
 \end{equation}
+Das Transponieren der unteren Zeile ergibt sich dadurch, dass man zu $P$ eine Spalte anhängt also zu $P^{T}$ die transformierte dieser Spalte.
 \begin{equation}
  \nabla^{2} f_{k}\left (z  \right )=\begin{bmatrix}0\\ -2 \left( c_{j}^{T}c_{j} - A_{j}^{T} A_{j}  \right)\end{bmatrix}_{k}
 \end{equation}
