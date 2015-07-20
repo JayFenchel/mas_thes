@@ -317,7 +317,7 @@ class SOCP:
                 P_add = np.zeros([T-1, np.shape(self.P)[1]])
                 for i in range(0, T-1):  # nur bis T-1, da T Index für socc_end
                     P_add[i, m+i*(m+n):m+i*(m+n)+n] =\
-                        self._A_of_socc(socc, zk[m+i*(n+m):m+i*(n+m)+n])
+                        self._A_of_socc(socc, 0.5*zk[m+i*(n+m):m+i*(n+m)+n])
                 P = np.vstack([P, P_add])
 
         # add second-order cone constraint (end) to P
@@ -325,7 +325,7 @@ class SOCP:
             for socc in self.socc_end:
                 P_add = np.zeros([1, np.shape(self.P)[1]])
                 P_add[0, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] =\
-                    self._A_of_socc(socc, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])
+                    self._A_of_socc(socc, 0.5*zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])
                 P = np.vstack([P, P_add])
 
         return P
@@ -343,15 +343,13 @@ class SOCP:
             for socc in self.socc:
                 correct = np.zeros([T-1, 1])
                 for i in range(0, T-1):
-                    correct[i] = 2*np.dot((np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n])) -\
-                               np.dot(socc[2].T*np.dot(zv_k[m+i*(n+m):m+i*(n+m)+n].T, socc[2]), zv_k[m+i*(n+m):m+i*(n+m)+n]) -\
+                    correct[i] = 2*np.dot((np.dot(socc[0], 0.5*zv_k[m+i*(n+m):m+i*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n])) -\
                                (np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n]+socc[1])*np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n]+socc[1])).sum()
                 d_correct = np.vstack([d_correct, correct])
 
         if self.socc_end is not None:
             for socc in self.socc_end:
-                correct = 2*np.dot((np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])) -\
-                          np.dot(socc[2].T*np.dot(zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n].T, socc[2]), zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) -\
+                correct = 2*np.dot((np.dot(socc[0], 0.5*zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])) -\
                           (np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]+socc[1])*np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]+socc[1])).sum()
                 d_correct = np.vstack([d_correct, correct])
         d[-np.shape(d_correct)[0]:] += d_correct[:]
