@@ -331,11 +331,30 @@ class SOCP:
         return P
 
     def form_d(self, xk, zv_k):
+        T, n, m = self.T, self.n, self.m
         # Form d for further use
         P = self.P_of_zk(zv_k[0:self.T*(self.m+self.n)])
         h = self.h_of_xk(xk)
         d = np.zeros([np.shape(P)[0], np.shape(zv_k)[1]])
         d[:] = 1/(h[:]-np.dot(P[:], zv_k[0:self.T*(self.m+self.n)]))
+
+        d_correct = np.zeros([0, 1 ])
+        if self.socc is not None:
+            for socc in self.socc:
+                correct = np.zeros([T-1, 1])
+                for i in range(0, T-1):
+                    correct[i] = 2*np.dot((np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n])) -\
+                               np.dot(socc[2].T*np.dot(zv_k[m+i*(n+m):m+i*(n+m)+n].T, socc[2]), zv_k[m+i*(n+m):m+i*(n+m)+n]) -\
+                               (np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n]+socc[1])*np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n]+socc[1])).sum()
+                d_correct = np.vstack([d_correct, correct])
+
+        if self.socc_end is not None:
+            for socc in self.socc_end:
+                correct = 2*np.dot((np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])) -\
+                          np.dot(socc[2].T*np.dot(zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n].T, socc[2]), zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) -\
+                          (np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]+socc[1])*np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]+socc[1])).sum()
+                d_correct = np.vstack([d_correct, correct])
+        d[-np.shape(d_correct)[0]:] += d_correct[:]
         return d
 
     def form_d_soft(self, xk, zv_k):
