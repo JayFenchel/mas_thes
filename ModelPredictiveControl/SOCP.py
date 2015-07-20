@@ -165,7 +165,11 @@ class SOCP:
 
     # Adding a quadratic constraint (type='end' for final constraints)
     def add_qc(self, type='trajectory', gamma=None, beta=None, alpha=None):
-        # TODO Was machen wenn eine Matrix/ein Vektor None?
+        if beta is None:
+            beta = np.zeros([np.shape(gamma)[0], 1])
+        if gamma is None or alpha is None:
+            print('gamma and alpha have to be not None.')
+
         if type == 'trajectory':
             if self.qc is not None:
                 self.qc.append([gamma, beta, alpha])
@@ -350,12 +354,9 @@ class SOCP:
         d[:] = e_term*1/((1 + e_term)*(1 + e_term))
         return d
 
-    def form_Phi(self, d, zk):
-
+    def term_for_qc(self, zk):
         T, n, m = self.T, self.n, self.m
-        P = self.P_of_zk(2*zk)
-        #TODO add Term for socp
-        # add term for qc (end)
+        # add term for qc
         term_for_qc = np.zeros([T*(n+m), T*(n+m)])
         if self.qc is not None:
             for qc in self.qc:
@@ -366,7 +367,7 @@ class SOCP:
                     # nur passender  nxn-Block für jeweile (T-1) x_k
                     term_for_qc[m+i*(n+m):m+i*(n+m)+n, m+i*(n+m):m+i*(n+m)+n] +=\
                         d_k*2*qc[0]
-
+        # add term for qc (end)
         term_for_qc_end = np.zeros([T*(n+m), T*(n+m)])
         if self.qc_end is not None:
             for qc in self.qc_end:
@@ -376,9 +377,15 @@ class SOCP:
                 term_for_qc_end[m+(T-1)*(n+m):m+(T-1)*(n+m)+n, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] +=\
                     d_k*2*qc[0]  # nur unterer rechter Block nxn bei end_qc
 
+        return term_for_qc + term_for_qc_end
+
+    def form_Phi(self, d, zk):
+
+        P = self.P_of_zk(2*zk)
+        #TODO add Term for socp
         Phi = 2*self.H\
               + self.kappa*(np.dot(np.dot(P.T, matrix_diag(d*d)), P) +
-                            term_for_qc + term_for_qc_end)  # *2 siehe Zettel
+                            self.term_for_qc(zk))  # *2 siehe Zettel
         return Phi
 
     def form_Phi_soft(self, d, zk):
