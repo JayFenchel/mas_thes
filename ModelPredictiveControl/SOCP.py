@@ -350,7 +350,7 @@ class SOCP:
         if self.socc_end is not None:
             for socc in self.socc_end:
                 correct = 2*np.dot((np.dot(socc[0], 0.5*zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])) -\
-                          (np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]+socc[1])*np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]+socc[1])).sum()
+                          ((np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])*(np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])).sum()
                 d_correct = np.vstack([d_correct, correct])
         d[-np.shape(d_correct)[0]:] += d_correct[:]
         return d
@@ -396,13 +396,36 @@ class SOCP:
 
         return term_for_qc + term_for_qc_end
 
+    def term_for_socc(self, zk):
+        T, n, m = self.T, self.n, self.m
+        # add term for qc
+        term_for_socc = np.zeros([T*(n+m), T*(n+m)])
+        if self.socc is not None:
+            for socc in self.socc:
+                for i in range(0, T-1):  # nur bis T-1, da T Index für qc_end
+                    d_k = 1/((np.dot(socc[2].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc[3])*(np.dot(socc[2].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc[3]) -
+                             ((np.dot(socc[0], zk[m+i*(n+m):m+i*(n+m)+n])-socc[1])* (np.dot(socc[0], zk[m+i*(n+m):m+i*(n+m)+n])-socc[1]).sum()))
+                    # nur passender  nxn-Block für jeweilige (T-1) x_k
+                    term_for_socc[m+i*(n+m):m+i*(n+m)+n, m+i*(n+m):m+i*(n+m)+n] +=\
+                        d_k*-2*(np.dot(socc[2], socc[2].T) - np.dot(socc[0].T, socc[0]))
+        # add term for qc (end)
+        term_for_socc_end = np.zeros([T*(n+m), T*(n+m)])
+        if self.socc_end is not None:
+            for socc in self.socc_end:
+                d_k = 1/((np.dot(socc[2].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[3])*(np.dot(socc[2].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[3]) -
+                         ((np.dot(socc[0], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])-socc[1])*(np.dot(socc[0], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])-socc[1])).sum())
+                term_for_socc_end[m+(T-1)*(n+m):m+(T-1)*(n+m)+n, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] +=\
+                    d_k*-2*(np.dot(socc[2], socc[2].T) - np.dot(socc[0].T, socc[0]))  # nur unterer rechter Block nxn bei end_qc
+
+        return term_for_socc + term_for_socc_end
+
     def form_Phi(self, d, zk):
 
         P = self.P_of_zk(2*zk)
         #TODO add Term for socp
         Phi = 2*self.H\
               + self.kappa*(np.dot(np.dot(P.T, matrix_diag(d*d)), P) +
-                            self.term_for_qc(zk))  # *2 siehe Zettel
+                            self.term_for_qc(zk) + self.term_for_socc(zk))  # *2 siehe Zettel
         return Phi
 
     def form_Phi_soft(self, d, zk):
