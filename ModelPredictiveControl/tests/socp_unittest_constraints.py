@@ -46,8 +46,8 @@ class MyTestCase(unittest.TestCase):
         # For test_socc
         T, n, m = 3, 2, 1
         self.test_qp2 = SOCP(T, n, m)
-        self.z_test_socc = np.array([[1.], [0.], [0.], [-3.], [-1.], [1.], [7.], [1.],
-                                     [6.]])
+        self.z_test_socc = np.array(
+            [[1.], [0.], [0.], [-3.], [-1.], [1.], [7.], [1.], [6.]])
         self.A = np.array([[1., 7.], [3., -4.]])
         self.b = np.array([[11.], [5.]])
         self.c = np.array([[3.], [7.]])
@@ -62,33 +62,40 @@ class MyTestCase(unittest.TestCase):
         self.test_qp2.add_socc(self.A, self.b, self.c, self.d)
         self.test_qp2.add_socc(self.AE, self.bE, self.cE, self.dE, type='end')
 
-        self.test_qp2.P=np.zeros([0, self.test_qp2.T*(self.test_qp2.n+self.test_qp2.m)])
+        x_dummy = np.array([[0], [0]])
+        T, n, m = self.test_qp2.T, self.test_qp2.n, self.test_qp2.m
+        
+        self.test_qp2.P=np.zeros([0, T*(n+m)])
         P_ref = np.array([[0., 58., 128., 0., 0., 0., 0., 0., 0.],
                           [0., 0., 0., 0., 4., 212., 0., 0., 0.],
                           [0., 0., 0., 0., 0., 0., 0., -292., 661./2.]])
 
-        self.assertTrue((abs(self.test_qp2.P_of_zk(2*self.z_test_socc) - P_ref).sum()) < 1e-10,
-                        'Wrong P_of_zk(socc)') # TODO *2 weil auch im Algorithmus so, unschön
+        self.assertTrue(
+            (abs(self.test_qp2.P_of_zk(2*self.z_test_socc) - P_ref).sum()) < 1e-10,
+            'Wrong P_of_zk(socc)') # TODO *2 weil auch im Algorithmus so, unschön
 
         d_ref = np.array([[-1./145.],
                           [-1./284.],
                           [-4./5371.]])
 
-        self.assertTrue((abs(self.test_qp2.form_d(np.array([[0], [0]]), self.z_test_socc) - d_ref).sum()) < 1e-10,
-                        'Wrong form_d(socc)')
+        self.assertTrue(
+            (abs(self.test_qp2.form_d(x_dummy, self.z_test_socc) - d_ref).sum()) < 1e-10,
+            'Wrong form_d(socc)')
 
-        term_for_socc_ref = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
-                                      [0., -2./145., 52./145., 0., 0., 0., 0., 0., 0.],
-                                      [0., 52./145., -32./145., 0., 0., 0., 0., 0., 0.],
-                                      [0., 0., 0., 0., 0., 0., 0., 0., 0.],
-                                      [0., 0., 0., 0., -1./142., 13./71., 0., 0., 0.],
-                                      [0., 0., 0., 0., 13./71., -8./71., 0., 0., 0.],
-                                      [0., 0., 0., 0., 0., 0., 0., 0., 0.],
-                                      [0., 0., 0., 0., 0., 0., 0., -2./5371., 224./5371.],
-                                      [0., 0., 0., 0., 0., 0., 0., 224./5371., -182./5371.]])
+        term_for_socc_ref = np.array(
+            [[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., -2./145., 52./145., 0., 0., 0., 0., 0., 0.],
+             [0., 52./145., -32./145., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., -1./142., 13./71., 0., 0., 0.],
+             [0., 0., 0., 0., 13./71., -8./71., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., -2./5371., 224./5371.],
+             [0., 0., 0., 0., 0., 0., 0., 224./5371., -182./5371.]])
 
-        self.assertTrue((abs(self.test_qp2.term_for_socc(self.z_test_socc)-term_for_socc_ref).sum()) < 1e-10,
-                        'Wrong socc_Term for Phi')
+        self.assertTrue(
+            (abs(self.test_qp2.term_for_socc(self.z_test_socc) - term_for_socc_ref).sum()) < 1e-10,
+            'Wrong socc_Term for Phi')
 
     def test_set_lin_constraints(self):
 
