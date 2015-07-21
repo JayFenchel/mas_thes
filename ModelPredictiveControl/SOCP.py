@@ -184,8 +184,8 @@ class SOCP:
                 self.qc_end = [[gamma, beta, alpha]]
 
     # Adding a second order cone constraint (type='end' for final constraints)
-    def add_socc(self, type='trajectory', socc_A=None, socc_b=None,
-                 socc_c=None, socc_d=None):
+    def add_socc(self, socc_A=None, socc_b=None,
+                 socc_c=None, socc_d=None, type='trajectory'):
         if type == 'trajectory':
             if self.socc is not None:
                 self.socc.append([socc_A, socc_b, socc_c, socc_d])
@@ -404,7 +404,7 @@ class SOCP:
             for socc in self.socc:
                 for i in range(0, T-1):  # nur bis T-1, da T Index für qc_end
                     d_k = 1/((np.dot(socc[2].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc[3])*(np.dot(socc[2].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc[3]) -
-                             ((np.dot(socc[0], zk[m+i*(n+m):m+i*(n+m)+n])-socc[1])* (np.dot(socc[0], zk[m+i*(n+m):m+i*(n+m)+n])-socc[1]).sum()))
+                             ((np.dot(socc[0], zk[m+i*(n+m):m+i*(n+m)+n])+socc[1])* (np.dot(socc[0], zk[m+i*(n+m):m+i*(n+m)+n])+socc[1])).sum())
                     # nur passender  nxn-Block für jeweilige (T-1) x_k
                     term_for_socc[m+i*(n+m):m+i*(n+m)+n, m+i*(n+m):m+i*(n+m)+n] +=\
                         d_k*-2*(np.dot(socc[2], socc[2].T) - np.dot(socc[0].T, socc[0]))
@@ -413,7 +413,7 @@ class SOCP:
         if self.socc_end is not None:
             for socc in self.socc_end:
                 d_k = 1/((np.dot(socc[2].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[3])*(np.dot(socc[2].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[3]) -
-                         ((np.dot(socc[0], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])-socc[1])*(np.dot(socc[0], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])-socc[1])).sum())
+                         ((np.dot(socc[0], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])*(np.dot(socc[0], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])).sum())
                 term_for_socc_end[m+(T-1)*(n+m):m+(T-1)*(n+m)+n, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] +=\
                     d_k*-2*(np.dot(socc[2], socc[2].T) - np.dot(socc[0].T, socc[0]))  # nur unterer rechter Block nxn bei end_qc
 

@@ -43,6 +43,38 @@ class MyTestCase(unittest.TestCase):
         T, n, m = 3, 5, 2
         self.test_qp = SOCP(T, n, m)
 
+        # For test_socc
+        T, n, m = 3, 2, 1
+        self.test_qp2 = SOCP(T, n, m)
+        self.z_test_socc = np.array([[1.], [0.], [0.], [-3.], [-1.], [1.], [7.], [1.],
+                                     [6.]])
+        self.A = np.array([[1., 7.], [3., -4.]])
+        self.b = np.array([[11.], [5.]])
+        self.c = np.array([[3.], [7.]])
+        self.d = np.array([[-1.]])
+        self.AE = np.array([[.5, 7.], [3., -4.]])
+        self.bE = np.array([[10.5], [5.]])
+        self.cE = np.array([[3.], [6.5]])
+        self.dE = np.array([[-.5]])
+
+    def test_terms_for_socc(self):
+
+        self.test_qp2.add_socc(self.A, self.b, self.c, self.d)
+        self.test_qp2.add_socc(self.AE, self.bE, self.cE, self.dE, type='end')
+
+        term_for_socc_ref = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                                      [0., -2./145., 52./145., 0., 0., 0., 0., 0., 0.],
+                                      [0., 52./145., -32./145., 0., 0., 0., 0., 0., 0.],
+                                      [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                                      [0., 0., 0., 0., -1./142., 13./71., 0., 0., 0.],
+                                      [0., 0., 0., 0., 13./71., -8./71., 0., 0., 0.],
+                                      [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                                      [0., 0., 0., 0., 0., 0., 0., -2./5371., 224./5371.],
+                                      [0., 0., 0., 0., 0., 0., 0., 224./5371., -182./5371.]])
+
+        self.assertTrue((abs(self.test_qp2.term_for_socc(self.z_test_socc)-term_for_socc_ref).sum()) < 1e-10,
+                        'Wrong socc_Term for Phi')
+
     def test_set_lin_constraints(self):
 
         self.test_qp.set_lin_constraints(self.Fu, self.fu, self.Fx, self.fx,
