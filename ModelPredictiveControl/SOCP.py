@@ -270,10 +270,8 @@ class SOCP:
 
     # new line in P matrix corresponding to a second order cone constraint
     def _A_of_socc(self, socc, xk_):
-        # TODO test _A_of_socc
         # TODO Konstante Terme nur einmal berechnen
         socc_A, socc_b, socc_c, socc_d = socc[0], socc[1], socc[2], socc[3]
-        # TODO [0:n] nur als Behelf, um die Dimensionen richtig zu machen eigentlich jede Zeile mit den richtigen Einträgen aus z multiplizieren
         _A_ = 2*(-socc_d*socc_c - np.dot(socc_c.T, xk_)*socc_c
                  + np.dot(socc_A.T, np.dot(socc_A, xk_) + socc_b))
         return _A_.T
@@ -282,9 +280,6 @@ class SOCP:
         # return 2*z.T*Ff_alpha
         # TODO richtige Berechnung, richtige angabe in system.py
         pass
-
-    def d_A_dz_of_socc_A_b(self, zk):
-        return 2*(-self.socc_c_end.T*self.socc_c_end.T + np.dot(self.socc_A_end.T, self.socc_A_end))
 
     def P_of_zk(self, zk):
 
