@@ -210,14 +210,20 @@ class SOCP:
     def h_of_xk(self, xk):
 
         T, n, m = self.T, self.n, self.m
-        f = self.f
 
-        h = np.zeros([T*np.shape(f)[0]+np.shape(self.ff)[0], 1])
-        for i in range(0, T):
-            h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
-        h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(self.ff)[0]] = self.ff
+        if self.f is not None and self.Fx is not None and self.ff is not None:
+            f = self.f
 
-        h[0:np.shape(self.Fx)[0]] -= np.dot(self.Fx, xk)
+            h = np.zeros([T*np.shape(f)[0]+np.shape(self.ff)[0], 1])
+            for i in range(0, T):
+                h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
+            h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(self.ff)[0]] = self.ff
+
+            h[0:np.shape(self.Fx)[0]] -= np.dot(self.Fx, xk)
+        else:
+            print('No linear constraints have been set')
+            h = np.zeros([0, 1])
+
         # add quadratic constraint to h
         if self.qc is not None:
             for qc in self.qc:
@@ -339,7 +345,7 @@ class SOCP:
                 correct = np.zeros([T-1, 1])
                 for i in range(0, T-1):
                     correct[i] = 2*np.dot((np.dot(socc[0], 0.5*zv_k[m+i*(n+m):m+i*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n])) -\
-                               (np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n]+socc[1])*np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n]+socc[1])).sum()
+                               ((np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n])+socc[1])*(np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n])+socc[1])).sum()
                 d_correct = np.vstack([d_correct, correct])
 
         if self.socc_end is not None:
@@ -347,7 +353,7 @@ class SOCP:
                 correct = 2*np.dot((np.dot(socc[0], 0.5*zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])) -\
                           ((np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])*(np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])).sum()
                 d_correct = np.vstack([d_correct, correct])
-        d[-np.shape(d_correct)[0]:] += d_correct[:]
+        d[-np.shape(d_correct)[0]:] = 1/(1/d[-np.shape(d_correct)[0]:] + d_correct[:])
         return d
 
     def form_d_soft(self, xk, zv_k):

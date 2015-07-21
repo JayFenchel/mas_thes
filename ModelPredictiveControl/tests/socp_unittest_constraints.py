@@ -70,7 +70,12 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue((abs(self.test_qp2.P_of_zk(2*self.z_test_socc) - P_ref).sum()) < 1e-10,
                         'Wrong P_of_zk(socc)') # TODO *2 weil auch im Algorithmus so, unschön
 
+        d_ref = np.array([[-1./145.],
+                          [-1./284.],
+                          [-4./5371.]])
 
+        self.assertTrue((abs(self.test_qp2.form_d(np.array([[0], [0]]), self.z_test_socc) - d_ref).sum()) < 1e-10,
+                        'Wrong form_d(socc)')
 
         term_for_socc_ref = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
                                       [0., -2./145., 52./145., 0., 0., 0., 0., 0., 0.],

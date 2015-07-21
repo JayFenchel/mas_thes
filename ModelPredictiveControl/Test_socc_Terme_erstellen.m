@@ -21,12 +21,19 @@ if ((A*zi + b)'*(A*zi + b) - (norm(A*zi+b))^2) > 0.00000000001
     'Warnung'
 end
 %% P_of_zk
-nab1_f = -2*((cE'*zi + dE)*cE - AE'*(AE*zi + bE))'
+nab1_f = -2*((cE'*zi + dE)*cE - AE'*(AE*zi + bE))';
 
 % P_ref = np.array([[0., 58., 128., 0., 0., 0., 0., 0., 0.],
 %                   [0., 0., 0., 0., 4., 212., 0., 0., 0.],
 %                   [0., 0., 0., 0., 0., 0., 0., -292., 661./2.]])
 
+%% form_d
+minus_f = (cE'*zi + dE)^2 - (AE*zi + bE)'*(AE*zi + bE);
+d_i= 1/minus_f
+
+% d_ref = np.array([[-1./145.],
+%                   [-1./284.],
+%                   [-4./5371.]])
 
 %% Term in Phi    
 minus_f = (c'*zi + d)^2 - (A*zi + b)'*(A*zi + b);
