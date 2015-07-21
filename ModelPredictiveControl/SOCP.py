@@ -353,7 +353,8 @@ class SOCP:
                 correct = 2*np.dot((np.dot(socc[0], 0.5*zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])) -\
                           ((np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])*(np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])).sum()
                 d_correct = np.vstack([d_correct, correct])
-        d[-np.shape(d_correct)[0]:] = 1/(1/d[-np.shape(d_correct)[0]:] + d_correct[:])
+        if self.socc_end is not None or self.socc is not None:
+            d[-np.shape(d_correct)[0]:] = 1/(1/d[-np.shape(d_correct)[0]:] + d_correct[:])
         return d
 
     def form_d_soft(self, xk, zv_k):
