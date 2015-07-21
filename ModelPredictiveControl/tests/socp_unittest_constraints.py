@@ -60,13 +60,16 @@ class MyTestCase(unittest.TestCase):
     def test_terms_for_socc(self):
 
         self.test_qp2.add_socc(self.A, self.b, self.c, self.d)
+        self.test_qp2.add_socc(self.A, self.b, self.c, self.d)
         self.test_qp2.add_socc(self.AE, self.bE, self.cE, self.dE, type='end')
 
         x_dummy = np.array([[0], [0]])
         T, n, m = self.test_qp2.T, self.test_qp2.n, self.test_qp2.m
-        
+
         self.test_qp2.P=np.zeros([0, T*(n+m)])
         P_ref = np.array([[0., 58., 128., 0., 0., 0., 0., 0., 0.],
+                          [0., 0., 0., 0., 4., 212., 0., 0., 0.],
+                          [0., 58., 128., 0., 0., 0., 0., 0., 0.],
                           [0., 0., 0., 0., 4., 212., 0., 0., 0.],
                           [0., 0., 0., 0., 0., 0., 0., -292., 661./2.]])
 
@@ -75,6 +78,8 @@ class MyTestCase(unittest.TestCase):
             'Wrong P_of_zk(socc)') # TODO *2 weil auch im Algorithmus so, unschön
 
         d_ref = np.array([[-1./145.],
+                          [-1./284.],
+                          [-1./145.],
                           [-1./284.],
                           [-4./5371.]])
 
@@ -91,7 +96,17 @@ class MyTestCase(unittest.TestCase):
              [0., 0., 0., 0., 13./71., -8./71., 0., 0., 0.],
              [0., 0., 0., 0., 0., 0., 0., 0., 0.],
              [0., 0., 0., 0., 0., 0., 0., -2./5371., 224./5371.],
-             [0., 0., 0., 0., 0., 0., 0., 224./5371., -182./5371.]])
+             [0., 0., 0., 0., 0., 0., 0., 224./5371., -182./5371.]]) +\
+                            np.array(
+            [[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., -2./145., 52./145., 0., 0., 0., 0., 0., 0.],
+             [0., 52./145., -32./145., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., -1./142., 13./71., 0., 0., 0.],
+             [0., 0., 0., 0., 13./71., -8./71., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.]])
 
         self.assertTrue(
             (abs(self.test_qp2.term_for_socc(self.z_test_socc) - term_for_socc_ref).sum()) < 1e-10,
