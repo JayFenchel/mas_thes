@@ -62,6 +62,16 @@ class MyTestCase(unittest.TestCase):
         self.test_qp2.add_socc(self.A, self.b, self.c, self.d)
         self.test_qp2.add_socc(self.AE, self.bE, self.cE, self.dE, type='end')
 
+        self.test_qp2.P=np.zeros([0, self.test_qp2.T*(self.test_qp2.n+self.test_qp2.m)])
+        P_ref = np.array([[0., 58., 128., 0., 0., 0., 0., 0., 0.],
+                          [0., 0., 0., 0., 4., 212., 0., 0., 0.],
+                          [0., 0., 0., 0., 0., 0., 0., -292., 661./2.]])
+
+        self.assertTrue((abs(self.test_qp2.P_of_zk(2*self.z_test_socc) - P_ref).sum()) < 1e-10,
+                        'Wrong P_of_zk(socc)') # TODO *2 weil auch im Algorithmus so, unschön
+
+
+
         term_for_socc_ref = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
                                       [0., -2./145., 52./145., 0., 0., 0., 0., 0., 0.],
                                       [0., 52./145., -32./145., 0., 0., 0., 0., 0., 0.],
@@ -75,59 +85,59 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue((abs(self.test_qp2.term_for_socc(self.z_test_socc)-term_for_socc_ref).sum()) < 1e-10,
                         'Wrong socc_Term for Phi')
 
-    def test_set_lin_constraints(self):
-
-        self.test_qp.set_lin_constraints(self.Fu, self.fu, self.Fx, self.fx,
-                                         self.Ff, self.ff)
-
-        self.assertTrue((self.test_qp.P_of_zk(None) == self.ref_P).all(), 'False P-matrix')
-
-        ref_h = np.array([[1, 3, 5, 1, 3, 5, 1, 3, 5, 0.5, 1, 1.5]]).T
-        self. assertTrue((self.test_qp.h_of_xk(np.array([[0], [0], [0], [0], [0]])) == ref_h).all(), 'False h-vector')
-
-        x_test = np.array([[5, 1, 4, 2, 3]]).T
-        z_test = np.array([[9, 0, 8, 1, 7, 2, 6, 3, 5, 4, 0, 9, 0, 8, 1, 7, 2,
-                            6, 3, 5, 4]]).T
-        v_test = np.array([[0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1]]).T
-        zv_test = np.vstack([z_test, v_test])
-
-        ref_d = np.array([[-0.01694915254, -0.00833333333, -0.01960784314,
-                           -0.01265822785, -0.00653594771, -0.02500000000,
-                           -0.01265822785, -0.00847457627, -0.02777777778,
-                           -0.03225806452, -0.01652892562, -1.00000000000]]).T
-        self.assertTrue((abs(self.test_qp.form_d(x_test, zv_test) - ref_d)).sum() < 1e-10,
-                        'False d-vector')
-        # TODO Test residual(), dazu noch C-Matrix setzen
-        # # Mal angenommen, das alte residual was richtig
-        # self.assertTrue((np.vstack(self.test_qp.old_residual(x_test, zv_test)) ==
-        #                 np.vstack(self.test_qp.residual(x_test, zv_test))).all(),
-        #                 'Residual changed')
-
-    # def test_eval_of_non_lin_constraints(self):
+    # def test_set_lin_constraints(self):
     #
     #     self.test_qp.set_lin_constraints(self.Fu, self.fu, self.Fx, self.fx,
     #                                      self.Ff, self.ff)
     #
+    #     self.assertTrue((self.test_qp.P_of_zk(None) == self.ref_P).all(), 'False P-matrix')
     #
-    #     self.test_qp.add_qc(F_qc=None, alpha=None)
+    #     ref_h = np.array([[1, 3, 5, 1, 3, 5, 1, 3, 5, 0.5, 1, 1.5]]).T
+    #     self. assertTrue((self.test_qp.h_of_xk(np.array([[0], [0], [0], [0], [0]])) == ref_h).all(), 'False h-vector')
     #
-    #
-    #     socc_A_test =
-    #     self.test_qp.add_socc(socc_A=socc_A_test, socc_c=M21.T,
-    #             socc_b=np.zeros_like(M21.T), socc_d=c)
-    #
+    #     x_test = np.array([[5, 1, 4, 2, 3]]).T
     #     z_test = np.array([[9, 0, 8, 1, 7, 2, 6, 3, 5, 4, 0, 9, 0, 8, 1, 7, 2,
     #                         6, 3, 5, 4]]).T
-    #     ref_P = np.zeros([np.shape(self.ref_P)[0]+self.test_qp.T-1, np.shape(self.ref_P)[1]])
-    #     # TODO auch extra Zeile nach erstem Fu?
-    #     ref_P[0:6] = self.ref_P[0:6]
-    #     ref_p[6] =
-    #     ref_P[7:10] = self.ref_P[6:9]
-    #     ref_p[10] =
-    #     ref_P[11:14] = self.ref_P[9:12]
-    #     self.assertTrue((self.test_qp.P_of_zk(z_test) == ref_P).all(),
-    #                     'P-matrix does not changed in the right way')
-    #     print(ref_P)
+    #     v_test = np.array([[0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1]]).T
+    #     zv_test = np.vstack([z_test, v_test])
+    #
+    #     ref_d = np.array([[-0.01694915254, -0.00833333333, -0.01960784314,
+    #                        -0.01265822785, -0.00653594771, -0.02500000000,
+    #                        -0.01265822785, -0.00847457627, -0.02777777778,
+    #                        -0.03225806452, -0.01652892562, -1.00000000000]]).T
+    #     self.assertTrue((abs(self.test_qp.form_d(x_test, zv_test) - ref_d)).sum() < 1e-10,
+    #                     'False d-vector')
+    #     # TODO Test residual(), dazu noch C-Matrix setzen
+    #     # # Mal angenommen, das alte residual was richtig
+    #     # self.assertTrue((np.vstack(self.test_qp.old_residual(x_test, zv_test)) ==
+    #     #                 np.vstack(self.test_qp.residual(x_test, zv_test))).all(),
+    #     #                 'Residual changed')
+    #
+    # # def test_eval_of_non_lin_constraints(self):
+    # #
+    # #     self.test_qp.set_lin_constraints(self.Fu, self.fu, self.Fx, self.fx,
+    # #                                      self.Ff, self.ff)
+    # #
+    # #
+    # #     self.test_qp.add_qc(F_qc=None, alpha=None)
+    # #
+    # #
+    # #     socc_A_test =
+    # #     self.test_qp.add_socc(socc_A=socc_A_test, socc_c=M21.T,
+    # #             socc_b=np.zeros_like(M21.T), socc_d=c)
+    # #
+    # #     z_test = np.array([[9, 0, 8, 1, 7, 2, 6, 3, 5, 4, 0, 9, 0, 8, 1, 7, 2,
+    # #                         6, 3, 5, 4]]).T
+    # #     ref_P = np.zeros([np.shape(self.ref_P)[0]+self.test_qp.T-1, np.shape(self.ref_P)[1]])
+    # #     # TODO auch extra Zeile nach erstem Fu?
+    # #     ref_P[0:6] = self.ref_P[0:6]
+    # #     ref_p[6] =
+    # #     ref_P[7:10] = self.ref_P[6:9]
+    # #     ref_p[10] =
+    # #     ref_P[11:14] = self.ref_P[9:12]
+    # #     self.assertTrue((self.test_qp.P_of_zk(z_test) == ref_P).all(),
+    # #                     'P-matrix does not changed in the right way')
+    # #     print(ref_P)
 
 
 if __name__ == '__main__':
