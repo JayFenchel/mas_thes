@@ -164,7 +164,7 @@ class SOCP:
         self.f_soft = fx + fu
 
     # Adding a quadratic constraint (type='end' for final constraints)
-    def add_qc(self, type='trajectory', gamma=None, beta=None, alpha=None):
+    def add_qc(self, gamma=None, beta=None, alpha=None, type='trajectory'):
         if beta is None:
             beta = np.zeros([np.shape(gamma)[0], 1])
         if gamma is None or alpha is None:

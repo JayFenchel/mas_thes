@@ -57,6 +57,69 @@ class MyTestCase(unittest.TestCase):
         self.cE = np.array([[3.], [6.5]])
         self.dE = np.array([[-.5]])
 
+        # For test_qc
+        self.Gamma = np.array([[.5, 7.], [3., -.5]])
+        self.beta = np.array([[13.], [-1.]])
+        self.alpha = np.array([[12.]])
+        self.GammaE = np.array([[1., 7.], [3., -.5]])
+        self.betaE = np.array([[12.5], [-1.]])
+        self.alphaE = np.array([[-11.]])
+
+    def test_terms_for_qc(self):
+
+        self.test_qp2.add_qc(self.Gamma, self.beta, self.alpha)
+        self.test_qp2.add_qc(gamma=self.Gamma, alpha=self.alpha)
+        self.test_qp2.add_qc(self.GammaE, self.betaE, self.alphaE, type='end')
+
+        x_dummy = np.array([[0], [0]])
+        T, n, m = self.test_qp2.T, self.test_qp2.n, self.test_qp2.m
+
+        self.test_qp2.P=np.zeros([0, T*(n+m)])
+        P_ref = np.array([[0., 13., -1., 0., 0., 0., 0., 0., 0.],
+                          [0., 0., 0., 0., 18., -16., 0., 0., 0.],
+                          [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                          [0., 0., 0., 0., 5., -15., 0., 0., 0.],
+                          [0., 0., 0., 0., 0., 0., 0., 101./2., 7.]])
+
+        self.assertTrue(
+            (abs(self.test_qp2.P_of_zk(2*self.z_test_socc) - P_ref).sum()) < 1e-10,
+            'Wrong P_of_zk(qc)') # TODO *2 weil auch im Algorithmus so, unschön
+
+        d_ref = np.array([[1./12.],
+                          [1./36.],
+                          [1./12.],
+                          [1./22.],
+                          [-2./121.]])
+
+        self.assertTrue(
+            (abs(self.test_qp2.form_d(x_dummy, self.z_test_socc) - d_ref).sum()) < 1e-10,
+            'Wrong form_d(qc)')
+
+        term_for_qc_ref = np.array(  # erste qc mit beta
+            [[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 1./12., 7./6., 0., 0., 0., 0., 0., 0.],
+             [0., 1./2., -1./12., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 1./36., 7./18., 0., 0., 0.],
+             [0., 0., 0., 0., 1./6., -1./36., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., -4./121., -28./121.],
+             [0., 0., 0., 0., 0., 0., 0., -12./121., 2./121.]]) +\
+                          np.array(  # erste qc ohne beta
+            [[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 1./12., 7./6., 0., 0., 0., 0., 0., 0.],
+             [0., 1./2., -1./12., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 1./22., 7./11., 0., 0., 0.],
+             [0., 0., 0., 0., 3./11., -1./22., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0., 0., 0., 0.]])
+
+        self.assertTrue(
+            (abs(self.test_qp2.term_for_qc(self.z_test_socc) - term_for_qc_ref).sum()) < 1e-10,
+            'Wrong qc_Term for Phi')
+
     def test_terms_for_socc(self):
 
         self.test_qp2.add_socc(self.A, self.b, self.c, self.d)
@@ -87,7 +150,7 @@ class MyTestCase(unittest.TestCase):
             (abs(self.test_qp2.form_d(x_dummy, self.z_test_socc) - d_ref).sum()) < 1e-10,
             'Wrong form_d(socc)')
 
-        term_for_socc_ref = np.array(
+        term_for_socc_ref = np.array(  # erste socc
             [[0., 0., 0., 0., 0., 0., 0., 0., 0.],
              [0., -2./145., 52./145., 0., 0., 0., 0., 0., 0.],
              [0., 52./145., -32./145., 0., 0., 0., 0., 0., 0.],
@@ -97,7 +160,7 @@ class MyTestCase(unittest.TestCase):
              [0., 0., 0., 0., 0., 0., 0., 0., 0.],
              [0., 0., 0., 0., 0., 0., 0., -2./5371., 224./5371.],
              [0., 0., 0., 0., 0., 0., 0., 224./5371., -182./5371.]]) +\
-                            np.array(
+                            np.array(  # zweite socc
             [[0., 0., 0., 0., 0., 0., 0., 0., 0.],
              [0., -2./145., 52./145., 0., 0., 0., 0., 0., 0.],
              [0., 52./145., -32./145., 0., 0., 0., 0., 0., 0.],
