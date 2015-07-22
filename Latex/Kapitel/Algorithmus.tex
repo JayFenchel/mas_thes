@@ -79,17 +79,63 @@ Alle $k$ barrier function Funktionen lassen sich zu
  =\begin{bmatrix}h_{i}\\0\end{bmatrix}_{k} - \begin{bmatrix}p_{i}^{T}z\\
  \left (\left\|A_{j}z+b_{j}\right \|_{2}^{2} - \left(c_{j}^{T}z+d_{j}\right )^{2} \right ) \end{bmatrix}_{k}
 \end{equation}
-zusammenfassen. Für den Algorithmus wird nun weiterhin die Ableitung (Gradient und Hessian) der logarithmic barrier function $\phi(z)$ benötigt, die aus unter anderem $\nabla f_{k}(z)$ und $\nabla^{2} f_{k}(z)$ gebildet werden.
+zusammenfassen. Dabei lässt sich $f_{j}$ auch noch auflösen zu
+\begin{equation}
+	f_{j}(z)=d_{j}^{2}-b_{j}^{T}b_{j}-\left  [-\left( c_{j}^{T}z +2d_{j} \right )c_{j}^{T}+\left ( z^{T}A_{j}^{T}+2b_{j}^{T} \right )A_{j}  \right ]z
+\end{equation}
+Für den Algorithmus wird nun weiterhin die Ableitung (Gradient und Hessian) der logarithmic barrier function $\phi(z)$ benötigt, die aus unter anderem $\nabla f_{k}(z)$ und $\nabla^{2} f_{k}(z)$ gebildet werden.
 \begin{equation}
  \nabla f_{k}\left (z  \right )=\begin{bmatrix}p_{i}^{T}\\ \left (-2\left(\left(c_{j}^{T}z + d_{j}\right )c_{j} - A_{j}^{T} \left(A_{j}z + b_{j} \right )\right) \right)^{T}\end{bmatrix}_{k}
 \end{equation}
-Das Transponieren der unteren Zeile ergibt sich dadurch, dass man zu $P$ eine Spalte anhängt also zu $P^{T}$ die transformierte dieser Spalte.
+Das Transponieren der unteren Zeile ergibt sich dadurch, dass man zu $P$ eine Spalte anhängt also zu $P^{T}$ die transformierte dieser Spalte. Damit lässt sich auch hier $\nabla f_{k}(z)$ wie schon bei die quadratic constraint schreiben.
 \begin{equation}
- \nabla^{2} f_{k}\left (z  \right )=\begin{bmatrix}0\\ -2 \left( c_{j}^{T}c_{j} - A_{j}^{T} A_{j}  \right)\end{bmatrix}_{k}
+	\nabla\phi\left ( z \right )=\hat{P}^{T}(2z)\hat{d}
 \end{equation}
-
-
-
+Mit
+\begin{equation}
+ \nabla^{2} f_{k}\left (z  \right )=\begin{bmatrix}0\\ -2 \left( c_{j}c_{j}^{T} - A_{j}^{T} A_{j}  \right)\end{bmatrix}_{k}
+\end{equation}
+ergibt sich $\nabla^{2} \phi(z)$ zu
+\begin{equation}
+	\nabla^{2}\phi(z)=\hat{P}(2z)\text{diag}(\hat{d})^{2}\hat{P}(2z)+\sum_{j=1}^{p}\left (\hat{d}_{(lT+l_{f})+j}-2 \left( c_{j}c_{j}^{T} - A_{j}^{T} A_{j}  \right)  \right )
+\end{equation}
+[TODO richtiger Index für d]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Komplette Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:KompletteFormulierung}
+Ungleichungsnebenbedingungen
+\begin{equation}
+	\hat{P}(z)z\leq \hat{h}
+\end{equation}
+mit
+\begin{equation}
+	\hat{P}(z)=\begin{bmatrix} P\\ \beta_{1}^{T}+z^{T}\Gamma_{1}\\ \vdots\\ \beta_{p}^{T}+z^{T}\Gamma_{p}\\
+	-\left( c_{1}^{T}z +2d_{1} \right )c_{1}^{T}+\left ( z^{T}A_{1}^{T}+2b_{1}^{T} \right )A_{1}\\
+	\vdots\\
+	-\left( c_{q}^{T}z +2d_{q} \right )c_{q}^{T}+\left ( z^{T}A_{q}^{T}+2b_{q}^{T} \right )A_{q}
+  \end{bmatrix}
+	,\quad \hat{h} = \begin{bmatrix} h\\ \alpha_{1}^{T}\\ \vdots\\ \alpha_{p}^{T}\\d_{1}^{2}-b_{1}^{T}b_{1}\\\vdots\\d_{q}^{2}-b_{q}^{T}b_{q}\end{bmatrix}
+\end{equation}
+Daraus ergibt sich die Logarithmic barrier function zu
+\begin{equation}
+	\phi(z)=\sum_{i=1}^{lT+l_{f}+p+q}-\log \left ( \hat{h}_{i}-\hat{p}_{i}^T(z)z \right )
+\end{equation}
+Wobei $\hat{p}_{i}^T(z)$ die Zeilen aus $\hat{P}(z)$ sind.\\
+Bei der Berechnung des Residuums wird der Gradient der logarithmic barrier function benötigt
+\begin{equation}
+	\nabla\phi(z)=\hat{P}^T(2z)\hat{d}
+\end{equation}
+mit
+\begin{equation}
+	\hat{d}_i=\frac{1}{\hat{h}_{i}-\hat{p}_{i}^T(z)z}
+\end{equation}
+Dabei muss $\hat{P}^T(z)$ mit $2z$ aufgerufen werden wie oben beschrieben.\\
+Hessian der der Logarithmic barrier function für Berechnung des $\Phi$
+\begin{equation}\begin{split}
+	\nabla^{2}\phi(z)=&\hat{P}(2z)\text{diag}(\hat{d})^{2}\hat{P}(2z)\\
+	&+\sum_{i=lT+lf+1}^{lT+lf+p}\left (\hat{d}_{i}2\Gamma_{i}  \right )
+	+\sum_{j=lT+lf+p+1}^{lT+lf+p+q}\left (\hat{d}_{j}-2 \left( c_{j}c_{j}^{T} - A_{j}^{T} A_{j}  \right)  \right )
+\end{split}\end{equation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Anpassung für test cases}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:testcases}
