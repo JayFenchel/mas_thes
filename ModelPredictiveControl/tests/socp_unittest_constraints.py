@@ -74,16 +74,24 @@ class MyTestCase(unittest.TestCase):
         x_dummy = np.array([[0], [0]])
         T, n, m = self.test_qp2.T, self.test_qp2.n, self.test_qp2.m
 
-        self.test_qp2.P=np.zeros([0, T*(n+m)])
+        # self.test_qp2.P=np.zeros([0, T*(n+m)])
         P_ref = np.array([[0., 13., -1., 0., 0., 0., 0., 0., 0.],
                           [0., 0., 0., 0., 18., -16., 0., 0., 0.],
                           [0., 0., 0., 0., 0., 0., 0., 0., 0.],
                           [0., 0., 0., 0., 5., -15., 0., 0., 0.],
                           [0., 0., 0., 0., 0., 0., 0., 101./2., 7.]])
+        h_ref = np.array([[12.],
+                          [12.],
+                          [12.],
+                          [12.],
+                          [-11.]])
 
         self.assertTrue(
             (abs(self.test_qp2.P_of_zk(2*self.z_test_socc) - P_ref).sum()) < 1e-10,
-            'Wrong P_of_zk(qc)') # TODO *2 weil auch im Algorithmus so, unschön
+            'Wrong P_of_zk(qc)')  # P for gradient of phi called with 2z
+        self.assertTrue(
+            (abs(self.test_qp2.h_of_zk(x_dummy) - h_ref).sum()) < 1e-10,
+            'Wrong h_of_zk(qc)')
 
         d_ref = np.array([[1./12.],
                           [1./36.],
@@ -129,16 +137,24 @@ class MyTestCase(unittest.TestCase):
         x_dummy = np.array([[0], [0]])
         T, n, m = self.test_qp2.T, self.test_qp2.n, self.test_qp2.m
 
-        self.test_qp2.P=np.zeros([0, T*(n+m)])
+        # self.test_qp2.P=np.zeros([0, T*(n+m)])
         P_ref = np.array([[0., 58., 128., 0., 0., 0., 0., 0., 0.],
                           [0., 0., 0., 0., 4., 212., 0., 0., 0.],
                           [0., 58., 128., 0., 0., 0., 0., 0., 0.],
                           [0., 0., 0., 0., 4., 212., 0., 0., 0.],
                           [0., 0., 0., 0., 0., 0., 0., -292., 661./2.]])
+        h_ref = np.array([[-145.],
+                          [-145.],
+                          [-145.],
+                          [-145.],
+                          [-135.]])
 
         self.assertTrue(
             (abs(self.test_qp2.P_of_zk(2*self.z_test_socc) - P_ref).sum()) < 1e-10,
-            'Wrong P_of_zk(socc)') # TODO *2 weil auch im Algorithmus so, unschön
+            'Wrong P_of_zk(socc)')  # P for gradient of phi called with 2z
+        self.assertTrue(
+            (abs(self.test_qp2.h_of_zk(x_dummy) - h_ref).sum()) < 1e-10,
+            'Wrong h_of_zk(socc)')
 
         d_ref = np.array([[-1./145.],
                           [-1./284.],
@@ -183,7 +199,12 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue((self.test_qp.P_of_zk(None) == self.ref_P).all(), 'False P-matrix')
 
         ref_h = np.array([[1, 3, 5, 1, 3, 5, 1, 3, 5, 0.5, 1, 1.5]]).T
-        self. assertTrue((self.test_qp.h_of_xk(np.array([[0], [0], [0], [0], [0]])) == ref_h).all(), 'False h-vector')
+        self. assertTrue(
+            (self.test_qp.h_of_xk(np.array([[0], [0], [0], [0], [0]])) == ref_h).all(),
+            'False h-vector')
+        self. assertTrue(
+            (self.test_qp.h_of_xk(np.array([[0], [0], [0], [0], [0]])) == ref_h).all(),
+            'False h-vector, 2nd call')
 
         x_test = np.array([[5, 1, 4, 2, 3]]).T
         z_test = np.array([[9, 0, 8, 1, 7, 2, 6, 3, 5, 4, 0, 9, 0, 8, 1, 7, 2,

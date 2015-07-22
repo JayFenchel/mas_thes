@@ -55,6 +55,38 @@ class SOCP:
         self.socc_end = None
         self.socc = None
 
+    def set_problem(self):
+        T = self.T
+
+        # add quadratic constraint to h
+        if self.qc is not None:
+            for qc in self.qc:
+                h_add = np.zeros([T-1, 1])
+                for i in range(0, T-1):
+                    h_add[i] = qc[2]
+                self.h = np.vstack([self.h, h_add])
+
+        # add quadratic constraint (end) to h
+        if self.qc_end is not None:
+            for qc in self.qc_end:
+                self.h = np.vstack([self.h, qc[2]])
+
+        # add second-order cone constraint to h
+        if self.socc is not None:
+            for socc in self.socc:
+                h_add = np.zeros([T-1, 1])
+                for i in range(0, T-1):
+                    h_add[i] = socc[3]*socc[3] - np.dot(socc[1].T, socc[1])
+                self.h = np.vstack([self.h, h_add])
+
+        # add second-order cone constraint (end) to h
+        if self.socc_end is not None:
+            for socc in self.socc_end:
+                self.h = np.vstack([self.h, socc[3]*socc[3] -
+                                    np.dot(socc[1].T, socc[1])])
+
+        print('problem is set!')
+
     def set_sys_dynamics(self, A, B):
 
         T, n, m = self.T, self.n, self.m
@@ -142,8 +174,17 @@ class SOCP:
         P[T*n_Fu:T*n_Fu+np.shape(Ff)[0], m+(T-1)*(m+n):m+(T-1)*(m+n)+n] = Ff
         self.P = P
 
+        # h vector aus T-1 mal f und ff
+        f = fx + fu
+
+        h = np.zeros([T*np.shape(f)[0]+np.shape(ff)[0], 1])
+        for i in range(0, T):
+            h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
+        h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(ff)[0]] = ff
+        self.h = h
+
         self.Fx = Fx
-        self.f = fx + fu
+        self.f = f
         self.ff = ff
 
     def set_soft_constraints(self, Fu, fu, Fx, fx):
@@ -211,44 +252,14 @@ class SOCP:
 
         T, n, m = self.T, self.n, self.m
 
-        if self.f is not None and self.Fx is not None and self.ff is not None:
-            f = self.f
-
-            h = np.zeros([T*np.shape(f)[0]+np.shape(self.ff)[0], 1])
-            for i in range(0, T):
-                h[i*np.shape(f)[0]:(i+1)*np.shape(f)[0]] = f
-            h[T*np.shape(f)[0]:T*np.shape(f)[0]+np.shape(self.ff)[0]] = self.ff
-
+        if self.h is None:
+            h = np.zeros_like(self.h)
+            h[:] = self.h[:]
             h[0:np.shape(self.Fx)[0]] -= np.dot(self.Fx, xk)
         else:
             print('No linear constraints have been set')
             h = np.zeros([0, 1])
 
-        # add quadratic constraint to h
-        if self.qc is not None:
-            for qc in self.qc:
-                h_add = np.zeros([T-1, 1])
-                for i in range(0, T-1):
-                    h_add[i] = qc[2]
-                h = np.vstack([h, h_add])
-
-        # add quadratic constraint (end) to h
-        if self.qc_end is not None:
-            for qc in self.qc_end:
-                h = np.vstack([h, qc[2]])
-
-        # add second-order cone constraint to h
-        if self.socc is not None:
-            for socc in self.socc:
-                h_add = np.zeros([T-1, 1])
-                for i in range(0, T-1):
-                    h_add[i] = socc[3]*socc[3] - np.dot(socc[1].T, socc[1])
-                h = np.vstack([h, h_add])
-
-        # add second-order cone constraint (end) to h
-        if self.socc_end is not None:
-            for socc in self.socc_end:
-                h = np.vstack([h, socc[3]*socc[3] - np.dot(socc[1].T, socc[1])])
         return h
 
     def h_soft_of_xk(self, xk):
@@ -291,7 +302,10 @@ class SOCP:
 
         T, n, m = self.T, self.n, self.m
         # Inequality constraints
-        P = self.P
+        if self.P is None:
+            P = np.zeros([0, T*(n+m)])
+        else:
+            P = self.P
 
         # add quadratic constraint to P
         if self.qc is not None:
