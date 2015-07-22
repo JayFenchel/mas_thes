@@ -242,13 +242,13 @@ class SOCP:
             for socc in self.socc:
                 h_add = np.zeros([T-1, 1])
                 for i in range(0, T-1):
-                    h_add[i] = socc[3]*socc[3]  # TODO d²?
+                    h_add[i] = socc[3]*socc[3] - np.dot(socc[1].T, socc[1])
                 h = np.vstack([h, h_add])
 
         # add second-order cone constraint (end) to h
         if self.socc_end is not None:
             for socc in self.socc_end:
-                h = np.vstack([h, socc[3]*socc[3]])
+                h = np.vstack([h, socc[3]*socc[3] - np.dot(socc[1].T, socc[1])])
         return h
 
     def h_soft_of_xk(self, xk):
@@ -278,9 +278,9 @@ class SOCP:
     def _A_of_socc(self, socc, xk_):
         # TODO Konstante Terme nur einmal berechnen
         socc_A, socc_b, socc_c, socc_d = socc[0], socc[1], socc[2], socc[3]
-        _A_ = 2*(-socc_d*socc_c - np.dot(socc_c.T, xk_)*socc_c
-                 + np.dot(socc_A.T, np.dot(socc_A, xk_) + socc_b))
-        return _A_.T
+        p_i = np.dot(socc_A.T, (np.dot(socc_A, xk_) + 2*socc_b)) -\
+            socc_c*(np.dot(socc_c.T, xk_) + 2*socc_d)
+        return p_i.T
 
     def _A_of_qc(self, qc, zk):
         # return 2*z.T*Ff_alpha
@@ -318,7 +318,7 @@ class SOCP:
                 P_add = np.zeros([T-1, np.shape(self.P)[1]])
                 for i in range(0, T-1):  # nur bis T-1, da T Index für socc_end
                     P_add[i, m+i*(m+n):m+i*(m+n)+n] =\
-                        self._A_of_socc(socc, 0.5*zk[m+i*(n+m):m+i*(n+m)+n])
+                        self._A_of_socc(socc, zk[m+i*(n+m):m+i*(n+m)+n])
                 P = np.vstack([P, P_add])
 
         # add second-order cone constraint (end) to P
@@ -326,7 +326,7 @@ class SOCP:
             for socc in self.socc_end:
                 P_add = np.zeros([1, np.shape(self.P)[1]])
                 P_add[0, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] =\
-                    self._A_of_socc(socc, 0.5*zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])
+                    self._A_of_socc(socc, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])
                 P = np.vstack([P, P_add])
 
         return P
@@ -339,22 +339,6 @@ class SOCP:
         d = np.zeros([np.shape(P)[0], np.shape(zv_k)[1]])
         d[:] = 1/(h[:]-np.dot(P[:], zv_k[0:self.T*(self.m+self.n)]))
 
-        d_correct = np.zeros([0, 1 ])
-        if self.socc is not None:
-            for socc in self.socc:
-                correct = np.zeros([T-1, 1])
-                for i in range(0, T-1):
-                    correct[i] = 2*np.dot((np.dot(socc[0], 0.5*zv_k[m+i*(n+m):m+i*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n])) -\
-                               ((np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n])+socc[1])*(np.dot(socc[0], zv_k[m+i*(n+m):m+i*(n+m)+n])+socc[1])).sum()
-                d_correct = np.vstack([d_correct, correct])
-
-        if self.socc_end is not None:
-            for socc in self.socc_end:
-                correct = 2*np.dot((np.dot(socc[0], 0.5*zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[1]).T, np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])) -\
-                          ((np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])*(np.dot(socc[0], zv_k[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])).sum()
-                d_correct = np.vstack([d_correct, correct])
-        if self.socc_end is not None or self.socc is not None:
-            d[-np.shape(d_correct)[0]:] = 1/(1/d[-np.shape(d_correct)[0]:] + d_correct[:])
         return d
 
     def form_d_soft(self, xk, zv_k):
