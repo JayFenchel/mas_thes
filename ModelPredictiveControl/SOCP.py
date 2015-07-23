@@ -297,6 +297,9 @@ class SOCP:
             socc['c']*(np.dot(socc['c'].T, xk_) + 2*socc['d'])
         return p_i.T
 
+    def _A_of_qc(self, qc, xk_):
+        return qc['beta'].T + np.dot(xk_.T, qc['gamma'])
+
     def P_of_zk(self, zk):
 
         T, n, m = self.T, self.n, self.m
@@ -312,8 +315,7 @@ class SOCP:
                 P_add = np.zeros([T-1, np.shape(P)[1]])
                 for i in range(0, T-1):  # nur bis T-1, da T Index für qc_end
                     P_add[i, m+i*(m+n):m+i*(m+n)+n] =\
-                        qc['beta'].T + np.dot(zk[m+i*(n+m):m+i*(n+m)+n].T, qc['gamma'])
-                        # TODO obige Zeile als Funktion auslagern
+                        self._A_of_qc(qc, zk[m+i*(n+m):m+i*(n+m)+n])
                 P = np.vstack([P, P_add])
 
         # add quadratic constraint (end) to P
@@ -321,8 +323,7 @@ class SOCP:
             for qc in self.qc_end:
                 P_add = np.zeros([1, np.shape(P)[1]])
                 P_add[0, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] =\
-                    qc['beta'].T + np.dot(zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n].T, qc['gamma'])
-                    # TODO obige Zeile als Funktion auslagern
+                    self._A_of_qc(qc, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])
                 P = np.vstack([P, P_add])
 
         # add second-order cone constraint to P
