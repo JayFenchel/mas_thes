@@ -23,6 +23,7 @@ from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 # QP1 = QuadraticProgram(sys)
 # QP, AA, bb = qp_from_test()
 QP = qp_from_new_sys()
+QP.set_problem()
 # exit()
 n = QP.n
 m = QP.m

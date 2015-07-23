@@ -58,6 +58,10 @@ class SOCP:
     def set_problem(self):
         T = self.T
 
+        if self.h is None:
+            print('No linear constraints have been set')
+            self.h = np.zeros([0, 1])
+
         # add quadratic constraint to h
         if self.qc is not None:
             for qc in self.qc:
@@ -252,13 +256,13 @@ class SOCP:
 
         T, n, m = self.T, self.n, self.m
 
-        if self.h is None:
+        if self.Fx is not None:
             h = np.zeros_like(self.h)
             h[:] = self.h[:]
             h[0:np.shape(self.Fx)[0]] -= np.dot(self.Fx, xk)
         else:
-            print('No linear constraints have been set')
-            h = np.zeros([0, 1])
+            h = np.zeros_like(self.h)
+            h[:] = self.h[:]
 
         return h
 
@@ -310,7 +314,7 @@ class SOCP:
         # add quadratic constraint to P
         if self.qc is not None:
             for qc in self.qc:
-                P_add = np.zeros([T-1, np.shape(self.P)[1]])
+                P_add = np.zeros([T-1, np.shape(P)[1]])
                 for i in range(0, T-1):  # nur bis T-1, da T Index für qc_end
                     P_add[i, m+i*(m+n):m+i*(m+n)+n] =\
                         qc[1].T + np.dot(zk[m+i*(n+m):m+i*(n+m)+n].T, qc[0])
@@ -320,7 +324,7 @@ class SOCP:
         # add quadratic constraint (end) to P
         if self.qc_end is not None:
             for qc in self.qc_end:
-                P_add = np.zeros([1, np.shape(self.P)[1]])
+                P_add = np.zeros([1, np.shape(P)[1]])
                 P_add[0, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] =\
                     qc[1].T + np.dot(zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n].T, qc[0])
                     # TODO obige Zeile als Funktion auslagern
@@ -329,7 +333,7 @@ class SOCP:
         # add second-order cone constraint to P
         if self.socc is not None:
             for socc in self.socc:
-                P_add = np.zeros([T-1, np.shape(self.P)[1]])
+                P_add = np.zeros([T-1, np.shape(P)[1]])
                 for i in range(0, T-1):  # nur bis T-1, da T Index für socc_end
                     P_add[i, m+i*(m+n):m+i*(m+n)+n] =\
                         self._A_of_socc(socc, zk[m+i*(n+m):m+i*(n+m)+n])
@@ -338,7 +342,7 @@ class SOCP:
         # add second-order cone constraint (end) to P
         if self.socc_end is not None:
             for socc in self.socc_end:
-                P_add = np.zeros([1, np.shape(self.P)[1]])
+                P_add = np.zeros([1, np.shape(P)[1]])
                 P_add[0, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] =\
                     self._A_of_socc(socc, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])
                 P = np.vstack([P, P_add])

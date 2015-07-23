@@ -70,6 +70,7 @@ class MyTestCase(unittest.TestCase):
         self.test_qp2.add_qc(self.Gamma, self.beta, self.alpha)
         self.test_qp2.add_qc(gamma=self.Gamma, alpha=self.alpha)
         self.test_qp2.add_qc(self.GammaE, self.betaE, self.alphaE, type='end')
+        self.test_qp2.set_problem()
 
         x_dummy = np.array([[0], [0]])
         T, n, m = self.test_qp2.T, self.test_qp2.n, self.test_qp2.m
@@ -90,7 +91,7 @@ class MyTestCase(unittest.TestCase):
             (abs(self.test_qp2.P_of_zk(2*self.z_test_socc) - P_ref).sum()) < 1e-10,
             'Wrong P_of_zk(qc)')  # P for gradient of phi called with 2z
         self.assertTrue(
-            (abs(self.test_qp2.h_of_zk(x_dummy) - h_ref).sum()) < 1e-10,
+            (abs(self.test_qp2.h_of_xk(x_dummy) - h_ref).sum()) < 1e-10,
             'Wrong h_of_zk(qc)')
 
         d_ref = np.array([[1./12.],
@@ -133,6 +134,7 @@ class MyTestCase(unittest.TestCase):
         self.test_qp2.add_socc(self.A, self.b, self.c, self.d)
         self.test_qp2.add_socc(self.A, self.b, self.c, self.d)
         self.test_qp2.add_socc(self.AE, self.bE, self.cE, self.dE, type='end')
+        self.test_qp2.set_problem()
 
         x_dummy = np.array([[0], [0]])
         T, n, m = self.test_qp2.T, self.test_qp2.n, self.test_qp2.m
@@ -153,7 +155,7 @@ class MyTestCase(unittest.TestCase):
             (abs(self.test_qp2.P_of_zk(2*self.z_test_socc) - P_ref).sum()) < 1e-10,
             'Wrong P_of_zk(socc)')  # P for gradient of phi called with 2z
         self.assertTrue(
-            (abs(self.test_qp2.h_of_zk(x_dummy) - h_ref).sum()) < 1e-10,
+            (abs(self.test_qp2.h_of_xk(x_dummy) - h_ref).sum()) < 1e-10,
             'Wrong h_of_zk(socc)')
 
         d_ref = np.array([[-1./145.],
@@ -198,12 +200,12 @@ class MyTestCase(unittest.TestCase):
 
         self.assertTrue((self.test_qp.P_of_zk(None) == self.ref_P).all(), 'False P-matrix')
 
-        ref_h = np.array([[1, 3, 5, 1, 3, 5, 1, 3, 5, 0.5, 1, 1.5]]).T
+        ref_h = np.array([[0, -3, 5, 1, 3, 5, 1, 3, 5, 0.5, 1, 1.5]]).T
         self. assertTrue(
-            (self.test_qp.h_of_xk(np.array([[0], [0], [0], [0], [0]])) == ref_h).all(),
+            (self.test_qp.h_of_xk(np.array([[1], [0], [0], [0], [0]])) == ref_h).all(),
             'False h-vector')
         self. assertTrue(
-            (self.test_qp.h_of_xk(np.array([[0], [0], [0], [0], [0]])) == ref_h).all(),
+            (self.test_qp.h_of_xk(np.array([[1], [0], [0], [0], [0]])) == ref_h).all(),
             'False h-vector, 2nd call')
 
         x_test = np.array([[5, 1, 4, 2, 3]]).T
