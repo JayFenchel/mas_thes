@@ -67,27 +67,28 @@ class SOCP:
             for qc in self.qc:
                 h_add = np.zeros([T-1, 1])
                 for i in range(0, T-1):
-                    h_add[i] = qc[2]
+                    h_add[i] = qc['alpha']
                 self.h = np.vstack([self.h, h_add])
 
         # add quadratic constraint (end) to h
         if self.qc_end is not None:
             for qc in self.qc_end:
-                self.h = np.vstack([self.h, qc[2]])
+                self.h = np.vstack([self.h, qc['alpha']])
 
         # add second-order cone constraint to h
         if self.socc is not None:
             for socc in self.socc:
                 h_add = np.zeros([T-1, 1])
                 for i in range(0, T-1):
-                    h_add[i] = socc[3]*socc[3] - np.dot(socc[1].T, socc[1])
+                    h_add[i] = socc['d']*socc['d'] -\
+                               np.dot(socc['b'].T, socc['b'])
                 self.h = np.vstack([self.h, h_add])
 
         # add second-order cone constraint (end) to h
         if self.socc_end is not None:
             for socc in self.socc_end:
-                self.h = np.vstack([self.h, socc[3]*socc[3] -
-                                    np.dot(socc[1].T, socc[1])])
+                self.h = np.vstack([self.h, socc['d']*socc['d'] -
+                                    np.dot(socc['b'].T, socc['b'])])
 
         print('problem is set!')
 
@@ -217,31 +218,31 @@ class SOCP:
 
         if type == 'trajectory':
             if self.qc is not None:
-                self.qc.append([gamma, beta, alpha])
+                self.qc.append({'gamma': gamma, 'beta': beta, 'alpha': alpha})
             else:
-                self.qc = [[gamma, beta, alpha]]
+                self.qc = [{'gamma': gamma, 'beta': beta, 'alpha': alpha}]
             pass
 
         elif type == 'end':
             if self.qc_end is not None:
-                self.qc_end.append([gamma, beta, alpha])
+                self.qc_end.append({'gamma': gamma, 'beta': beta, 'alpha': alpha})
             else:
-                self.qc_end = [[gamma, beta, alpha]]
+                self.qc_end = [{'gamma': gamma, 'beta': beta, 'alpha': alpha}]
 
     # Adding a second order cone constraint (type='end' for final constraints)
     def add_socc(self, socc_A=None, socc_b=None,
                  socc_c=None, socc_d=None, type='trajectory'):
         if type == 'trajectory':
             if self.socc is not None:
-                self.socc.append([socc_A, socc_b, socc_c, socc_d])
+                self.socc.append({'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d})
             else:
-                self.socc = [[socc_A, socc_b, socc_c, socc_d]]
+                self.socc = [{'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d}]
 
         elif type == 'end':
             if self.socc_end is not None:
-                self.socc_end.append([socc_A, socc_b, socc_c, socc_d])
+                self.socc_end.append({'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d})
             else:
-                self.socc_end = [[socc_A, socc_b, socc_c, socc_d]]
+                self.socc_end = [{'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d}]
         else:
             print('SOCC: type is not known')
             exit()
@@ -292,15 +293,9 @@ class SOCP:
     # new line in P matrix corresponding to a second order cone constraint
     def _A_of_socc(self, socc, xk_):
         # TODO Konstante Terme nur einmal berechnen
-        socc_A, socc_b, socc_c, socc_d = socc[0], socc[1], socc[2], socc[3]
-        p_i = np.dot(socc_A.T, (np.dot(socc_A, xk_) + 2*socc_b)) -\
-            socc_c*(np.dot(socc_c.T, xk_) + 2*socc_d)
+        p_i = np.dot(socc['A'].T, (np.dot(socc['A'], xk_) + 2*socc['b'])) -\
+            socc['c']*(np.dot(socc['c'].T, xk_) + 2*socc['d'])
         return p_i.T
-
-    def _A_of_qc(self, qc, zk):
-        # return 2*z.T*Ff_alpha
-        # TODO richtige Berechnung, richtige angabe in system.py
-        pass
 
     def P_of_zk(self, zk):
 
@@ -317,7 +312,7 @@ class SOCP:
                 P_add = np.zeros([T-1, np.shape(P)[1]])
                 for i in range(0, T-1):  # nur bis T-1, da T Index für qc_end
                     P_add[i, m+i*(m+n):m+i*(m+n)+n] =\
-                        qc[1].T + np.dot(zk[m+i*(n+m):m+i*(n+m)+n].T, qc[0])
+                        qc['beta'].T + np.dot(zk[m+i*(n+m):m+i*(n+m)+n].T, qc['gamma'])
                         # TODO obige Zeile als Funktion auslagern
                 P = np.vstack([P, P_add])
 
@@ -326,7 +321,7 @@ class SOCP:
             for qc in self.qc_end:
                 P_add = np.zeros([1, np.shape(P)[1]])
                 P_add[0, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] =\
-                    qc[1].T + np.dot(zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n].T, qc[0])
+                    qc['beta'].T + np.dot(zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n].T, qc['gamma'])
                     # TODO obige Zeile als Funktion auslagern
                 P = np.vstack([P, P_add])
 
@@ -382,21 +377,21 @@ class SOCP:
         if self.qc is not None:
             for qc in self.qc:
                 for i in range(0, T-1):  # nur bis T-1, da T Index für qc_end
-                    d_k = 1/(qc[2] - np.dot(
-                        qc[1].T + np.dot(zk[m+i*(n+m):m+i*(n+m)+n].T, qc[0]),
+                    d_k = 1/(qc['alpha'] - np.dot(
+                        qc['beta'].T + np.dot(zk[m+i*(n+m):m+i*(n+m)+n].T, qc['gamma']),
                         zk[m+i*(n+m):m+i*(n+m)+n]))
                     # nur passender  nxn-Block für jeweile (T-1) x_k
                     term_for_qc[m+i*(n+m):m+i*(n+m)+n, m+i*(n+m):m+i*(n+m)+n] +=\
-                        d_k*2*qc[0]
+                        d_k*2*qc['gamma']
         # add term for qc (end)
         term_for_qc_end = np.zeros([T*(n+m), T*(n+m)])
         if self.qc_end is not None:
             for qc in self.qc_end:
-                d_k = 1/(qc[2] - np.dot(
-                    qc[1].T + np.dot(zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n].T, qc[0]),
+                d_k = 1/(qc['alpha'] - np.dot(
+                    qc['beta'].T + np.dot(zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n].T, qc['gamma']),
                     zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]))
                 term_for_qc_end[m+(T-1)*(n+m):m+(T-1)*(n+m)+n, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] +=\
-                    d_k*2*qc[0]  # nur unterer rechter Block nxn bei end_qc
+                    d_k*2*qc['gamma']  # nur unterer rechter Block nxn bei end_qc
 
         return term_for_qc + term_for_qc_end
 
@@ -407,19 +402,19 @@ class SOCP:
         if self.socc is not None:
             for socc in self.socc:
                 for i in range(0, T-1):  # nur bis T-1, da T Index für qc_end
-                    d_k = 1/((np.dot(socc[2].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc[3])*(np.dot(socc[2].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc[3]) -
-                             ((np.dot(socc[0], zk[m+i*(n+m):m+i*(n+m)+n])+socc[1])* (np.dot(socc[0], zk[m+i*(n+m):m+i*(n+m)+n])+socc[1])).sum())
+                    d_k = 1/((np.dot(socc['c'].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc['d'])*(np.dot(socc['c'].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc['d']) -
+                             ((np.dot(socc['A'], zk[m+i*(n+m):m+i*(n+m)+n])+socc['b'])* (np.dot(socc['A'], zk[m+i*(n+m):m+i*(n+m)+n])+socc['b'])).sum())
                     # nur passender  nxn-Block für jeweilige (T-1) x_k
                     term_for_socc[m+i*(n+m):m+i*(n+m)+n, m+i*(n+m):m+i*(n+m)+n] +=\
-                        d_k*-2*(np.dot(socc[2], socc[2].T) - np.dot(socc[0].T, socc[0]))
+                        d_k*-2*(np.dot(socc['c'], socc['c'].T) - np.dot(socc['A'].T, socc['A']))
         # add term for qc (end)
         term_for_socc_end = np.zeros([T*(n+m), T*(n+m)])
         if self.socc_end is not None:
             for socc in self.socc_end:
-                d_k = 1/((np.dot(socc[2].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[3])*(np.dot(socc[2].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc[3]) -
-                         ((np.dot(socc[0], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])*(np.dot(socc[0], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc[1])).sum())
+                d_k = 1/((np.dot(socc['c'].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc['d'])*(np.dot(socc['c'].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc['d']) -
+                         ((np.dot(socc['A'], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc['b'])*(np.dot(socc['A'], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc['b'])).sum())
                 term_for_socc_end[m+(T-1)*(n+m):m+(T-1)*(n+m)+n, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] +=\
-                    d_k*-2*(np.dot(socc[2], socc[2].T) - np.dot(socc[0].T, socc[0]))  # nur unterer rechter Block nxn bei end_qc
+                    d_k*-2*(np.dot(socc['c'], socc['c'].T) - np.dot(socc['A'].T, socc['A']))  # nur unterer rechter Block nxn bei end_qc
 
         return term_for_socc + term_for_socc_end
 
