@@ -236,7 +236,7 @@ class SOCP:
             if self.socc is not None:
                 self.socc.append({'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d})
             else:
-                self.socc = [{'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d}]
+                self.socc = [{'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d, 'cxc-AxA': np.dot(socc_c, socc_c.T) - np.dot(socc_A.T, socc_A)}]
 
         elif type == 'end':
             if self.socc_end is not None:
@@ -407,7 +407,7 @@ class SOCP:
                              ((np.dot(socc['A'], zk[m+i*(n+m):m+i*(n+m)+n])+socc['b'])* (np.dot(socc['A'], zk[m+i*(n+m):m+i*(n+m)+n])+socc['b'])).sum())
                     # nur passender  nxn-Block für jeweilige (T-1) x_k
                     term_for_socc[m+i*(n+m):m+i*(n+m)+n, m+i*(n+m):m+i*(n+m)+n] +=\
-                        d_k*-2*(np.dot(socc['c'], socc['c'].T) - np.dot(socc['A'].T, socc['A']))
+                        d_k*-2*socc['cxcAxA']
         # add term for qc (end)
         term_for_socc_end = np.zeros([T*(n+m), T*(n+m)])
         if self.socc_end is not None:
