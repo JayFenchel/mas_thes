@@ -411,8 +411,9 @@ class SOCP:
         if self.socc is not None:
             for socc in self.socc:
                 for i in range(0, T-1):  # nur bis T-1, da T Index für qc_end
-                    d_k = 1/((np.dot(socc['c'].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc['d'])*(np.dot(socc['c'].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc['d']) -
-                             ((np.dot(socc['A'], zk[m+i*(n+m):m+i*(n+m)+n])+socc['b'])* (np.dot(socc['A'], zk[m+i*(n+m):m+i*(n+m)+n])+socc['b'])).sum())
+                    term_1 = (np.dot(socc['c'].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc['d'])
+                    term_2 = (np.dot(socc['A'], zk[m+i*(n+m):m+i*(n+m)+n])+socc['b'])
+                    d_k = 1/(term_1*term_1 - (term_2*term_2).sum())
                     # nur passender  nxn-Block für jeweilige (T-1) x_k
                     term_for_socc[m+i*(n+m):m+i*(n+m)+n, m+i*(n+m):m+i*(n+m)+n] +=\
                         d_k*-2*socc['cxc-AxA']
@@ -420,8 +421,9 @@ class SOCP:
         term_for_socc_end = np.zeros([T*(n+m), T*(n+m)])
         if self.socc_end is not None:
             for socc in self.socc_end:
-                d_k = 1/((np.dot(socc['c'].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc['d'])*(np.dot(socc['c'].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc['d']) -
-                         ((np.dot(socc['A'], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc['b'])*(np.dot(socc['A'], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc['b'])).sum())
+                term_1 = (np.dot(socc['c'].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc['d'])
+                term_2 = (np.dot(socc['A'], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc['b'])
+                d_k = 1/(term_1*term_1 - (term_2*term_2).sum())
                 term_for_socc_end[m+(T-1)*(n+m):m+(T-1)*(n+m)+n, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] +=\
                     d_k*-2*socc['cxc-AxA']  # nur unterer rechter Block nxn bei end_socc
 
