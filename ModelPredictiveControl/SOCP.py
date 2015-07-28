@@ -371,7 +371,7 @@ class SOCP:
         d[:] = 1/(1 + e_term)
         return d
 
-    def form_d_soft_dach(self, xk, zv_k):
+    def form_d_soft_hat(self, xk, zv_k):
         P = self.P_soft
         h = self.h_soft_of_xk(xk)
         d = np.zeros([np.shape(P)[0], np.shape(zv_k)[1]])
@@ -412,8 +412,8 @@ class SOCP:
             for socc in self.socc:
                 for i in range(0, T-1):  # nur bis T-1, da T Index für qc_end
                     term_1 = (np.dot(socc['c'].T, zk[m+i*(n+m):m+i*(n+m)+n]) + socc['d'])
-                    term_2 = (np.dot(socc['A'], zk[m+i*(n+m):m+i*(n+m)+n])+socc['b'])
-                    d_k = 1/(term_1*term_1 - (term_2*term_2).sum())
+                    term_2 = (np.dot(socc['A'], zk[m+i*(n+m):m+i*(n+m)+n]) + socc['b'])
+                    d_k = 1/(term_1*term_1 - np.dot(term_2.T, term_2))
                     # nur passender  nxn-Block für jeweilige (T-1) x_k
                     term_for_socc[m+i*(n+m):m+i*(n+m)+n, m+i*(n+m):m+i*(n+m)+n] +=\
                         d_k*-2*socc['cxc-AxA']
@@ -422,8 +422,8 @@ class SOCP:
         if self.socc_end is not None:
             for socc in self.socc_end:
                 term_1 = (np.dot(socc['c'].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc['d'])
-                term_2 = (np.dot(socc['A'], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc['b'])
-                d_k = 1/(term_1*term_1 - (term_2*term_2).sum())
+                term_2 = (np.dot(socc['A'], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc['b'])
+                d_k = 1/(term_1*term_1 - np.dot(term_2.T, term_2))
                 term_for_socc_end[m+(T-1)*(n+m):m+(T-1)*(n+m)+n, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] +=\
                     d_k*-2*socc['cxc-AxA']  # nur unterer rechter Block nxn bei end_socc
 
@@ -431,15 +431,16 @@ class SOCP:
 
     def form_Phi(self, d, zk):
 
-        P = self.P_of_zk(2*zk)
-        #TODO add Term for socp
-        Phi = 2*self.H\
-              + self.kappa*(np.dot(np.dot(P.T, matrix_diag(d*d)), P) +
-                            self.term_for_qc(zk) + self.term_for_socc(zk))  # *2 siehe Zettel
+        P = self.P_of_zk(2*zk)  # 2*zk for gradient terms (socc, qc) in Phi
+        Phi = self.kappa*(np.dot(np.dot(P.T, matrix_diag(d*d)), P) +
+                          self.term_for_qc(zk) +
+                          self.term_for_socc(zk)) +\
+              2*self.H
         return Phi
 
     def form_Phi_soft(self, d, zk):
-        Phi = self.roh*(np.dot(np.dot(self.P_soft.T, matrix_diag(d)), self.P_soft))
+        Phi = self.roh*(np.dot(
+            np.dot(self.P_soft.T, matrix_diag(d)), self.P_soft))
         return Phi
 
     def solve(self, xk, zv_k):
@@ -453,8 +454,9 @@ class SOCP:
         d = self.form_d(xk, zv_k)
         Phi = self.form_Phi(d, zv_k[0:self.T*(self.m+self.n)])
         if self.P_soft is not None:
-            d_soft_dach = self.form_d_soft_dach(xk, zv_k)
-            Phi += self.form_Phi_soft(d_soft_dach, zv_k[0:self.T*(self.m+self.n)])
+            d_soft_hat = self.form_d_soft_hat(xk, zv_k)
+            Phi += self.form_Phi_soft(
+                d_soft_hat, zv_k[0:self.T*(self.m+self.n)])
 
         rd, rp = self.residual(xk, zv_k)
 
