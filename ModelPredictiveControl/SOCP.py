@@ -234,15 +234,23 @@ class SOCP:
                  socc_c=None, socc_d=None, type='trajectory'):
         if type == 'trajectory':
             if self.socc is not None:
-                self.socc.append({'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d})
+                self.socc.append(
+                    {'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d,
+                     'cxc-AxA': np.dot(socc_c, socc_c.T) - np.dot(socc_A.T, socc_A)})
             else:
-                self.socc = [{'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d, 'cxc-AxA': np.dot(socc_c, socc_c.T) - np.dot(socc_A.T, socc_A)}]
+                self.socc = [
+                    {'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d,
+                     'cxc-AxA': np.dot(socc_c, socc_c.T) - np.dot(socc_A.T, socc_A)}]
 
         elif type == 'end':
             if self.socc_end is not None:
-                self.socc_end.append({'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d})
+                self.socc_end.append(
+                    {'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d,
+                     'cxc-AxA': np.dot(socc_c, socc_c.T) - np.dot(socc_A.T, socc_A)})
             else:
-                self.socc_end = [{'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d}]
+                self.socc_end = [
+                    {'A': socc_A, 'b': socc_b, 'c': socc_c, 'd': socc_d,
+                     'cxc-AxA': np.dot(socc_c, socc_c.T) - np.dot(socc_A.T, socc_A)}]
         else:
             print('SOCC: type is not known')
             exit()
@@ -407,7 +415,7 @@ class SOCP:
                              ((np.dot(socc['A'], zk[m+i*(n+m):m+i*(n+m)+n])+socc['b'])* (np.dot(socc['A'], zk[m+i*(n+m):m+i*(n+m)+n])+socc['b'])).sum())
                     # nur passender  nxn-Block für jeweilige (T-1) x_k
                     term_for_socc[m+i*(n+m):m+i*(n+m)+n, m+i*(n+m):m+i*(n+m)+n] +=\
-                        d_k*-2*socc['cxcAxA']
+                        d_k*-2*socc['cxc-AxA']
         # add term for qc (end)
         term_for_socc_end = np.zeros([T*(n+m), T*(n+m)])
         if self.socc_end is not None:
@@ -415,7 +423,7 @@ class SOCP:
                 d_k = 1/((np.dot(socc['c'].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc['d'])*(np.dot(socc['c'].T, zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n]) + socc['d']) -
                          ((np.dot(socc['A'], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc['b'])*(np.dot(socc['A'], zk[m+(T-1)*(n+m):m+(T-1)*(n+m)+n])+socc['b'])).sum())
                 term_for_socc_end[m+(T-1)*(n+m):m+(T-1)*(n+m)+n, m+(T-1)*(n+m):m+(T-1)*(n+m)+n] +=\
-                    d_k*-2*(np.dot(socc['c'], socc['c'].T) - np.dot(socc['A'].T, socc['A']))  # nur unterer rechter Block nxn bei end_qc
+                    d_k*-2*socc['cxc-AxA']  # nur unterer rechter Block nxn bei end_socc
 
         return term_for_socc + term_for_socc_end
 
