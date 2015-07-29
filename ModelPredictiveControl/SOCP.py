@@ -130,8 +130,12 @@ class SOCP:
 
         T, n, m = self.T, self.n, self.m
         # if None: set_zero(right_dimension)
+        if Q is None:
+            Q = np.zeros([n, n])
         if q is None:
             q = np.zeros([n, 1])
+        if R is None:
+            R = np.zeros([m, m])
         if r is None:
             r = np.zeros([m, 1])
         if S is None:
@@ -258,7 +262,10 @@ class SOCP:
     def calculate_kappa(self, zk):
         dim = self.n+self.m
         cost = np.dot(zk.T, np.dot(self.H, zk)) + np.dot(self.g.T, zk)
-        kappa = 0.01*cost/dim
+        kappa = 0.01*cost/dim  # Wahl des Faktors ist schwierig, 0.01 oft gut
+        if kappa <= 0:
+            print("kappa <= 0, really not good!")
+            kappa = 0.01
         return kappa
 
     def h_of_xk(self, xk):
