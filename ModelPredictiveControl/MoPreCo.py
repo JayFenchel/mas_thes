@@ -12,6 +12,7 @@ from ModelPredictiveControl.Systems import AirCraft
 from ModelPredictiveControl.Systems import qp_from_test
 from ModelPredictiveControl.Systems import qp_from_sys
 from ModelPredictiveControl.Systems import qp_from_new_sys
+from ModelPredictiveControl.Systems import lp
 from time import time
 from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 # import matplotlib.pyplot as plt
@@ -23,6 +24,7 @@ from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 # QP1 = QuadraticProgram(sys)
 # QP, AA, bb = qp_from_test()
 QP = qp_from_new_sys()
+QP = lp()
 QP.set_problem()
 # exit()
 n = QP.n
@@ -106,19 +108,19 @@ for schritt in range(schritte):
     # # print(zv_k[0])
     # # print(np.dot(sys.B, zv_k[0]))
 
-    # neues xk berechnen
-    xk = np.dot(QP.A, xk) + QP.B*zv_k[0:m]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
-    # z_k shiften
-    zv_k[0:(n+m)*(T-1)] = zv_k[n+m:(n+m)*T]
-    # neues z_k[T] hinten anhängen, u[T] ist nicht ganz korrekt, aber kein
-    # u[T+1] vorhanden
-    zv_k[(n+m)*(T-1)+m:(n+m)*T] = np.dot(QP.A, zv_k[(n+m)*(T-1)+m:(n+m)*T])\
-                        + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
-
-    # v_k shiften
-    zv_k[(n+m)*T:(n+m)*T+n*(T-1)] = zv_k[(n+m)*T+n:(n+m)*T+n*T]
-    # neues v_k[T] hinten anhängen
-    zv_k[(n+m)*T+n*(T-1):(n+m)*T+n*(T)] = np.ones([n, 1])*100
+    # # neues xk berechnen
+    # xk = np.dot(QP.A, xk) + QP.B*zv_k[0:m]  #TODO np.dot darf nicht für multiplikation mit skalaren genommen werden
+    # # z_k shiften
+    # zv_k[0:(n+m)*(T-1)] = zv_k[n+m:(n+m)*T]
+    # # neues z_k[T] hinten anhängen, u[T] ist nicht ganz korrekt, aber kein
+    # # u[T+1] vorhanden
+    # zv_k[(n+m)*(T-1)+m:(n+m)*T] = np.dot(QP.A, zv_k[(n+m)*(T-1)+m:(n+m)*T])\
+    #                     + QP.B*zv_k[(T-1)*(m+n):(T-1)*(m+n)+m]
+    #
+    # # v_k shiften
+    # zv_k[(n+m)*T:(n+m)*T+n*(T-1)] = zv_k[(n+m)*T+n:(n+m)*T+n*T]
+    # # neues v_k[T] hinten anhängen
+    # zv_k[(n+m)*T+n*(T-1):(n+m)*T+n*(T)] = np.ones([n, 1])*100
     print('next xk', xk)
 print(time()-zeit)
 # profiler.disable()

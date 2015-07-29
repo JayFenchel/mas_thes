@@ -174,6 +174,47 @@ def qp_from_test():
 
     return (qp, Bd, 2*x0)
 
+def lp():
+    A = np.array([[-1, 2, 0],
+                  [0, -2, 1],
+                  [0, 1, 1]])
+    B = np.array([[0, 0],
+                  [0, 0],
+                  [1, 0]])
+
+    n = A.shape[1]  # columns in A
+    m = B.shape[1]  # columns in B
+    T = 10  # Planning Horizon
+
+    x0 = np.array([[0.2], [0.2], [0.5]])
+    u0 = np.array([[0.9], [0.7]])
+
+    qp = SOCP(T, n, m, x0=x0, u0=u0)
+    # # Eigentlich brauch man keine GNB für einface lp
+    # qp.set_sys_dynamics(A, B)
+
+    # Objective
+    q = np.ones([n, 1])
+    r = np.ones([m, 1])
+
+    qp.set_weighting(q=q, r=r)
+
+    # Box constraints
+    Fx = -np.eye(2*(n+m), n)
+    Fx[n:2*n] = -Fx[0:n]
+    fx = np.zeros([2*(n+m), 1])
+
+    fx[0: n] = -0
+    fx[n: 2*n] = 2
+    Fu = np.eye(2*(n+m), m)
+    Fu[2*n:2*n+m],Fu[2*n+m:2*(n+m)], Fu[0:m] = -Fu[0:m], Fu[0:m], 0
+    fu = np.zeros([2*(n+m), 1])
+    fu[2*n:2*n+m] = 0
+    fu[2*n+m:2*(n+m)] = 1
+
+    qp.set_lin_constraints(Fu, fu, Fx, fx, Fx[0:2*n], fx[0:2*n])
+    return qp
+
 def qp_from_new_sys():
     mm = io.loadmat('data/data_matrix.mat')  # load system matrices
     socp = io.loadmat('data/socp_matrices.mat')
