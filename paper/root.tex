@@ -19,7 +19,7 @@
 %\usepackage{epsfig} % for postscript graphics files
 %\usepackage{mathptmx} % assumes new font selection scheme installed
 %\usepackage{times} % assumes new font selection scheme installed
-%\usepackage{amsmath} % assumes amsmath package installed
+\usepackage{amsmath} % assumes amsmath package installed
 %\usepackage{amssymb}  % assumes amsmath package installed
 
 \title{\LARGE \bf
@@ -97,10 +97,38 @@ In the descirbed primal barrier first and second order derivative. A SOCC in the
 \end{equation}
 
 \subsection{Extended Problem Statement}
-The algorithm of \cite{c1} shell still be used, therefor its genreal form is not changed. Only the constant matrix P and the vector h, also constant regardingly the optimizationvariable z, are expended with $p$ rows belonging to the $p$ new quadratic constraints und $q$ rows for the conic constraints. Different from vector $\hat{h}$ matrix $\hat{P}$ 
-In the extended problem statement 
-\subsection{Selecting $\kappa$}
+The algorithm of \cite{c1} shell still be used, therefor its genreal form is not changed. Only the constant matrix P and the vector h, also constant regardingly the optimizationvariable z, are expended with $p$ rows belonging to the $p$ new quadratic constraints und $q$ rows for the conic constraints. Different from the extended vector $\hat{h}$ the extended matrix $\hat{P}(z)$ is not constant regardingly z anymore.
+\begin{equation}
+	\hat{P}(z)=\begin{bmatrix} P\\ \beta_{1}^{T}+z^{T}\Gamma_{1}\\ \vdots\\ \beta_{p}^{T}+z^{T}\Gamma_{p}\\
+	-\left( c_{1}^{T}z +2d_{1} \right )c_{1}^{T}+\left ( z^{T}A_{1}^{T}+2b_{1}^{T} \right )A_{1}\\
+	\vdots\\
+	-\left( c_{q}^{T}z +2d_{q} \right )c_{q}^{T}+\left ( z^{T}A_{q}^{T}+2b_{q}^{T} \right )A_{q}
+  \end{bmatrix}
+\end{equation}
+\begin{equation}
+	\hat{h} = \begin{bmatrix} h\\ \alpha_{1}^{T}\\ \vdots\\ \alpha_{p}^{T}\\d_{1}^{2}-b_{1}^{T}b_{1}\\\vdots\\d_{q}^{2}-b_{q}^{T}b_{q}\end{bmatrix}
+\end{equation}
+Expending $P$ and $h$ does not change the structure of $\Phi$ exploited in \cite{c1}. So we have not to worry go on with its algorithm. With new $\hat{h}$ and $\hat{P}(z)$ the logarithmic barrier function looks like
+\begin{equation}
+	\phi(z)=\sum_{i=1}^{lT+l_{f}+p+q}-\log \left ( \hat{h}_{i}-\hat{p}_{i}^T(z)z \right )
+\end{equation}
+where $\hat{p}_{i}^T(z)$ is the $i$th rows of $\hat{P}(z)$ depending on $z$. The gradient of the logarithmic barrier function $\nabla\phi(z)$ necessary to calculate the residual is derived simply bei forming $\hat{P}$ with argument $2z$ multiplied by $\hat{d}$.
+\begin{equation}
+	\nabla\phi(z)=\hat{P}^T(2z)\hat{d}
+\end{equation}
+with
+\begin{equation}
+	\hat{d}_i=\frac{1}{\hat{h}_{i}-\hat{p}_{i}^T(z)z}
+\end{equation}
+To obtain $\Phi$ in the resulting system of linear equations two additionel terms have to be added to the Hessian of $\phi(z)$.
+\begin{equation}\begin{split}
+	\nabla^{2}\phi(z)=&\hat{P}(2z)\text{diag}(\hat{d})^{2}\hat{P}(2z)\\
+	&+\sum_{i=lT+lf+1}^{lT+lf+p}\left (\hat{d}_{i}2\Gamma_{i}  \right )\\
+	&+\sum_{j=lT+lf+p+1}^{lT+lf+p+q}\left (\hat{d}_{j}-2 \left( c_{j}c_{j}^{T} - A_{j}^{T} A_{j}  \right)  \right )
+\end{split}\end{equation}
 
+\subsection{Selecting $\kappa$}
+In \cite{c1} the use of a fixed kappa is proposed. But it is difficult to find one. Eventually it should be considered to calculate a new $\kappa$ once every time step, not every inner step, proportional to the values in the optimization variable like in [guck nach] for linear programs. Adopted for quadratic programs $\kappa$ can be estimated as follows
 \subsection{Nummerical Improvments}
 
 \section{RESULTS}
