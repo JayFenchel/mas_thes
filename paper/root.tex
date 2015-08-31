@@ -64,7 +64,7 @@ List some literature with information about model predictive control (MPC).
 
 \subsection{Solving optimization problems}
 
-Many Algorithms using primal dual methods to solve several optimization problems are described in literature, which give solutions with high accuracy. For application as MPC optimization often do not necessarily has to find such exact solutions, therefor in \cite{c1} a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs is described, where of the special MPC problem structure is made use. This papers contribution is manly based on the algorithm in \cite{c1}, which is extended with some numerical robustness approaches and for application for more general optimization problems, especially QPQCs and SOCPs.
+Many Algorithms which use primal dual methods to solve several optimization problems and give solutions with high accuracy are described in literature. For application as MPC optimization often do not necessarily has to find such exact solutions, therefor in \cite{c1} a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs is described, where of the special MPC problem structure is made use of. This paper's contribution is manly based on the algorithm in \cite{c1}, which has been extended by some numerical robustness approaches and for application to more general optimization problems, especially QPQCs and SOCPs.
 
 \section{PROBLEM STATEMENT}
 
@@ -91,7 +91,7 @@ as following inequality:
 \section{EXTENDED ALGORITHM}
 
 \subsection{Generalized Constraints}
-In the described primal barrier first and second order derivative. A SOCC in the above mentioned form is not continuously differentiable. Therefor SOCC in Generalized form \cite{c2} can be used.
+In the described primal barrier method the gradient and the Hessian of the logarithmic barrier function are necessary. SOCCs in the above mentioned form are not continuously differentiable. Therefor SOCCs in Generalized form \cite{c2} can be used.
 \begin{equation}
  \left \|Az+b  \right \|_{2}^2 \leq \left (c^{T}z+d  \right )^{2}
 \end{equation}
@@ -128,7 +128,11 @@ To obtain $\Phi$ in the resulting system of linear equations two additional term
 \end{split}\end{equation}
 
 \subsection{Selecting $\kappa$}
-In \cite{c1} the use of a fixed kappa is proposed. But it is difficult to find one. Eventually it should be considered to calculate a new $\kappa$ once every time step, not every inner step, proportional to the values in the optimization variable like in [guck nach] for linear programs. Adopted for quadratic programs $\kappa$ can be estimated as follows
+In \cite{c1} the use of a fixed kappa is proposed. But it is difficult to find one. Eventually it should be considered to calculate a new $\kappa$ once every time step, not every inner step, to have the effect of the barrier function to the cost in same magnitude as the effect of weighting terms like in \cite{c4} for linear programs. Adopted for quadratic programs a good $\kappa$ can be estimated by
+\begin{equation}
+  \kappa=\frac{z^{T}Hz + g^{T}z}{T(n+m)}
+\end{equation}
+
 \subsection{Numerical Improvements}
 
 \section{RESULTS}
@@ -140,6 +144,7 @@ Results of Solving Test QPs by \cite{c3}
 \subsection{Application Example}
 
 \section{CONCLUSIONS}
+What are the conclusions?
 
 \addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
                                   % on the last page of the document manually. It shortens
@@ -157,10 +162,6 @@ Results of Solving Test QPs by \cite{c3}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section*{APPENDIX}
-
-Appendixes should appear before the acknowledgment.
-
 \section*{ACKNOWLEDGMENT}
 
 Acknowledgment.
@@ -177,6 +178,7 @@ Acknowledgment.
 \bibitem{c1} Y. Wang and S. Boyd, Fast Model predictive control using online optimization, IEEE Transactions on Control Systems Technology, vol. 18, no. 2, pp. 267-278, March 2010.
 \bibitem{c2} S. Boyd and L. Vandenberghe, Convex Optimization
 \bibitem{c3} I. Maros and C. Mészáros, A Repository of Convex Quadratic ...
+\bibitem{c4} A. Marxen, Primal Barrier Methods for Linear Programming...
 \bibitem {c40} Weitere Literatur
 %\bibitem{c1} G. O. Young, ÒSynthetic structure of industrial plastics (Book style with paper title and editor),Ó 	in Plastics, 2nd ed. vol. 3, J. Peters, Ed.  New York: McGraw-Hill, 1964, pp. 15Ð64.
 %\bibitem{c2} W.-K. Chen, Linear Networks and Systems (Book style).	Belmont, CA: Wadsworth, 1993, pp. 123Ð135.
