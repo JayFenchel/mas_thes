@@ -60,11 +60,11 @@ Write the introduction here.
 
 \subsection{Model predictive control}
 
-List some papers sharing information about model predictive control.
+List some literature with information about model predictive control (MPC).
 
 \subsection{Solving optimization problems}
 
-Mainly introduce [Fast Model Predictive Control Using Online Optimization by Wang and Boyd] and where some usefull features expending its algorithm are discribed. \cite{c1}
+Many Algorithms using primal dual methods to solve several optimization problems are described in literature, which give solutions with high accuracy. For application as MPC optimization often do not necessarily has to find such exact solutions, therefor in \cite{c1} a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs is described, where of the special MPC problem structure is made use. This papers contribution is manly based on the algorithm in \cite{c1}, which is extended with some numerical robustness aproaches and for application for more general optimization problems, especially QPQCs and SOCPs.
 
 \section{PROBLEM STATEMENT}
 
@@ -79,7 +79,7 @@ If linear constraints as bounds for state and control variable are not sufficien
 \end{equation}
 
 \subsection{Second Order Cone Program}
-A more gernal form of contraints are second order cone constraints. An Optimization problem using this type of constraints is called second order cone program. Constraints are described as a second order cone as following:
+A more general form of constraints are second order cone constraints. An Optimization problem using this type of constraints is called second order cone program. Constraints are described as a second order cone as following:
 \{Description as Cone Definition K:=...\}
 as following inequality:
 \begin{equation}
@@ -91,13 +91,13 @@ as following inequality:
 \section{EXTENDED ALGORITHM}
 
 \subsection{Generalized Constraints}
-In the descirbed primal barrier first and second order derivative. A SOCC in the above mentioned form is not continuously differentiable. Therefor SOCC in Generalized form \cite{c2} can be used.
+In the described primal barrier first and second order derivative. A SOCC in the above mentioned form is not continuously differentiable. Therefor SOCC in Generalized form \cite{c2} can be used.
 \begin{equation}
  \left \|Az+b  \right \|_{2}^2 \leq \left (c^{T}z+d  \right )^{2}
 \end{equation}
 
 \subsection{Extended Problem Statement}
-The algorithm of \cite{c1} shell still be used, therefor its genreal form is not changed. Only the constant matrix P and the vector h, also constant regardingly the optimizationvariable z, are expended with $p$ rows belonging to the $p$ new quadratic constraints und $q$ rows for the conic constraints. Different from the extended vector $\hat{h}$ the extended matrix $\hat{P}(z)$ is not constant regardingly z anymore.
+The algorithm of \cite{c1} shell still be used, therefor its general form is not changed. Only the constant matrix P and the vector h, also constant regarding the optimization variable z, are expended with $p$ rows belonging to the $p$ new quadratic constraints and $q$ rows for the conic constraints. Different from the extended vector $\hat{h}$ the extended matrix $\hat{P}(z)$ is not constant regarding z anymore.
 \begin{equation}
 	\hat{P}(z)=\begin{bmatrix} P\\ \beta_{1}^{T}+z^{T}\Gamma_{1}\\ \vdots\\ \beta_{p}^{T}+z^{T}\Gamma_{p}\\
 	-\left( c_{1}^{T}z +2d_{1} \right )c_{1}^{T}+\left ( z^{T}A_{1}^{T}+2b_{1}^{T} \right )A_{1}\\
@@ -112,7 +112,7 @@ Expending $P$ and $h$ does not change the structure of $\Phi$ exploited in \cite
 \begin{equation}
 	\phi(z)=\sum_{i=1}^{lT+l_{f}+p+q}-\log \left ( \hat{h}_{i}-\hat{p}_{i}^T(z)z \right )
 \end{equation}
-where $\hat{p}_{i}^T(z)$ is the $i$th rows of $\hat{P}(z)$ depending on $z$. The gradient of the logarithmic barrier function $\nabla\phi(z)$ necessary to calculate the residual is derived simply bei forming $\hat{P}$ with argument $2z$ multiplied by $\hat{d}$.
+where $\hat{p}_{i}^T(z)$ is the $i$th rows of $\hat{P}(z)$ depending on $z$. The gradient of the logarithmic barrier function $\nabla\phi(z)$ necessary to calculate the residual is derived simply by forming $\hat{P}$ with argument $2z$ multiplied by $\hat{d}$.
 \begin{equation}
 	\nabla\phi(z)=\hat{P}^T(2z)\hat{d}
 \end{equation}
@@ -120,7 +120,7 @@ with
 \begin{equation}
 	\hat{d}_i=\frac{1}{\hat{h}_{i}-\hat{p}_{i}^T(z)z}
 \end{equation}
-To obtain $\Phi$ in the resulting system of linear equations two additionel terms have to be added to the Hessian of $\phi(z)$.
+To obtain $\Phi$ in the resulting system of linear equations two additional terms have to be added to the Hessian of $\phi(z)$.
 \begin{equation}\begin{split}
 	\nabla^{2}\phi(z)=&\hat{P}(2z)\text{diag}(\hat{d})^{2}\hat{P}(2z)\\
 	&+\sum_{i=lT+lf+1}^{lT+lf+p}\left (\hat{d}_{i}2\Gamma_{i}  \right )\\
@@ -129,7 +129,7 @@ To obtain $\Phi$ in the resulting system of linear equations two additionel term
 
 \subsection{Selecting $\kappa$}
 In \cite{c1} the use of a fixed kappa is proposed. But it is difficult to find one. Eventually it should be considered to calculate a new $\kappa$ once every time step, not every inner step, proportional to the values in the optimization variable like in [guck nach] for linear programs. Adopted for quadratic programs $\kappa$ can be estimated as follows
-\subsection{Nummerical Improvments}
+\subsection{Numerical Improvements}
 
 \section{RESULTS}
 
