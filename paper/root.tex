@@ -23,13 +23,13 @@
 %\usepackage{amssymb}  % assumes amsmath package installed
 
 \title{\LARGE \bf
-Preparation of Papers for IEEE Sponsored Conferences \& Symposia*
+Optimization Algorithm Tailored for Embedded Model Predictive Control
 }
 
 
-\author{Hannes Heinemann$^{1}$% <-this % stops a space
+\author{author$^{1}$% <-this % stops a space
 \thanks{*This work was not supported by any organization}% <-this % stops a space
-\thanks{$^{1}$Hannes Heinemann is student
+\thanks{$^{1}$author
         {\tt\small hannes.heinemann@st.ovgu.de}}%
         }
 
@@ -64,7 +64,7 @@ List some literature with information about model predictive control (MPC).
 
 \subsection{Solving optimization problems}
 
-Many Algorithms which use primal dual methods to solve several optimization problems and give solutions with high accuracy are described in literature. For application as MPC optimization often do not necessarily has to find such exact solutions, therefor in \cite{c1} a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs is described, where of the special MPC problem structure is made use of. This paper's contribution is manly based on the algorithm in \cite{c1}, which has been extended by some numerical robustness approaches and for application to more general optimization problems, especially QPQCs and SOCPs.
+Many Algorithms which use primal dual methods to solve several optimization problems and give solutions with high accuracy are described in literature. For application as MPC, optimization often do not necessarily has to find such exact solutions, therefor in \cite{c1} a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs is described, where of the special MPC problem structure is made use of. This paper's contribution is manly based on the algorithm in \cite{c1}, which has been extended by some numerical robustness approaches and for application to more general optimization problems, especially QPQCs and SOCPs.
 
 \section{PROBLEM STATEMENT}
 
@@ -79,9 +79,11 @@ If linear constraints as bounds for state and control variable are not sufficien
 \end{equation}
 
 \subsection{Second Order Cone Program}
-A more general form of constraints are second order cone constraints. An Optimization problem using this type of constraints is called second order cone program. Constraints are described as a second order cone as following:
-\{Description as Cone Definition K:=...\}
-as following inequality:
+A more general form of constraints are second order cone constraints. The constraints of such second order cone program ca be formulated as following
+%:
+%\{Description as Cone Definition K:=...\}
+%as following 
+inequality:
 \begin{equation}
  \left \|Az+b  \right \|_{2} \leq c^{T}z+d
 \end{equation}
@@ -97,7 +99,7 @@ In the described primal barrier method the gradient and the Hessian of the logar
 \end{equation}
 
 \subsection{Extended Problem Statement}
-The algorithm of \cite{c1} shell still be used, therefor its general form is not changed. Only the constant matrix P and the vector h, also constant regarding the optimization variable z, are expended with $p$ rows belonging to the $p$ new quadratic constraints and $q$ rows for the conic constraints. Different from the extended vector $\hat{h}$ the extended matrix $\hat{P}(z)$ is not constant regarding z anymore.
+The algorithm of \cite{c1} shell still be used, therefor the general form of the extended problem statement is not changed. Only the constant matrix P and the vector h, also constant regarding the optimization variable z, are expended with $p$ rows belonging to the $p$ new quadratic constraints and $q$ rows for the conic constraints. Different from the extended vector $\hat{h}$ the extended matrix $\hat{P}(z)$ is not constant regarding z anymore.
 \begin{equation}
 	\hat{P}(z)=\begin{bmatrix} P\\ \beta_{1}^{T}+z^{T}\Gamma_{1}\\ \vdots\\ \beta_{p}^{T}+z^{T}\Gamma_{p}\\
 	-\left( c_{1}^{T}z +2d_{1} \right )c_{1}^{T}+\left ( z^{T}A_{1}^{T}+2b_{1}^{T} \right )A_{1}\\
@@ -128,7 +130,7 @@ To obtain $\Phi$ in the resulting system of linear equations two additional term
 \end{split}\end{equation}
 
 \subsection{Selecting $\kappa$}
-In \cite{c1} the use of a fixed kappa is proposed. But it is difficult to find one. Eventually it should be considered to calculate a new $\kappa$ once every time step, not every inner step, to have the effect of the barrier function to the cost in same magnitude as the effect of weighting terms like in \cite{c4} for linear programs. Adopted for quadratic programs a good $\kappa$ can be estimated by
+In \cite{c1} the use of a fixed kappa is proposed. But it is difficult to find one. It should be considered to calculate a new $\kappa$ once every time step, not every inner step, to have the effect of the barrier function to the cost in same magnitude as the effect of weighting terms like in \cite{c4} for linear programs. Adopted for quadratic programs a good $\kappa$ can be estimated by
 \begin{equation}
   \kappa=\frac{z^{T}Hz + g^{T}z}{T(n+m)}
 \end{equation}
