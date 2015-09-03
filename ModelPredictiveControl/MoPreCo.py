@@ -24,7 +24,7 @@ from ModelPredictiveControl.QuadraticProgram import QuadraticProgram
 # QP1 = QuadraticProgram(sys)
 # QP, AA, bb = qp_from_test()
 QP = qp_from_new_sys()
-QP = lp()
+# QP = lp()
 QP.set_problem()
 # exit()
 n = QP.n
@@ -36,6 +36,13 @@ x0 = np.array([[0.], [0.], [0.], [400.], [0.]])
 u0 = np.array([[0.]])
 
 x0, u0 = QP.x0, QP.u0
+
+(s, t) = u0.shape
+for si in range(s):
+    for ti in range(t):
+        print("%f, " % u0[si, ti], end="", flush=True)
+    print()
+print(s, t)
 
 z0 = np.zeros([T*(m+n), 1])
 for i in range(0, T):
@@ -49,7 +56,7 @@ zv_k = zv_0
 print('startwert valide = ', QP.check(xk, zv_k))  # Validität des Startwerts prüfen
 zeit = time()
 # profiler.enable()
-schritte = 25
+schritte = 1
 st_tolerance = 0.0466  # 0.6^2
 r_tolerance = 1e-4
 x_out = np.zeros([np.shape(xk)[0], schritte])
@@ -62,7 +69,8 @@ for schritt in range(schritte):
         st, rp_norm, rd_norm = 1, 1, 1
         # Optimize until algorithm fails to go further (st < st_tolerance) or
         # residual is small enough
-        while st >= st_tolerance and rp_norm+rd_norm >= r_tolerance:
+        #while st >= st_tolerance and rp_norm+rd_norm >= r_tolerance:
+        for i in range(5):
             zeits = time()
             delta_zv = QP.solve(xk, zv_k)
             print('solve', 5*(time()-zeits))
