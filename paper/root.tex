@@ -64,7 +64,7 @@ List some literature with information about model predictive control (MPC).
 
 \subsection{Solving optimization problems}
 
-Many Algorithms which use primal dual methods to solve several optimization problems and give solutions with high accuracy are described in literature. For application as MPC, optimization often do not necessarily has to find such exact solutions, therefore in \cite{c1} a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs is described, where the special MPC problem structure is made use of. This paper's contribution is manly based on the algorithm in \cite{c1}, which has been extended by some numerical robustness approaches and for application to more general optimization problems, especially QCQPs and SOCPs.
+Many Algorithms which use primal dual methods to solve several optimization problems and give solutions with high accuracy are described in literature. For application as MPC, optimization often do not necessarily has to find such exact solutions. Therefore \cite{c1} describes a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs, making use of the special MPC problem structure. This paper's contribution is manly based on the algorithm in \cite{c1}, which has been extended by some numerical robustness approaches. Regularization \cite{}, soft constraints \cite{c5}. For application to more general optimization problems, we extend the algorithm to handle quadratic Constrained quadratic programs (QCQPs) and second order cone programs (SOCPs).
 
 \section{PROBLEM STATEMENT}
 
@@ -88,6 +88,7 @@ inequality:
 \end{equation}
 
 \subsection{Soft Constraints}
+To use the algorithm in \cite{c1} it is necessary that $z$ strictly satisfies the inequality constraints all the time. If the system is moving near its constraints, in case of disturbances it is not guaranteed that its state $x$ is remaining in the feasible area. To avoid such feasibility problems and to make the algorithm more robust we additionlly introduc soft contraints. So the algorithm can violate some inequality constraints for the cost of some additional penalty. There are different ways to introduc soft constraints in an optimization algorithm. \cite{c5} proposes a method tailored for the algorithm we use without any additional typically needed slack variable.
 
 \section{EXTENDED ALGORITHM}
 
@@ -181,6 +182,7 @@ Acknowledgment.
 \bibitem{c2} S. Boyd and L. Vandenberghe, Convex Optimization
 \bibitem{c3} I. Maros and C. Mészáros, A Repository of Convex Quadratic ...
 \bibitem{c4} A. Marxen, Primal Barrier Methods for Linear Programming...
+\bibitem{c5} A. Richards, Fast Model Predictive Control with Soft Constraints
 \bibitem {c40} Weitere Literatur
 %\bibitem{c1} G. O. Young, ÒSynthetic structure of industrial plastics (Book style with paper title and editor),Ó 	in Plastics, 2nd ed. vol. 3, J. Peters, Ed.  New York: McGraw-Hill, 1964, pp. 15Ð64.
 %\bibitem{c2} W.-K. Chen, Linear Networks and Systems (Book style).	Belmont, CA: Wadsworth, 1993, pp. 123Ð135.
