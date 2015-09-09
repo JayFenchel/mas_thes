@@ -64,8 +64,8 @@ List some literature with information about model predictive control (MPC).
 
 \subsection{Solving optimization problems}
 
-Many Algorithms which use primal dual methods to solve several optimization problems are described in literature. Most of them focus on finding solutions with high accuracy. For application as MPC, optimization often do not necessarily has to find such exact solutions. Therefore \cite{c1} describes a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs, making use of the special MPC problem structure. This paper's contribution is manly based on the algorithm in \cite{c1}, which has been extended by some numerical robustness approaches. Regularization \cite{c6} and iterative refinement if necessary, soft constraints \cite{c5}. For application to more general optimization problems, we extend the algorithm to handle quadratic Constrained quadratic programs (QCQPs) and second-order cone programs (SOCPs).\\
-So we aim to cobinate the advantages of existing algorithms to get very fast solutions and use several approaches for robustness of the algorithm.
+Many Algorithms which use primal dual methods to solve several optimization problems are described in literature. Most of them focus on finding solutions with high accuracy. For application as MPC, optimization often do not necessarily has to find such exact solutions. Therefore \cite{c1} describes a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs, making use of the special MPC problem structure. This paper's contribution is manly based on the algorithm in \cite{c1}, which has been extended by some numerical robustness approaches. Like \cite{c6} we use regularization to have a more robust algorithm in combination with iterative refinement to compensate the error of regularization if necessary. Like \cite{c5} we integrate soft constraints in the Fast MPC algorithm of Boyd and focus particularly on the consequences of losing the exact penalty function guarantee. For application to more general optimization problems, we extend the algorithm to handle quadratically constrained quadratic programs (QCQPs) and second-order cone programs (SOCPs).\\
+We aim to combine the advantages of existing algorithms to get very fast solutions and use several approaches for robustness of the algorithm. So we can compare the solutions for several approaches and estimate the influence of them to the algorithm.
 
 \section{PROBLEM STATEMENT}
 
@@ -192,7 +192,7 @@ To solve the system of linear equations the most important step is to compute th
   \begin{bmatrix} \Phi+\epsilon I & C^{T} \\ C & 0 \end{bmatrix} \begin{bmatrix}\Delta z \\ \Delta v\end{bmatrix}= -\begin{bmatrix}r_d \\ r_p\end{bmatrix}
 \end{equation}
 and tolerate a small error we make instead of solving the original system of linear equations.
-\addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
+\addtolength{\textheight}{-10cm}   % This command serves to balance the column lengths
                                   % on the last page of the document manually. It shortens
                                   % the textheight of the last page by a suitable amount.
                                   % This command does not take effect until the next page
@@ -224,19 +224,21 @@ and iterate $k$. After repeating both steps until
 is sufficiently small, $l^{(k)}$ can be used as good approximation for $l$.
 
 \section{RESULTS}
-Comparison of the speed of the algorithm\\
-condensed formulation (one block) <-> exploit the structure of MPC optimization problem
+Comparison of the speed of the algorithm and how it satisfies the constraints for PCE of the airplane example\\
+condensed formulation (one block) $<->$ exploit the structure of MPC optimization problem
 
 \subsection{Test QPs}
 
 Results of Solving Test QPs by \cite{c3}
 
-\subsection{Application Example}
+\subsection{Description of Airplane PCE}
+
+\subsection{Results for Airplane PCE}
 
 \section{CONCLUSIONS}
 What are the conclusions?
 
-\addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
+%\addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
                                   % on the last page of the document manually. It shortens
                                   % the textheight of the last page by a suitable amount.
                                   % This command does not take effect until the next page
