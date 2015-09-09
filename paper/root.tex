@@ -20,7 +20,7 @@
 %\usepackage{mathptmx} % assumes new font selection scheme installed
 %\usepackage{times} % assumes new font selection scheme installed
 \usepackage{amsmath} % assumes amsmath package installed
-%\usepackage{amssymb}  % assumes amsmath package installed
+\usepackage{amssymb}  % assumes amsmath package installed
 
 \title{\LARGE \bf
 Optimization Algorithm Tailored for Embedded Model Predictive Control
@@ -64,59 +64,92 @@ List some literature with information about model predictive control (MPC).
 
 \subsection{Solving optimization problems}
 
-Many Algorithms which use primal dual methods to solve several optimization problems and give solutions with high accuracy are described in literature. For application as MPC, optimization often do not necessarily has to find such exact solutions. Therefore \cite{c1} describes a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs, making use of the special MPC problem structure. This paper's contribution is manly based on the algorithm in \cite{c1}, which has been extended by some numerical robustness approaches. Regularization \cite{c6} and iterative refinement if necessary, soft constraints \cite{c5}. For application to more general optimization problems, we extend the algorithm to handle quadratic Constrained quadratic programs (QCQPs) and second order cone programs (SOCPs).
+Many Algorithms which use primal dual methods to solve several optimization problems are described in literature. Most of them focus on finding solutions with high accuracy. For application as MPC, optimization often do not necessarily has to find such exact solutions. Therefore \cite{c1} describes a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs, making use of the special MPC problem structure. This paper's contribution is manly based on the algorithm in \cite{c1}, which has been extended by some numerical robustness approaches. Regularization \cite{c6} and iterative refinement if necessary, soft constraints \cite{c5}. For application to more general optimization problems, we extend the algorithm to handle quadratic Constrained quadratic programs (QCQPs) and second-order cone programs (SOCPs).
 
 \section{PROBLEM STATEMENT}
 
 \subsection{Description of a Quadratic Program}
 
-Introduce the unchanged problem statement of \cite{c1}
+Introduce the unchanged problem statement of \cite{c1}\\
+The control variables $u(t),\dots, u(t+T-1)$ and the presented states $x(t+1),\dots, x(t+T)$ up to the planning horizon $T$ are rewritten to one optimization variable
+\begin{equation*}
+  z = (u(t),x(t+1),\dots,u(t+T-1),x(t+T))\in \mathbb{R}^{T(m+n)}.
+\end{equation*}
+The quadratic program (QP) can be formulated as
+\begin{equation}\begin{split}
+  \underset{z}{\text{min}}\quad &z^{T}Hz + g^{T}z\\
+  \text{s.t.} \quad &Pz \leq h,\quad Cz=b
+\end{split}\end{equation}
+For the use of an infeasible start primal barrier method a logarithmic barrier fuction
+\begin{equation}
+  \phi(z)=\sum_{i=1}^{lT+l_{f}}-\log \left ( h_{i}-p_{i}^Tz \right )
+\end{equation}
+ is introduced the the cost function to handle the inequality constraints.
 
-\subsection{Quadratic Constrained Quadratic Program}
+\subsection{Quadratically Constrained Quadratic Program}
+\{Vorteile von QCQP nennen\}
 If linear constraints as bounds for state and control variable are not sufficient it can be necessary to use nonlinear constraints such as quadratic constraints
 \begin{equation}
- z^{T}\Gamma z+\beta^{T}z\leq\alpha.
+\label{eq:qc}
+ z^{T}\Gamma_{i} z+\beta_{i}^{T}z\leq\alpha_{i},\quad i=1, \dots, p
 \end{equation}
-\subsection{Second Order Cone Program}
-A more general form of constraints are second order cone constraints. The constraints of such second order cone program ca be formulated as following
+with positive semidefinite matrices $P_{1},\dots,P_{p} \in \mathbb{R}^{n\times n}$ (\cite{c7}).
+\subsection{Second-Order Cone Program}
+A more general form of optimization problems are second-order cone programs (SOCP). We can formulate a lot of different nonlinear convex optimization problems as SOCP (\cite{c7}). The constraints of dimension $k_{i}$ of such SOCP ca be formulated as following
 %:
 %\{Description as Cone Definition K:=...\}
 %as following 
 inequality:
-\begin{equation}
- \left \|Az+b  \right \|_{2} \leq c^{T}z+d.
-\end{equation}
+\begin{equation*}
+ \left \|A_{i}z+b_{i}  \right \|_{2} \leq c_{i}^{T}z+d_{i}\quad i=1, \dots, q,
+\end{equation*}
+where $A_{1},\dots,A_{q} \in \mathbb{R}^{(k_{i}-1)\times n}$, $b_{1},\dots,b_{q} \in \mathbb{R}^{k_{i}-1}$, $c_{1},\dots,c_{q} \in \mathbb{R}^{n}$ and $d_{1},\dots,d_{q} \in \mathbb{R}$
 
 \subsection{Soft Constraints}
-To use the algorithm in \cite{c1} it is necessary that $z$ strictly satisfies the inequality constraints all the time. If the system is moving near its constraints, in case of disturbances it is not guaranteed that its state $x$ is remaining in the feasible area. To avoid such feasibility problems and to make the algorithm more robust we additionlly introduc soft contraints. So the algorithm can violate some inequality constraints for the cost of some additional penalty. There are different ways to introduc soft constraints in an optimization algorithm. \cite{c5} proposes a method tailored for the algorithm we use without any additional typically needed slack variable.\\
+To use the algorithm in \cite{c1} it is necessary that $z$ strictly satisfies the inequality constraints all the time. If the system is moving near its constraints, in case of disturbances it is not guaranteed that its state $x$ is remaining in the feasible area. To avoid such feasibility problems and to make the algorithm more robust we additionlly introduc soft contraints. So the algorithm can violate some inequality constraints for the cost of some additional penalty. There are different ways to introduc soft constraints in an optimization algorithm. \cite{c5} proposes a method tailored for the algorithm we use without any typically needed additional slack variable.\\
 exact panalty formulation: solution is the same as in the unmodified case. Only for if there is no feasible point that stis 
 
 \section{EXTENDED ALGORITHM}
 
 \subsection{Generalized Constraints}
-In the described primal barrier method the gradient and the Hessian of the logarithmic barrier function are necessary. SOCCs in the above mentioned form are not continuously differentiable. Therefor SOCCs in Generalized form \cite{c2}
+In the described primal barrier method the gradient and the Hessian of the logarithmic barrier function are necessary. SOCCs in the above mentioned form are not continuously differentiable. Therefore SOCCs in Generalized form \cite{c2}
 \begin{equation}
- \left \|Az+b  \right \|_{2}^2 \leq \left (c^{T}z+d  \right )^{2}
+\label{eq:gen_socc}
+ \left \|A_{i}z+b_{i}  \right \|_{2}^2 \leq \left (c_{i}^{T}z+d_{i}  \right )^{2}\quad i=1, \dots, q
 \end{equation}
 can be used.
 
 \subsection{Extended Problem Statement}
-The algorithm of \cite{c1} shell still be used, therefor the general form of the extended problem statement is not changed. Only the constant matrix $P$ and the vector $h$, also constant with respect to the optimization variable $z$, are expended with $p$ rows belonging to the $p$ new quadratic constraints and $q$ rows for the conic constraints. Different from the extended vector $\hat{h}$ the extended matrix $\hat{P}(z)$ is not constant with respect to $z$ anymore
+The algorithm of \cite{c1} shell still be used, therefore the general form of the extended problem statement is not changed. We can resolve the norm in (\ref{eq:gen_socc}) and reorder the terms to
 \begin{equation}
+\label{eq:socc}
+  \left  [-\left( c_{i}^{T}z +2d_{i} \right )c_{i}^{T}+\left ( z^{T}A_{i}^{T}+2b_{i}^{T} \right )A_{i}  \right ]z\leq d_{i}^{2}-b_{i}^{T}b_{i}
+\end{equation}
+Only the constant matrix $P$ and the vector $h$, also constant with respect to the optimization variable $z$, are expanded with $p$ rows belonging to the $p$ new quadratic constraints (\ref{eq:qc}) and $q$ rows for the conic constraints (\ref{eq:socc}) to
+\begin{equation*}
 	\hat{P}(z)=\begin{bmatrix} P\\ \beta_{1}^{T}+z^{T}\Gamma_{1}\\ \vdots\\ \beta_{p}^{T}+z^{T}\Gamma_{p}\\
 	-\left( c_{1}^{T}z +2d_{1} \right )c_{1}^{T}+\left ( z^{T}A_{1}^{T}+2b_{1}^{T} \right )A_{1}\\
 	\vdots\\
 	-\left( c_{q}^{T}z +2d_{q} \right )c_{q}^{T}+\left ( z^{T}A_{q}^{T}+2b_{q}^{T} \right )A_{q}
-  \end{bmatrix},
-\end{equation}
-\begin{equation}
+  \end{bmatrix}
+\end{equation*}
+and
+\begin{equation*}
 	\hat{h} = \begin{bmatrix} h\\ \alpha_{1}^{T}\\ \vdots\\ \alpha_{p}^{T}\\d_{1}^{2}-b_{1}^{T}b_{1}\\\vdots\\d_{q}^{2}-b_{q}^{T}b_{q}\end{bmatrix}.
-\end{equation}
-Expanding $P$ and $h$ does not change the structure of $\Phi$ exploited in \cite{c1}. So we have not to worry go on with its algorithm. With new $\hat{h}$ and $\hat{P}(z)$ the logarithmic barrier function looks like
+\end{equation*}
+Different from the extended vector $\hat{h}$ the extended matrix $\hat{P}(z)$ is not constant with respect to $z$ anymore. Dispite that expanding $P$ and $h$ does not change the structure of $\Phi$ exploited in \cite{c1}. So we have not to worry go on with its algorithm. With the new inequality constraint $\hat{P}(z)z \leq \hat{h}$ the logarithmic barrier function looks like
 \begin{equation}
 	\phi(z)=\sum_{i=1}^{lT+l_{f}+p+q}-\log \left ( \hat{h}_{i}-\hat{p}_{i}^T(z)z \right )
 \end{equation}
-where $\hat{p}_{i}^T(z)$ is the $i$th rows of $\hat{P}(z)$ depending on $z$. The gradient of the logarithmic barrier function $\nabla\phi(z)$ necessary to calculate the residual is derived simply by forming $\hat{P}$ with argument $2z$ multiplied by $\hat{d}$.
+where $\hat{p}_{i}^T(z)$ is the $i$th rows of $\hat{P}(z)$ depending on $z$. The gradient of the logarithmic barrier function $\nabla\phi(z)$  is necessary to calculate the residual $r$. Because of first order derivatives of the functions associated with the inequality constraints
+\begin{equation}
+  \nabla f_{i}\left (z  \right )=\beta_{i}^{T}+2z^{T}\Gamma_{i}
+\end{equation}
+and
+\begin{equation*}
+  \nabla f_{i}\left (z  \right )=\left (2\left(-\left(c_{i}^{T}z + d_{i}\right )c_{i} + \left(z^{T}A_{i}^{T} + b_{i}z^{T} \right )A_{i}\right) \right),
+\end{equation*}
+the gradient of the logarithmic barrier function is simply derived by forming $\hat{P}$ with argument $2z$ multiplied by $\hat{d}$.
 \begin{equation}
 	\nabla\phi(z)=\hat{P}^T(2z)\hat{d}
 \end{equation}
@@ -124,11 +157,19 @@ with
 \begin{equation}
 	\hat{d}_i=\frac{1}{\hat{h}_{i}-\hat{p}_{i}^T(z)z}
 \end{equation}
-To obtain $\Phi$ in the resulting system of linear equations two additional terms have to be added to the Hessian of $\phi(z)$.
+The second order derivatives of the functions associated with the inequality constraints are
+\begin{equation}
+ \nabla^{2} f_{i}\left (z  \right )=2\Gamma_{i}
+\end{equation}
+and
+\begin{equation}
+  \nabla^{2} f_{i}\left (z  \right )= -2 \left( c_{i}c_{i}^{T} - A_{i}^{T} A_{i}  \right),
+\end{equation}
+of which we obtain two additional terms, have to be added to the Hessian of $\phi(z)$, to form $\Phi$ in the resulting system of linear equations.
 \begin{equation}\begin{split}
 	\nabla^{2}\phi(z)=&\hat{P}(2z)\text{diag}(\hat{d})^{2}\hat{P}(2z)\\
-	&+\sum_{i=lT+lf+1}^{lT+lf+p}\left (\hat{d}_{i}2\Gamma_{i}  \right )\\
-	&+\sum_{j=lT+lf+p+1}^{lT+lf+p+q}\left (\hat{d}_{j}-2 \left( c_{j}c_{j}^{T} - A_{j}^{T} A_{j}  \right)  \right )
+	&+\sum_{i=lT+lf+1}^{lT+lf+p}\left (2\hat{d}_{i}\Gamma_{i}  \right )\\
+	&+\sum_{j=lT+lf+p+1}^{lT+lf+p+q}\left (-2\hat{d}_{j} \left( c_{j}c_{j}^{T} - A_{j}^{T} A_{j}  \right)  \right )
 \end{split}\end{equation}
 
 \subsection{Selecting $\kappa$}
@@ -194,6 +235,7 @@ Acknowledgment.
 \bibitem{c4} A. Marxen, Primal Barrier Methods for Linear Programming...
 \bibitem{c5} A. Richards, Fast Model Predictive Control with Soft Constraints
 \bibitem{c6} J. Mattingley, S. Boyd, CVXGEN: a code generator for embedded convex optimization
+\bibitem{c7} M. S. Lobo and L. Vandenberghe, Application pf second-order cone programming
 \bibitem {c40} Weitere Literatur
 %\bibitem{c1} G. O. Young, ÒSynthetic structure of industrial plastics (Book style with paper title and editor),Ó 	in Plastics, 2nd ed. vol. 3, J. Peters, Ed.  New York: McGraw-Hill, 1964, pp. 15Ð64.
 %\bibitem{c2} W.-K. Chen, Linear Networks and Systems (Book style).	Belmont, CA: Wadsworth, 1993, pp. 123Ð135.
