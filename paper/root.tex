@@ -80,7 +80,7 @@ The quadratic program (QP) can be formulated as
   \underset{z}{\text{min}}\quad &z^{T}Hz + g^{T}z\\
   \text{s.t.} \quad &Pz \leq h,\quad Cz=b
 \end{split}\end{equation}
-For the use of an infeasible start primal barrier method a logarithmic barrier fuction
+For the use of an infeasible start primal barrier method a logarithmic barrier function
 \begin{equation}
   \phi(z)=\sum_{i=1}^{lT+l_{f}}-\log \left ( h_{i}-p_{i}^Tz \right )
 \end{equation}
@@ -106,8 +106,8 @@ inequality:
 where $A_{1},\dots,A_{q} \in \mathbb{R}^{(k_{i}-1)\times n}$, $b_{1},\dots,b_{q} \in \mathbb{R}^{k_{i}-1}$, $c_{1},\dots,c_{q} \in \mathbb{R}^{n}$ and $d_{1},\dots,d_{q} \in \mathbb{R}$
 
 \subsection{Soft Constraints}
-To use the algorithm in \cite{c1} it is necessary that $z$ strictly satisfies the inequality constraints all the time. If the system is moving near its constraints, in case of disturbances it is not guaranteed that its state $x$ is remaining in the feasible area. To avoid such feasibility problems and to make the algorithm more robust we additionlly introduc soft contraints. So the algorithm can violate some inequality constraints for the cost of some additional penalty. There are different ways to introduc soft constraints in an optimization algorithm. \cite{c5} proposes a method tailored for the algorithm we use without any typically needed additional slack variable.\\
-exact panalty formulation: solution is the same as in the unmodified case. Only for if there is no feasible point that stis 
+To use the algorithm in \cite{c1} it is necessary that $z$ strictly satisfies the inequality constraints all the time. If the system is moving near its constraints, in case of disturbances it is not guaranteed that its state $x$ is remaining in the feasible area. To avoid such feasibility problems and to make the algorithm more robust we additionally introduce soft constraints. So the algorithm can violate some inequality constraints for the cost of some additional penalty. There are different ways to introduce soft constraints in an optimization algorithm. \cite{c5} proposes a method tailored for the algorithm we use without any typically needed additional slack variable.\\
+exact penalty formulation: solution is the same as in the unmodified case. Only for if there is no feasible point that stis 
 
 \section{EXTENDED ALGORITHM}
 
@@ -137,7 +137,7 @@ and
 \begin{equation*}
 	\hat{h} = \begin{bmatrix} h\\ \alpha_{1}^{T}\\ \vdots\\ \alpha_{p}^{T}\\d_{1}^{2}-b_{1}^{T}b_{1}\\\vdots\\d_{q}^{2}-b_{q}^{T}b_{q}\end{bmatrix}.
 \end{equation*}
-Different from the extended vector $\hat{h}$ the extended matrix $\hat{P}(z)$ is not constant with respect to $z$ anymore. Dispite that expanding $P$ and $h$ does not change the structure of $\Phi$ exploited in \cite{c1}. So we have not to worry go on with its algorithm. With the new inequality constraint $\hat{P}(z)z \leq \hat{h}$ the logarithmic barrier function looks like
+Different from the extended vector $\hat{h}$ the extended matrix $\hat{P}(z)$ is not constant with respect to $z$ anymore. Despite that expanding $P$ and $h$ does not change the structure of $\Phi$ exploited in \cite{c1}. So we have not to worry go on with its algorithm. With the new inequality constraint $\hat{P}(z)z \leq \hat{h}$ the logarithmic barrier function looks like
 \begin{equation}
 	\phi(z)=\sum_{i=1}^{lT+l_{f}+p+q}-\log \left ( \hat{h}_{i}-\hat{p}_{i}^T(z)z \right )
 \end{equation}
@@ -173,20 +173,34 @@ of which we obtain two additional terms, have to be added to the Hessian of $\ph
 \end{split}\end{equation}
 
 \subsection{Selecting $\kappa$}
-In \cite{c1} the use of a fixed $\kappa$ is proposed. But it is difficult to find one. It should be considered to calculate a new $\kappa$ once every time step, not every inner step, to have the effect of the barrier function to the cost in same magnitude as the effect of weighting terms like in \cite{c4} for linear programs. Adopted for quadratic programs a good $\kappa$ can be estimated by
-\begin{equation}
+In \cite{c1} the use of a fixed $\kappa$ is proposed. But it is difficult to find one $\kappa$ which provides fast convergence of the algorithm against the optimal solution for all feasible states of a controlled system . It should be considered to calculate a new $\kappa$ once every time step of the MPC. To have the effect of the barrier function to the whole cost in same magnitude as the effect of weighting terms, we can calculate $\kappa$ similar as in \cite{c4} for linear programs. Several tests have shown that a good $\kappa$ can be estimated by adopting the suggested procedure of \cite{c4} for quadratic programs as 
+\begin{equation*}
   \kappa=\frac{z^{T}Hz + g^{T}z}{T(n+m)}
-\end{equation}
+\end{equation*}
 
-\subsection{Numerical Improvements}
-To solve the system of linear equations the most important step is to compute the Cholesky foctorizaion of every block in $Phi$. For Cholesky factorization the blocks have to be symmetric and positiv definite (\cite{c2}). To avoid possible positiv semidefinite blocks we introduce a regularization term in $Phi$. With
+\subsection{Regularization}
+To solve the system of linear equations the most important step is to compute the Cholesky factorization of every block in $\Phi$. For Cholesky factorization the blocks have to be symmetric and positive definite (\cite{c2}). To have all blocks positive definite and so ensure the Cholesky factorization of every block in $\Phi$ exists, we introduce a regularization term in the system of linear equations. We now solve
 \begin{equation}
-  Phi := Phi + \epsilon I
+  \begin{bmatrix} \Phi+\epsilon I & C^{T} \\ C & 0 \end{bmatrix} \begin{bmatrix}\Delta z \\ \Delta v\end{bmatrix}= -\begin{bmatrix}r_d \\ r_p\end{bmatrix}
 \end{equation}
-we ensure, that all blocks are positive definite. With regularization we make a small error. If necessary we can improve our solution by iterative refinement described in \cite{c6} 
-\begin{equation}
-  \delta l = \tilde{K}^{-1} \left(r-Kl^{(k)} \right)
-\end{equation}
+and tolerate a small error we make instead of solving the original system of linear equations.
+\subsection{Iterative Refinement}
+As application for solving the optimization problem of a MPC it is often sufficient to use the solution of the linear equations with regularization term. If it is necessary to get the solution of the original linear equations we can compensate the error of regularization by iterative refinement as described in \cite{c6}. Let
+\begin{equation*}
+  K l = r
+\end{equation*}
+the original system of linear equations and
+\begin{equation*}
+  \tilde{K}l = r
+\end{equation*}
+the system with regularization we can solve easily. A correction $\delta l$ can be approximated by solving
+\begin{equation*}
+  \tilde{K}\delta l^{(k)} = \left(r-Kl^{(k)} \right)
+\end{equation*}
+and updating
+\begin{equation*}
+  l^{(k+1)} = l^{(k)}+\delta l^{(k)}.
+\end{equation*}
 
 
 \section{RESULTS}
