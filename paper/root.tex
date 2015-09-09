@@ -64,7 +64,8 @@ List some literature with information about model predictive control (MPC).
 
 \subsection{Solving optimization problems}
 
-Many Algorithms which use primal dual methods to solve several optimization problems are described in literature. Most of them focus on finding solutions with high accuracy. For application as MPC, optimization often do not necessarily has to find such exact solutions. Therefore \cite{c1} describes a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs, making use of the special MPC problem structure. This paper's contribution is manly based on the algorithm in \cite{c1}, which has been extended by some numerical robustness approaches. Regularization \cite{c6} and iterative refinement if necessary, soft constraints \cite{c5}. For application to more general optimization problems, we extend the algorithm to handle quadratic Constrained quadratic programs (QCQPs) and second-order cone programs (SOCPs).
+Many Algorithms which use primal dual methods to solve several optimization problems are described in literature. Most of them focus on finding solutions with high accuracy. For application as MPC, optimization often do not necessarily has to find such exact solutions. Therefore \cite{c1} describes a primal barrier method with focus of getting fast sufficiently exact solutions of quadratic programs, making use of the special MPC problem structure. This paper's contribution is manly based on the algorithm in \cite{c1}, which has been extended by some numerical robustness approaches. Regularization \cite{c6} and iterative refinement if necessary, soft constraints \cite{c5}. For application to more general optimization problems, we extend the algorithm to handle quadratic Constrained quadratic programs (QCQPs) and second-order cone programs (SOCPs).\\
+So we aim to cobinate the advantages of existing algorithms to get very fast solutions and use several approaches for robustness of the algorithm.
 
 \section{PROBLEM STATEMENT}
 
@@ -87,6 +88,7 @@ For the use of an infeasible start primal barrier method a logarithmic barrier f
  is introduced the the cost function to handle the inequality constraints.
 
 \subsection{Quadratically Constrained Quadratic Program}
+
 \{Vorteile von QCQP nennen\}
 If linear constraints as bounds for state and control variable are not sufficient it can be necessary to use nonlinear constraints such as quadratic constraints
 \begin{equation}
@@ -95,6 +97,7 @@ If linear constraints as bounds for state and control variable are not sufficien
 \end{equation}
 with positive semidefinite matrices $P_{1},\dots,P_{p} \in \mathbb{R}^{n\times n}$ (\cite{c7}).
 \subsection{Second-Order Cone Program}
+
 A more general form of optimization problems are second-order cone programs (SOCP). We can formulate a lot of different nonlinear convex optimization problems as SOCP (\cite{c7}). The constraints of dimension $k_{i}$ of such SOCP ca be formulated as following
 %:
 %\{Description as Cone Definition K:=...\}
@@ -106,12 +109,14 @@ inequality:
 where $A_{1},\dots,A_{q} \in \mathbb{R}^{(k_{i}-1)\times n}$, $b_{1},\dots,b_{q} \in \mathbb{R}^{k_{i}-1}$, $c_{1},\dots,c_{q} \in \mathbb{R}^{n}$ and $d_{1},\dots,d_{q} \in \mathbb{R}$
 
 \subsection{Soft Constraints}
+
 To use the algorithm in \cite{c1} it is necessary that $z$ strictly satisfies the inequality constraints all the time. If the system is moving near its constraints, in case of disturbances it is not guaranteed that its state $x$ is remaining in the feasible area. To avoid such feasibility problems and to make the algorithm more robust we additionally introduce soft constraints. So the algorithm can violate some inequality constraints for the cost of some additional penalty. There are different ways to introduce soft constraints in an optimization algorithm. \cite{c5} proposes a method tailored for the algorithm we use without any typically needed additional slack variable.\\
 exact penalty formulation: solution is the same as in the unmodified case. Only for if there is no feasible point that stis 
 
 \section{EXTENDED ALGORITHM}
 
 \subsection{Generalized Constraints}
+
 In the described primal barrier method the gradient and the Hessian of the logarithmic barrier function are necessary. SOCCs in the above mentioned form are not continuously differentiable. Therefore SOCCs in Generalized form \cite{c2}
 \begin{equation}
 \label{eq:gen_socc}
@@ -120,6 +125,7 @@ In the described primal barrier method the gradient and the Hessian of the logar
 can be used.
 
 \subsection{Extended Problem Statement}
+
 The algorithm of \cite{c1} shell still be used, therefore the general form of the extended problem statement is not changed. We can resolve the norm in (\ref{eq:gen_socc}) and reorder the terms to
 \begin{equation}
 \label{eq:socc}
@@ -173,37 +179,53 @@ of which we obtain two additional terms, have to be added to the Hessian of $\ph
 \end{split}\end{equation}
 
 \subsection{Selecting $\kappa$}
+
 In \cite{c1} the use of a fixed $\kappa$ is proposed. But it is difficult to find one $\kappa$ which provides fast convergence of the algorithm against the optimal solution for all feasible states of a controlled system . It should be considered to calculate a new $\kappa$ once every time step of the MPC. To have the effect of the barrier function to the whole cost in same magnitude as the effect of weighting terms, we can calculate $\kappa$ similar as in \cite{c4} for linear programs. Several tests have shown that a good $\kappa$ can be estimated by adopting the suggested procedure of \cite{c4} for quadratic programs as 
 \begin{equation*}
   \kappa=\frac{z^{T}Hz + g^{T}z}{T(n+m)}
 \end{equation*}
 
 \subsection{Regularization}
+
 To solve the system of linear equations the most important step is to compute the Cholesky factorization of every block in $\Phi$. For Cholesky factorization the blocks have to be symmetric and positive definite (\cite{c2}). To have all blocks positive definite and so ensure the Cholesky factorization of every block in $\Phi$ exists, we introduce a regularization term in the system of linear equations. We now solve
 \begin{equation}
   \begin{bmatrix} \Phi+\epsilon I & C^{T} \\ C & 0 \end{bmatrix} \begin{bmatrix}\Delta z \\ \Delta v\end{bmatrix}= -\begin{bmatrix}r_d \\ r_p\end{bmatrix}
 \end{equation}
 and tolerate a small error we make instead of solving the original system of linear equations.
+\addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
+                                  % on the last page of the document manually. It shortens
+                                  % the textheight of the last page by a suitable amount.
+                                  % This command does not take effect until the next page
+                                  % so it should come on the page before the last. Make
+                                  % sure that you do not shorten the textheight too much.
 \subsection{Iterative Refinement}
+
 As application for solving the optimization problem of a MPC it is often sufficient to use the solution of the linear equations with regularization term. If it is necessary to get the solution of the original linear equations we can compensate the error of regularization by iterative refinement as described in \cite{c6}. Let
 \begin{equation*}
   K l = r
 \end{equation*}
 the original system of linear equations and
 \begin{equation*}
-  \tilde{K}l = r
+  \tilde{K}l^{(0)} = r
 \end{equation*}
-the system with regularization we can solve easily. A correction $\delta l$ can be approximated by solving
+the system with regularization we can solve easily. Setting $k=0$ a correction $\delta l^{(k)}$ can be approximated by solving
 \begin{equation*}
-  \tilde{K}\delta l^{(k)} = \left(r-Kl^{(k)} \right)
+  \tilde{K}\delta l^{(k)} = \left(r-Kl^{(k)} \right),
 \end{equation*}
-and updating
+which has less effort because we already calculated the operator $\tilde{K}^{-1}$ before.
+Then one has to update
 \begin{equation*}
-  l^{(k+1)} = l^{(k)}+\delta l^{(k)}.
+  l^{(k+1)} = l^{(k)}+\delta l^{(k)}
 \end{equation*}
-
+and iterate $k$. After repeating both steps until
+\begin{equation*}
+  \left\|r-Kl^{(k)} \right\|
+\end{equation*}
+is sufficiently small, $l^{(k)}$ can be used as good approximation for $l$.
 
 \section{RESULTS}
+Comparison of the speed of the algorithm\\
+condensed formulation (one block) <-> exploit the structure of MPC optimization problem
 
 \subsection{Test QPs}
 
