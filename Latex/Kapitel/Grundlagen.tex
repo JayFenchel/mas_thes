@@ -7,3 +7,14 @@
  \item Originalalgorithmus von Wang und Boyd \cite{BOY10}
 \end{itemize}
 Tääast
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Soft Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:SoftConstraints}
+Manchmal liegen die Lösungen der Optimierungsprobleme an Rande der feasible Regionen und so kann es dazu kommen, dass durch Störungen auf das System, Lösungsvektoren nicht mehr feasibl sind. Da es besser ist, den Algorithmus nicht abzubrechen sondern mit einer nicht erlaubten Punkt weiter zu arbeiten, gibt es die Möglichkeit Soft Constraints einzuführen. Dieses weichen wie der Name schon sagt, die harten Ungleichungsnebenbedingungen auf, sodass diese Verletzt werden können. diese Verletzung geht als zusätzliche Strafe mit in die Kostenfunktionen ein. Bei richtiger Wichtung der Verletzung, sorgt er Optimierungsalgorithmus dafür, dass diese Grenzen nur verletzt werden, wenn keiner Punkt mehr feasibl ist.\\
+Im folgenden Abschnitt werde ich 2 Möglichkeiten erlären solche Soft Constraints einzuführen, die ich im Zuge meiner Masterarbeit bzgl der auswirkung des nichteinhaltens der exact penalty function untersuche und vergleiche.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Zusätzliche Slackvariable}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:QCQPFormulierung}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Using the KS function}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:QCQPFormulierung}
