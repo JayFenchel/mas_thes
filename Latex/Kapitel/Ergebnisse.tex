@@ -1,0 +1,58 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beschreibung der verschiedenen Testprobleme und Vergleich der Ergebnisse %%%
+\chapter{Ergebnisse}
+\label{chap:ergebnisse}
+Um zu beurteilen, wie robust der implementierte Algorithmus funktioniert, wurden verschiedene Testscenarien erstellt und die Ergebnisse hinsichtlich der Laufzeit und Häufigkeit der Beschränkungsverletzungen miteinander vergleichen.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Testprobleme}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:Testprobleme}
+Um zu beurteilen, wie robust der implementierte Algorithmus funktioniert, wurden verschiedene Testscenarien erstellt und die Ergebnisse hinsichtlich der Laufzeit und Häufigkeit der Beschränkungsverletzungen miteinander vergleichen.\\
+Als Optimierungsbeispiel wurde dazu in verschiedenen angepassten Varianten das Beispiel aus 
+% \cite{} TODO
+herangezogen. Dabei handelt es sich um ein lineares System dass die Bewegung eines Flugzeuges beschreibt. Dieses System besitzt 5 Zustände und einen Eingang und sieht folgendermaßen aus:
+\begin{equation}
+%TODO
+  x_{k+1} = .
+\end{equation}
+Mit $x_1$, des angel of attack $x_2$, $x_3$, der Höhe $x_4$, und $x_5$ als Zustände und $u_1$ als Eingang.\\
+Eine Schwierigkeit bei der Regelung ist die Unsicherheit bei den ermittelten Systemmatrizen. Deshalb wurde für die Simulation des Systems die Zustandsmatrizen mit den Unsicherheiten $\sigma_1$ und $\sigma_2$ variert, wobei die Werte für die Unsicherheit im angepassten System
+\begin{equation}
+  x_{k+1} = 
+\end{equation}
+während jeder Simulation in allen Zeitschritten konstant ist und nur zwischen den Simulationen wechselt. Für die Prädiktion in der MPC wurden jeweils weiterhin die nominalen Werte für die Systemmatrizen $A$ und $B$ verwendet.
+\subsection{Einfaches QP}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:EinfachesQP}
+Stellt man das Optimierungsproblem als einfaches QP auf, sieht es wie folgt aus. Die Optimierungsvariable $z$ hat die Dimension $(n+m)T = 6T$ und demzufolge gilt Matrix $H \in R^{6T\times 6T}$.
+\subsection{QP in PCE Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:QPinPCEformulierung}
+Wie schon erwähnt ist es hilfreich die Modellunsicherheiten mittels stochastischer Abschätzungen zu erfassen. Dazu wurde das einfache QP als PCE augestellt. Nun hat die Optimierungsvariable $z$ Dimension $31*T$ und $H$ dann natürlich $31T \times 31T$. Es wird insbesondere hier erwartet, dass das ausnutzen der blockdiagonalen Struktur der Matrix $H$ große Vorteile mit sich bringt.
+\subsection{Referenzproblem}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:Referenzproblem}
+Der implementierte Algorithmus nutzt die Struktur des Optimierungsproblems aus, die spezifisch für die Verwendung als MPC entsteht. Um zu zeigen, wie der Vorteil des Algorithmus die nötige Zeit der Optimierung verringert wurden Problem 1 (\ref{sec:EinfachesQP}) und Problem 2 (\ref{sec:QPinPCEformulierung}) sowohl mit dem zugeschnittenen Algorithmus als auch ohne die Matrixstruktur auszunutzen gelöst.
+\subsection{QP in PCE Formulierung mit QC}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:QPinPCEformulierungQC}
+\subsection{QP in PCE Formulierung mit SOCC}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:QPinPCEformulierungSOCC}
+Besser ist es das PCE als SOCP zu lösen. Um so besser mit den Unsicherheiten umgehen zu können. Die implementierte Erweiterung lässt dies nun zu.
+\subsection{QP in PCE Formulierung mit Softconstraints (KSF)}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:QPinPCEformulierungSoftKSF}
+Erhöht man die Unsicherheit des Systems weiter, so kommt es zu Fällen in den der Algorithmus versagt, da kein feasibler Punkt für die Optimierungsvariable da ist, bzw nicht in einem Schritt erreicht werden kann. wenn es sich hierbei allerdings um Grenzen handelt, deren Verletzung kurzzeitig vertretbar wäre, kann diese durch Soft Constraints zugelassen werden. Dafür als Vergleich das Problem mit Softconstraints als KSF.
+\subsection{QP in PCE Formulierung mit Softconstraints (Slack)}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:QPinPCEformulierungSoftSlack}
+Eine andere Möglichkeit Softconstraints zu integrieren wurde beschrieben und implementiert. Dazu wurde eine zusätzliche Slackvariable eingeführt, die Dimensinen sehen daher bei dieser Variante wie folgt aus.
+\section{Vergleich der Testergebnisse}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:Vergleich der Testergebnisse}
+Verglichen werden hier\\
+Besonderes Augenmerk auf Laufzeit, um den Vorteil des Grundalgorithmus zu zeigen. Mit verschiedenen Horizontlängen. Vielleicht unconstraint
+QP ref <--> QP\\
+QP PCE ref <--> QP PCE\\
+QP PCE mit verschiedenen Constraints (also lineare Constraints, QC, SOCC, Soft KSF, Soft Slack (Soft statt lin)) um dort Laufzeiten und Violations zu vergleichen\\
+Ergebnisse könnten hinsichtlich innerer Steps vergleichen werden. Dafür feste Horizontlängen\\
+Softconstraints mehr untereinander vergleichen, als gegen die anderen, weil hier noch der zusätliche Parameter dazu kommt, der Vergleich mit anderen verfälscht.
+
+
+
+
+
+
+
