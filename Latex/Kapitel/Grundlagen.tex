@@ -6,7 +6,66 @@
  \item generalized inequalities
  \item Originalalgorithmus von Wang und Boyd \cite{BOY10}
 \end{itemize}
-Tääast
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Modellprädiktive Regelung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:MPC}
+Viele Regelungskonzepte werden in der Industrie angewand. Ein Ansatz ist die optimale Reglung, bei der online oder auch offline das Reglungsgestz so bestimmt wird das eine gewisse Kostenfunktion minimal ist. Besteht die Möglichkeit dieses Reglungsgestz offline zu berechnen ist alles schön und gut. Aber in vielen lässt muss dieses Gesetz für jeden Zeitschritt erneut ausgerechnet werden und somit online zur Laufzeit des Systems ständig neu berechnet werden. Nun gibt es Syteme bei denen die eine schnelle Reaktionszeit des Reglers erforden, was unter Umständen dazu führen kann, dass möglichst effiziente Methoden benutzt werden.\\
+Eine spezielle Form der optimalen Reglung ist die Modellprädiktive Regelung (MPC).\\
+AUS OTTOCAR-BERICHT GEKLAUT\\
+Bei der modellprädiktiven Regelung (MPC) handelt es sich um eine Form der optimalen Regelung, bei der wiederholt eine Berechnung der optimalen Steuerung für ein System ausgehend von dessen aktuellem Zustand stattfindet. In vielen Bereichen finden MPCs immer häufiger Anwendung, da sie eine direkte Berücksichtigung von Beschränkungen erlauben und eine Form des strukturierten Reglerentwurfs ausgehend von der modellierten Systemdynamik darstellen. Dabei kann durch die geeignete Wahl der Kostenfunktion und deren Wichtungsparametern die Güte des Reglers gezielt beeinflusst werden. Allerdings ergeben sich auch Schwierigkeiten bei der Verwendung von MPCs. Zum einen ist die Konvergenz der Optimierung gegen einen optimalen Wert für die Optimierungsvariablen und die Stabilität des geschlossenen Kreises insbesondere bei nichtlinearen Systemmodellen oft nur schwierig nachweisbar und zum anderen stellt das wiederholte Lösen des meist hochdimensionalen Optimierungsproblems während der Laufzeit in genügend schneller Geschwindigkeit eine große Herausforderung dar.\\
+Es ergibt sich ein Optimierungsproblem:\\
+m realen Anwendungsfall des oTToCAR-Projekts eignet sich eine Systemdarstellung in zeitdiskreter Form (\cite{ADA09}), bei der die Lösung des Optimierungsproblems weniger komplex ist und die ebenfalls zeitdiskreten Messwerte vom realen System weniger kompliziert integriert werden können. Demnach sind die diskretisierten Systemgleichungen wie folgt gegeben:
+\begin{align*}
+  \boldsymbol{x}(k+1)&=\boldsymbol{f}\left ( \boldsymbol{x}(k), \boldsymbol{u}(k) \right )\\
+  \boldsymbol{y}(k)&=\boldsymbol{g}\left ( \boldsymbol{x}(k) \right )\\
+\end{align*}
+mit den nichtlinearen Funktionen $\boldsymbol{f}\left ( \cdot \right )$ und $\boldsymbol{g}\left ( \cdot \right )$, wobei
+\begin{align*}
+  &\boldsymbol{x}(k) \in \mathcal{X}\subset\mathbb{R}^n\\
+  &\boldsymbol{u}(k) \in \mathcal{U}\subset\mathbb{R}^m\\
+  &\boldsymbol{y}(k) \in \mathcal{Y}\subset\mathbb{R}^r
+\end{align*}
+Ausgehend vom aktuellen Zustand $\boldsymbol{x}(k)$ des zu regelnden Systems, der wenn nicht messbar geschätzt werden muss, wird anhand des Systemmodells das zukünftige Systemverhalten
+\begin{align*}
+  \boldsymbol{x_p}=\left\{ \boldsymbol{x}(k+1),\dots,\boldsymbol{x}(k+n_p)\right\}
+\end{align*}
+bis zum Prädiktionshorizont $n_p$ unter der Optimierung einer Sequenz von Eingängen
+\begin{align*}
+  \boldsymbol{u}=\left\{ \boldsymbol{u}(k),\dots,\boldsymbol{u}(k+n_c-1)\right\}
+\end{align*}
+bis zum Stellhorizont $n_c$ vorhergesagt. Aus der gefundenen optimalen Eingangssequenz $\boldsymbol{u}^*$ wird der erste Eintrag $\boldsymbol{u}^*(k)$ auf das zu regelnde System angewandt. Im nächsten Zeitschritt kann der neue Zustand gemessen bzw. geschätzt werden und die Optimierung beginnt von neuem. Ziel dabei ist es einer Referenztrajektorie $\boldsymbol{x_r}$ zu folgen.\\ \\
+Für das an jedem Zeitschritt $k$ zu lösende Minimierungsproblem wurde die benötigte Kostenfunktion $J$ in quadratische Form mit $\boldsymbol{x_p}$ und $\boldsymbol{u}$ als Optimierungsvariablen aufgestellt:
+\begin{align*}
+	\underset{\boldsymbol{x_p, u}}{\text{min}}\;&J:=\sum_{i=k+1}^{k+n_p} \left [\boldsymbol{x}_{p}(i)-\boldsymbol{x}_{r}(i)\right ]^T\boldsymbol{Q}_i\left [\boldsymbol{x}_{p}(i)-\boldsymbol{x}_{r}(i)\right ] +\sum_{j=k}^{k+n_c-1} \boldsymbol{u}^T(j)\boldsymbol{R}_j\boldsymbol{u}(j)\\
+	s.t.\;&\boldsymbol{x_p}(i+1)=\boldsymbol{f}\left ( \boldsymbol{x_p}(i), \boldsymbol{u}(i) \right ),\quad i=k,...,k+n_c-1\\
+	&\boldsymbol{x_p}(i+1)=\boldsymbol{f}\left ( \boldsymbol{x_p}(i), \boldsymbol{u}(k+n_c-1) \right ),\quad i=k+n_c,...,k+n_p-1
+\end{align*}
+Mit den Vektoren
+\begin{align*}
+	\boldsymbol{x}_p(k)&=\left [ \boldsymbol{x}_p(k+1\mid k),\dots,\boldsymbol{x}_p(k+n_p\mid k) \right ]^T\\
+	\boldsymbol{x}_r(k)&=\left [ \boldsymbol{x}_r(k+1),\dots,\boldsymbol{x}_r(k+n_p) \right ]^T\\
+	\boldsymbol{u}(k)&=\left [ \boldsymbol{u}(k),\dots,\boldsymbol{u}(k+n_c-1) \right ]^T
+\end{align*}
+und den dazugehörigen positiv definiten Wichtungsmatrizen $\boldsymbol{Q}_i\in\mathbb{R}^{n\times n}\;(i=1, ...,n_p)$ und $\boldsymbol{R}_j\in\mathbb{R}^{m\times m}\;(j=0, ...,n_c-1)$. Weiterhin lässt sich das Optimierungsproblem um einfache Beschränkungen der Eingänge
+\begin{align*}
+  \boldsymbol{u}_{min} \leq \boldsymbol{u}(i) \leq \boldsymbol{u}_{max},\quad i=k,...,k+n_c-1
+\end{align*}
+und Zustandsbeschränkungen der Form
+\begin{align*}
+  \boldsymbol{A}\boldsymbol{x}_p(i) \leq \boldsymbol{b}\quad i=k+1,...,k+n_p
+\end{align*}
+erweitern.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Boyds Grundlagen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:BoydsGrundlagen}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Quadratic Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:QuadraticConstraints}
+Was genau, wofür QC?
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Second Order Cone Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:SecondOrderConeConstraints}
+Was genau, wofür SOCC?
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Soft Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:SoftConstraints}
@@ -18,3 +77,11 @@ Im folgenden Abschnitt werde ich 2 Möglichkeiten erlären solche Soft Constraints
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Using the KS function}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:SoftWithKSF}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Polynimial Chaos Expansion}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:PCE}
+Wie bekomme ich aus einem normalen QP ein PCE?
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Weitere Mathematische Grundlagen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:MathematischeGrundlagen}
+Was muss man wissen, um spätere Umstellungen und Ableitungen und Berechnungen zu verstehen?
