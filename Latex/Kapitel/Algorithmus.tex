@@ -3,13 +3,38 @@
 \chapter{Algorithmus}
 \label{chap:algorithmus}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Optimierungsproblem für Fast-MPC Algorithmus}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:OPforFastMPC}
-Beschreibung des allgemeinen Problems das von Boyd gelöst wird.
+\section{Primal Barrier Interior-Point Methode}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:PrimalBarrierInteriorPointMethode}
+Das Optimierungsproblem, welches den Kern der Reglung mittles MPC bildet, muss zu jedem Zeitschritt online gelöst werden. Dabei ist es wichtig, dass eine ausreichend genaue Lösung möglichst schnell und zuverlässig gefunden werden kann. In dieser Arbeit wurde dazu eine Interior-Point Methode genutzt, bei der die Ungleichungsnebenbedingung näherungsweise durch Zuhilfenahme von logaritmische Straftermen (im folgenden als log barrier bezeichnet) berücksichtigt werden. Diese Methode wird als Primal Barrier Interior-Point Methode bezeichnet. Im Speziellen wurde hier der Ansatz von \cite{BOY10} verfolgt, bei dem besondere Rücksicht auf die Ausnutzung der spezifischen Struktur, wie sie bei MPC-Problemen auftritt, gelegt wird. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Fast-MPC Algorithmus}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Optimierungsproblem für Fast-MPC Algorithmus}%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:OPforFastMPC}
+Der Primal Barrier Interior-Point Methode nach \cite{BOY10} oder kurz Fast MPC
+% TODO ABkürzung
+auf die sich später erklärte Erweitungen beziehen liegt folgende Problembeschreibung zu Grunde.\\
+
+Beschreibung des allgemeinen Problems das von Boyd gelöst wird.
+Der Prädikitonshorizont $T$
+\\
+Damit ergibt sich Optimierungsproblem für die MPC zu
+\begin{equation}
+ \text{min}
+\end{equation}
+mit den Optimierungsvariablen $x(t+1), \dots, x(t+T)$ und $u(t), \dots, u(t+T-1)$. Dieses Problem lässt sich kompakt auch als
+\begin{equation}
+ \text{min}
+\end{equation}
+formulieren, worauf sich weitere Erklärungen zur Lösung dieses Optimierungsproblems beziehen.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Fast-MPC Algorithmus}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:FastMPC}
-Wie löst Boyd sein QP?
+Wie löst Boyd sein QP?\\
+Wie schon oben erwähnt werden die Ungleichungsnebenbedingungen durch Zuhilfenahme von log barriers berücksichtigt. Dadurch ergibt sich das einfacher zu lösendes Optimierungsproblem
+\begin{equation}
+  \text{min}
+\end{equation}
+mit$\kappa$ und $\Phi$, bei dem keine direkten Ungleichungsnebenbedingungen behandeln werden müssen.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Erweiterung für nichtlineare Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:ErweiterungNonlincon}
