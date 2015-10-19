@@ -12,6 +12,18 @@
 \newblock \emph{Convex Optimization}.
 \newblock University Press, 2004
 
+\bibitem[KM00]{kerrigan2000soft}
+\textsc{Kerrigan}, Eric~C. ; \textsc{Maciejowski}, Jan~M.:
+\newblock Soft constraints and exact penalty functions in model predictive
+  control.
+\newblock {In: }\emph{Control 2000 Conference, Cambridge}, 2000
+
+\bibitem[Kre79]{kreisselmeier1979systematic}
+\textsc{Kreisselmeier}, G:
+\newblock Systematic control design by optimizing a vector performance index.
+\newblock {In: }\emph{IFAC Symp. Computer Aided Design of Control Systems,
+  Zurich, Switzerland, 1979}, 1979
+
 \bibitem[MM97]{MAR97}
 \textsc{Maros}, István ; \textsc{Mészáros}, Csaba:
 \newblock A Repository of Convex Quadratic Programming Problems.
