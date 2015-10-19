@@ -2,7 +2,13 @@
 
  \nomgroup{A}
 
+  \item [{KS}]\begingroup Kreisselmeier-Steinhauser\nomeqref {2.1}
+		\nompageref{7}
   \item [{MPC}]\begingroup Modellprädiktive Regelung\nomeqref {1.0}
-		\nompageref{1}
+		\nompageref{2}
+  \item [{QCQP}]\begingroup Quadratic Constrained Quadratic Program\nomeqref {3.3}
+		\nompageref{10}
+  \item [{SOCP}]\begingroup Second Order Cone Problem\nomeqref {3.3}
+		\nompageref{10}
 
 \end{thenomenclature}

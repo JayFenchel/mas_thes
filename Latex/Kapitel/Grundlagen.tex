@@ -65,6 +65,39 @@ erweitern.
 \subsection{Primal vs. Dual}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:PrimalDual}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Ungleichungsnebenbedingungen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:Ungleichungsnebenbedingungen}
+Wie schon angeführt, ist ein Vorteil des MPC Ansatzes die direkte Berücksichtigung von Nebenbedingungen. Das gilt sowohl für Gleichungsnebenbedingungen als auch Ungleichungsnebenbedingungen.  Bei dem später beschriebenen Algorithmus werden ausschließlich die zur Prädiktion nötigen linearen Dynamiken eines zu regelnden Systems als Gleichungsnebenbedingungen der Form
+\begin{equation*}
+ x_{k+1} = Ax_{k} + Bu_{k}
+\end{equation*}
+berücksichtigt.\\
+Zusätzlich zu der Einhaltung der Systemdynamik wird allgemein gefordert, dass sowohl Zustände als auch Stellgrößen aus erlaubten Mengen von Werten
+\begin{align*}
+  &\boldsymbol{x}(k) \in \mathcal{X}\subset\mathbb{R}^n\\
+  &\boldsymbol{u}(k) \in \mathcal{U}\subset\mathbb{R}^m
+\end{align*}
+stammt (\cite{mayne2000constrained}). Dieses wird, je nach Eigenschaften von $\mathcal{X}$ und $\mathcal{U}$, mit Hilfe von Ungleichungsnebenbedingungen in verschiedenen Formen, die im folgenden Abschnitt kurz erläutert werden, sichergestellt. Begonnen wird mit einfachen Ungleichungsnebenbedingungen in linearer Form, es folgen spezielle Formen nichtlienarer Ungleichungsnebenbedingungen, die häufig Anwendung finden.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Lineare Ungleichungsnebenbedingungen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:LineareUngleichungsnebenbedingungen}
+In Regelungsproblemen treten häufig Fälle auf, in denen für einzelne oder alle Zustände beispielsweise aus Sicherheitsgründen bestimmte Werte nicht unter- bzw. überschritten werden dürfen. Änliches git auch Systemeingänge bei denen aus beispielsweise technischen Gründen nur nur Werte aus einem bekannten Intervall auf das System gegeben werden können. Solche einfachen Zustandsbeschränkungen der Form
+\begin{align*}
+ x_{min}\leq &x(k)\leq x_{max}, \quad k = 0, 1, \dots\\
+ u_{min}\leq &u(k)\leq u_{max}, \quad k = 0, 1, \dots
+\end{align*}
+werden auch als box constraints bezeichnet (\cite{BOY10}). Dabei gilt $x_{min}, x_{max} \in \mathbb{R}^n$ und $u_{min}, u_{max} \in \mathbb{R}^m$.\\
+Mixed constraints guck mal muao mpc wegen beschreibung.\\
+Alle so beschriebenen linearen Ungleichungsnebenbedingungen lassen sich als ein System von $l$ linearen Ungleichungen
+\begin{equation}
+ \label{eq:linequ}
+ F_{x}x(k) + F_{u}u(k) \leq f, \quad k = 0, 1, \dots
+\end{equation}
+mit $F_{x}\in \mathbb{R}^{l\times n}, F_{u}\in \mathbb{R}^{l\times m}$ und $f\in \mathbb{R}^{l}$ zusammenfassen.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Quadratic Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:QuadraticConstraints}
 Was genau, wofür QC?
@@ -77,12 +110,22 @@ Was genau, wofür SOCC?
 \label{sec:SoftConstraints}
 Manchmal liegen die Lösungen der Optimierungsprobleme an Rande der feasible Regionen und so kann es dazu kommen, dass durch Störungen auf das System, Lösungsvektoren nicht mehr feasibl sind. Da es besser ist, den Algorithmus nicht abzubrechen sondern mit einer nicht erlaubten Punkt weiter zu arbeiten, gibt es die Möglichkeit Soft Constraints einzuführen. Dieses weichen wie der Name schon sagt, die harten Ungleichungsnebenbedingungen auf, sodass diese Verletzt werden können. diese Verletzung geht als zusätzliche Strafe mit in die Kostenfunktionen ein. Bei richtiger Wichtung der Verletzung, sorgt er Optimierungsalgorithmus dafür, dass diese Grenzen nur verletzt werden, wenn keiner Punkt mehr feasibl ist.\\
 Im folgenden Abschnitt werden 2 Möglichkeiten erlärt, solche Soft Constraints einzuführen, die ich im Zuge meiner Masterarbeit bzgl der auswirkung des nichteinhaltens der exact penalty function untersuche und vergleiche.
+\abk{KS}{Kreisselmeier-Steinhauser}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Soft Constraints mittels Einführung Zusätzliche Slackvariablen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Soft Constraints mittels Einführung zusätzlicher Slackvariablen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:SoftWithSlack}
-Die übliche Methode, weil auch die kofortabelste, statt harten Ungleichungsnebenbedingungen weichen Ungleichungsnebenbedingungen (oder Soft Constraints) zu verwenden, ist die Einführung von Schlupfvariablen (slack variables) (\cite{richards2013fast})
+Die übliche Methode, weil auch die kofortabelste, statt harten Ungleichungsnebenbedingungen weichen Ungleichungsnebenbedingungen (oder Soft Constraints) zu verwenden, ist die Einführung von Schlupfvariablen (slack variables) (\cite{richards2013fast}). Das lässt sich unkompliziert durch die Erweiterung des Stellgrößen Vektors um eine zusätzliche Variable $s(k)$ ohne phsikalische Bedeutung zu $\begin{bmatrix}u^{T}(k)& s(k)\end{bmatrix}^T$ für jeden Zeitschritt $k$ durchführen. Analog zu Ungleichung \ref{eq:linequ} lassen sich dann die soft constriants als
+\begin{equation}
+ \label{eq:softinequ}
+\begin{bmatrix}
+\tilde{F}_{x}\\ 0
+\end{bmatrix}x(k) + \begin{bmatrix}
+\tilde{F}_{u} & -1\\ 0& -1 
+\end{bmatrix}\begin{pmatrix}u(k)\\s(k)\end{pmatrix} \leq \begin{bmatrix}\tilde{f}\\0\end{bmatrix}, \quad k = 0, 1, \dots
+\end{equation}
+formulieren. $s(k)$ ist dabei die maximale Verletzung der der Ungleichungsnebenbedingungen im $k$ten Zeitschritt, $s(k) = 0$ sofern alle Ungleichungsnebenbedingungen erfüllt sind und wird in der Kostenfunktion entsprechend bestraft, sodass $s(k) \neq 0$ nur dann, wenn andernfalls kein valider Schritt möglich ist. Es ist zu erwähnen dass zur Berrücksichtigung der Soft Constraints in dieser Formulierung keine besondere Berücksichtigung im Algorithmus vorgesehen sein muss. Lediglich die Formulierung der Matrizen und Dimensionen für das zu lösende Optimierungsproblem müssen angepasst werden.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Using the KS function}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Soft Constraints mittels Einführung eines Strafterms in Form der Kreisselmeier-Steinhauser Funktion}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:SoftWithKSF}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Polynimial Chaos Expansion}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
