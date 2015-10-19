@@ -17,6 +17,12 @@
 \newblock A Repository of Convex Quadratic Programming Problems.
 \newblock   (1997)
 
+\bibitem[Ric13]{richards2013fast}
+\textsc{Richards}, Arthur:
+\newblock Fast model predictive control with soft constraints.
+\newblock {In: }\emph{Control Conference (ECC), 2013 European} IEEE, 2013, S.
+  1--6
+
 \bibitem[WB10]{BOY10}
 \textsc{Wang}, Yang ; \textsc{Boyd}, Stephen:
 \newblock Fast Model Predictive Control Using Online optimization.
