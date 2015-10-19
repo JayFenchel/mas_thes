@@ -1,70 +1,4 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Herleitung der nötigen Grundlagen zur weiteren Anwendung in der Arbeit %%%%%
-\chapter{Grundlagen}
-\label{chap:gundlagen}
-\begin{itemize}
- \item generalized inequalities
- \item Originalalgorithmus von Wang und Boyd \cite{BOY10}
-\end{itemize}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Modellprädiktive Regelung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:MPC}
-Viele Regelungskonzepte werden in der Industrie angewand. Ein Ansatz ist die optimale Reglung, bei der online oder auch offline das Reglungsgestz so bestimmt wird das eine gewisse Kostenfunktion minimal ist. Besteht die Möglichkeit dieses Reglungsgestz offline zu berechnen ist alles schön und gut. Aber in vielen lässt muss dieses Gesetz für jeden Zeitschritt erneut ausgerechnet werden und somit online zur Laufzeit des Systems ständig neu berechnet werden. Nun gibt es Syteme bei denen die eine schnelle Reaktionszeit des Reglers erforden, was unter Umständen dazu führen kann, dass möglichst effiziente Methoden benutzt werden.\\
-Eine spezielle Form der optimalen Reglung ist die Modellprädiktive Regelung (MPC).\\
-AUS OTTOCAR-BERICHT GEKLAUT\\
-Bei der modellprädiktiven Regelung (MPC) handelt es sich um eine Form der optimalen Regelung, bei der wiederholt eine Berechnung der optimalen Steuerung für ein System ausgehend von dessen aktuellem Zustand stattfindet. In vielen Bereichen finden MPCs immer häufiger Anwendung, da sie eine direkte Berücksichtigung von Beschränkungen erlauben und eine Form des strukturierten Reglerentwurfs ausgehend von der modellierten Systemdynamik darstellen. Dabei kann durch die geeignete Wahl der Kostenfunktion und deren Wichtungsparametern die Güte des Reglers gezielt beeinflusst werden. Allerdings ergeben sich auch Schwierigkeiten bei der Verwendung von MPCs. Zum einen ist die Konvergenz der Optimierung gegen einen optimalen Wert für die Optimierungsvariablen und die Stabilität des geschlossenen Kreises insbesondere bei nichtlinearen Systemmodellen oft nur schwierig nachweisbar und zum anderen stellt das wiederholte Lösen des meist hochdimensionalen Optimierungsproblems während der Laufzeit in genügend schneller Geschwindigkeit eine große Herausforderung dar.\\
-Es ergibt sich ein Optimierungsproblem:\\
-m realen Anwendungsfall des oTToCAR-Projekts eignet sich eine Systemdarstellung in zeitdiskreter Form (\cite{ADA09}), bei der die Lösung des Optimierungsproblems weniger komplex ist und die ebenfalls zeitdiskreten Messwerte vom realen System weniger kompliziert integriert werden können. Demnach sind die diskretisierten Systemgleichungen wie folgt gegeben:
-\begin{align*}
-  \boldsymbol{x}(k+1)&=\boldsymbol{f}\left ( \boldsymbol{x}(k), \boldsymbol{u}(k) \right )\\
-  \boldsymbol{y}(k)&=\boldsymbol{g}\left ( \boldsymbol{x}(k) \right )\\
-\end{align*}
-mit den nichtlinearen Funktionen $\boldsymbol{f}\left ( \cdot \right )$ und $\boldsymbol{g}\left ( \cdot \right )$, wobei
-\begin{align*}
-  &\boldsymbol{x}(k) \in \mathcal{X}\subset\mathbb{R}^n\\
-  &\boldsymbol{u}(k) \in \mathcal{U}\subset\mathbb{R}^m\\
-  &\boldsymbol{y}(k) \in \mathcal{Y}\subset\mathbb{R}^r
-\end{align*}
-Ausgehend vom aktuellen Zustand $\boldsymbol{x}(k)$ des zu regelnden Systems, der wenn nicht messbar geschätzt werden muss, wird anhand des Systemmodells das zukünftige Systemverhalten
-\begin{align*}
-  \boldsymbol{x_p}=\left\{ \boldsymbol{x}(k+1),\dots,\boldsymbol{x}(k+n_p)\right\}
-\end{align*}
-bis zum Prädiktionshorizont $n_p$ unter der Optimierung einer Sequenz von Eingängen
-\begin{align*}
-  \boldsymbol{u}=\left\{ \boldsymbol{u}(k),\dots,\boldsymbol{u}(k+n_c-1)\right\}
-\end{align*}
-bis zum Stellhorizont $n_c$ vorhergesagt. Aus der gefundenen optimalen Eingangssequenz $\boldsymbol{u}^*$ wird der erste Eintrag $\boldsymbol{u}^*(k)$ auf das zu regelnde System angewandt. Im nächsten Zeitschritt kann der neue Zustand gemessen bzw. geschätzt werden und die Optimierung beginnt von neuem. Ziel dabei ist es einer Referenztrajektorie $\boldsymbol{x_r}$ zu folgen.\\ \\
-Für das an jedem Zeitschritt $k$ zu lösende Minimierungsproblem wurde die benötigte Kostenfunktion $J$ in quadratische Form mit $\boldsymbol{x_p}$ und $\boldsymbol{u}$ als Optimierungsvariablen aufgestellt:
-\begin{align*}
-	\underset{\boldsymbol{x_p, u}}{\text{min}}\;&J:=\sum_{i=k+1}^{k+n_p} \left [\boldsymbol{x}_{p}(i)-\boldsymbol{x}_{r}(i)\right ]^T\boldsymbol{Q}_i\left [\boldsymbol{x}_{p}(i)-\boldsymbol{x}_{r}(i)\right ] +\sum_{j=k}^{k+n_c-1} \boldsymbol{u}^T(j)\boldsymbol{R}_j\boldsymbol{u}(j)\\
-	s.t.\;&\boldsymbol{x_p}(i+1)=\boldsymbol{f}\left ( \boldsymbol{x_p}(i), \boldsymbol{u}(i) \right ),\quad i=k,...,k+n_c-1\\
-	&\boldsymbol{x_p}(i+1)=\boldsymbol{f}\left ( \boldsymbol{x_p}(i), \boldsymbol{u}(k+n_c-1) \right ),\quad i=k+n_c,...,k+n_p-1
-\end{align*}
-Mit den Vektoren
-\begin{align*}
-	\boldsymbol{x}_p(k)&=\left [ \boldsymbol{x}_p(k+1\mid k),\dots,\boldsymbol{x}_p(k+n_p\mid k) \right ]^T\\
-	\boldsymbol{x}_r(k)&=\left [ \boldsymbol{x}_r(k+1),\dots,\boldsymbol{x}_r(k+n_p) \right ]^T\\
-	\boldsymbol{u}(k)&=\left [ \boldsymbol{u}(k),\dots,\boldsymbol{u}(k+n_c-1) \right ]^T
-\end{align*}
-und den dazugehörigen positiv definiten Wichtungsmatrizen $\boldsymbol{Q}_i\in\mathbb{R}^{n\times n}\;(i=1, ...,n_p)$ und $\boldsymbol{R}_j\in\mathbb{R}^{m\times m}\;(j=0, ...,n_c-1)$. Weiterhin lässt sich das Optimierungsproblem um einfache Beschränkungen der Eingänge
-\begin{align*}
-  \boldsymbol{u}_{min} \leq \boldsymbol{u}(i) \leq \boldsymbol{u}_{max},\quad i=k,...,k+n_c-1
-\end{align*}
-und Zustandsbeschränkungen der Form
-\begin{align*}
-  \boldsymbol{A}\boldsymbol{x}_p(i) \leq \boldsymbol{b}\quad i=k+1,...,k+n_p
-\end{align*}
-erweitern.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Boyds Grundlagen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:BoydsGrundlagen}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Interior-Point Methode}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:InteriorPointMethode}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Primal vs. Dual}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:PrimalDual}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Ungleichungsnebenbedingungen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:Ungleichungsnebenbedingungen}
 Wie schon angeführt, ist ein Vorteil des MPC Ansatzes die direkte Berücksichtigung von Nebenbedingungen. Das gilt sowohl für Gleichungsnebenbedingungen als auch Ungleichungsnebenbedingungen.  Bei dem später beschriebenen Algorithmus werden ausschließlich die zur Prädiktion nötigen linearen Dynamiken eines zu regelnden Systems als Gleichungsnebenbedingungen der Form
@@ -110,7 +44,6 @@ Was genau, wofür SOCC?
 \label{sec:SoftConstraints}
 Manchmal liegen die Lösungen der Optimierungsprobleme an Rande der feasible Regionen und so kann es dazu kommen, dass durch Störungen auf das System, Lösungsvektoren nicht mehr feasibl sind. Da es besser ist, den Algorithmus nicht abzubrechen sondern mit einer nicht erlaubten Punkt weiter zu arbeiten, gibt es die Möglichkeit Soft Constraints einzuführen. Dieses weichen wie der Name schon sagt, die harten Ungleichungsnebenbedingungen auf, sodass diese Verletzt werden können. diese Verletzung geht als zusätzliche Strafe mit in die Kostenfunktionen ein. Bei richtiger Wichtung der Verletzung, sorgt er Optimierungsalgorithmus dafür, dass diese Grenzen nur verletzt werden, wenn keiner Punkt mehr feasibl ist.\\
 Im folgenden Abschnitt werden 2 Möglichkeiten erlärt, solche Soft Constraints einzuführen, die ich im Zuge meiner Masterarbeit bzgl der auswirkung des nichteinhaltens der exact penalty function untersuche und vergleiche.
-\abk{KS}{Kreisselmeier-Steinhauser}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Soft Constraints mittels Einführung zusätzlicher Slackvariablen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:SoftWithSlack}
@@ -127,6 +60,56 @@ formulieren. $s(k)$ ist dabei die maximale Verletzung der der Ungleichungsnebenb
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Soft Constraints mittels Einführung eines Strafterms in Form der Kreisselmeier-Steinhauser Funktion}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:SoftWithKSF}
+In \cite{richards2013fast} wird eine weitere Möglichkeit vorgeschlagen, um lineare Ungleichungsnebenbedingungen als soft constraints zu nutzen. Der Artikel ist darauf fokussiert die soft constraints zugeschnitten zu dem Algorithmus aus \cite{BOY10} einzuführen. Dazu wird die sogenannte Kreisselmeier-Steinhauser (KS) Funktion
+\begin{equation*}
+ KS'(g(x)) = \frac{1}{\rho}\log \left[ \sum_{j}\exp (\rho g_{j}(x)) \right ]
+\end{equation*}
+nach \cite{kreisselmeier1979systematic} [darf ich das?] genutzt. Um Probleme mit zu starkem exponentiellen Wachstum zu vermeiden nimmt man genauer gesagt eine equivalente Form der KS Funktion, bei der diese Probleme nicht auftreten:
+\begin{equation}
+ KS(g(x)) = g_{max}(x)+\frac{1}{\rho}\log \left[ \sum_{j}\exp (\rho (g_{j}(x)-g_{max(x)})) \right ].
+\end{equation}
+Ähnlich wie bei die log barrier den Übergang von feasibl zu infeasibl annähert, dient die KS Funktion dazu, die Nichtkontinuität des Gradienten zu durch eine kontinuierliche Funktion zu approximieren. Analog zu der Reduzierung von $\kappa$ führt eine Erhöhung von $\rho$ dazu, dass man sich der exakten Funktion nähert.\\
+Um mit der KS Funktion soft constraints in den Algorithmus von Boyd zu integrieren sind folgende Schritte notwendig. Soft constraints analog zu \ref{eq:IEQ} formulieren
+\begin{equation*}
+ \tilde{P}z \leq\tilde{h}.
+\end{equation*}
+Sodass der Strafterm
+\begin{equation*}
+ \sum_i \max\{0, \tilde{p}_i^T z- \tilde{h}_i\}
+\end{equation*}
+mit Hilfe der KS Fnuktion als 
+\begin{equation*}
+ \theta(z)=\sum_i \frac{1}{\rho}\log \left[1 + \exp (\rho (\tilde{p}_i^T z- \tilde{h}_i)) \right ]
+\end{equation*}
+formuliert werden kann.\\
+\begin{align*}
+ e_i^+\\
+ e_i^-
+\end{align*}
+für Gradient der Straffunktion
+\begin{equation}
+ \nabla
+\end{equation}
+mit
+\begin{equation}
+ \tilde{d}
+\end{equation}
+Und die Hessian
+\begin{equation}
+ \nabla^2
+\end{equation}
+mit
+\begin{equation}
+ \hat{d}
+\end{equation}
+$\Phi$ und $r_d$ anpassen.\\
+Auf Struktur geachtet, die die vorher ausgenutzte Struktur nicht verändert.
+\abk{KS}{Kreisselmeier-Steinhauser}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Exact Penalty Functions}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:ExactPenaltyFunctions}
+Siehe \cite{kerrigan2000soft}\\
+In der ersten Variante der Verwendung von soft constraints ist es möglich mit der Richtigen Wichtung der Strafe für die Verletzung der Ungleichungsnebenbedingungen zu garantieren, dass bei ausreichend genauer Lösung des Optimierungsproblems auch die exakte Lösung gefunden wird, sofern diese feasibl ist und wirklich nur bei keinen feasiblen Lösungen Verletzungen zugelassen werden. Hier wird grob angerissen, was dazu nötig ist, um eine exact penalty function zu haben. Im Rahmen dieser Masterarbeit soll noch untersucht werden, ob der Verlust der exact penalty function Garantie bei der KS Funktion Variante in kritischen und unkritischen Fällen mit Nachteilen zu rechnen ist.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Polynimial Chaos Expansion}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:PCE}
