@@ -20,7 +20,7 @@ In Regelungsproblemen treten häufig Fälle auf, in denen für einzelne oder alle Z
  x_{min}\leq &x(k)\leq x_{max}, \quad k = 0, 1, \dots\\
  u_{min}\leq &u(k)\leq u_{max}, \quad k = 0, 1, \dots
 \end{align*}
-werden auch als box constraints bezeichnet (\cite{BOY10}). Dabei gilt $x_{min}, x_{max} \in \mathbb{R}^n$ und $u_{min}, u_{max} \in \mathbb{R}^m$.\\
+werden auch als box constraints bezeichnet (\cite{wang2010fast}). Dabei gilt $x_{min}, x_{max} \in \mathbb{R}^n$ und $u_{min}, u_{max} \in \mathbb{R}^m$.\\
 Mixed constraints guck mal muao mpc wegen beschreibung.\\
 Alle so beschriebenen linearen Ungleichungsnebenbedingungen lassen sich als ein System von $l$ linearen Ungleichungen
 \begin{equation}
@@ -60,7 +60,7 @@ formulieren. $s(k)$ ist dabei die maximale Verletzung der der Ungleichungsnebenb
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Soft Constraints mittels Einführung eines Strafterms in Form der Kreisselmeier-Steinhauser Funktion}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:SoftWithKSF}
-In \cite{richards2013fast} wird eine weitere Möglichkeit vorgeschlagen, um lineare Ungleichungsnebenbedingungen als soft constraints zu nutzen. Der Artikel ist darauf fokussiert die soft constraints zugeschnitten zu dem Algorithmus aus \cite{BOY10} einzuführen. Dazu wird die sogenannte Kreisselmeier-Steinhauser (KS) Funktion
+In \cite{richards2013fast} wird eine weitere Möglichkeit vorgeschlagen, um lineare Ungleichungsnebenbedingungen als soft constraints zu nutzen. Der Artikel ist darauf fokussiert die soft constraints zugeschnitten zu dem Algorithmus aus \cite{wang2010fast} einzuführen. Dazu wird die sogenannte Kreisselmeier-Steinhauser (KS) Funktion
 \begin{equation*}
  KS'(g(x)) = \frac{1}{\rho}\log \left[ \sum_{j}\exp (\rho g_{j}(x)) \right ]
 \end{equation*}
@@ -106,15 +106,53 @@ $\Phi$ und $r_d$ anpassen.\\
 Auf Struktur geachtet, die die vorher ausgenutzte Struktur nicht verändert.
 \abk{KS}{Kreisselmeier-Steinhauser}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Exact Penalty Functions}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Exact Penalty Functions}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:ExactPenaltyFunctions}
 Siehe \cite{kerrigan2000soft}\\
 In der ersten Variante der Verwendung von soft constraints ist es möglich mit der Richtigen Wichtung der Strafe für die Verletzung der Ungleichungsnebenbedingungen zu garantieren, dass bei ausreichend genauer Lösung des Optimierungsproblems auch die exakte Lösung gefunden wird, sofern diese feasibl ist und wirklich nur bei keinen feasiblen Lösungen Verletzungen zugelassen werden. Hier wird grob angerissen, was dazu nötig ist, um eine exact penalty function zu haben. Im Rahmen dieser Masterarbeit soll noch untersucht werden, ob der Verlust der exact penalty function Garantie bei der KS Funktion Variante in kritischen und unkritischen Fällen mit Nachteilen zu rechnen ist.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Polynimial Chaos Expansion}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Polynimial Chaos Expansion}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:PCE}
 Wie bekomme ich aus einem normalen QP ein PCE?
+Fangen wir erstmal an mit \cite{lucia2015efficient}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Weitere Mathematische Grundlagen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Konvergenz für nummerisch schwierige und infeasibl Probleme}%%%%%%%%%
+\label{sec:Probleme}
+Um die Konvergenz bei Optmierungsproblemen mit gewissen Schwierigkeiten sicher zu stellen, wird der gewählte Optimierungsalgorithmus durch verschiedene Ansätze erweitert. Dazu gehören Soft Constraints, mit denen ein Scheitern des Algorithmus bei infeasibl Problemen vermieden werden kann. Ein anderer kritischer Punkt ist die Nummerik, gerade auf rechenarmer Hardware, auf der eventuell nur 32bit große Gleitkommazahlen verwendet werden können.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Regularization}%%%%%%%%%
+\label{sec:Regularization}
+The most important step to solve the system of linear equations is to compute the Cholesky factorization of every block in $\Phi$. For Cholesky factorization the blocks have to be symmetric and positive definite (\cite{boyd2004convex}). In order to have all blocks positive definite and so ensure the Cholesky factorization of every block in $\Phi$ exists, we introduce a regularization term in the system of linear equations. We now solve
+\begin{equation}
+  \begin{bmatrix} \Phi+\epsilon I & C^{T} \\ C & 0 \end{bmatrix} \begin{bmatrix}\Delta z \\ \Delta v\end{bmatrix}= -\begin{bmatrix}r_d \\ r_p\end{bmatrix}
+\end{equation}
+and tolerate a small error we make instead of solving the original system of linear equations.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Iterative Refinement}%%%%%%%%%
+\label{sec:IterativeRefinement}
+All you need is find in \cite{mattingley2012cvxgen} Seite 16\\
+For solving the optimization problem as application of a MPC, it is often sufficient to use the solution of the linear equations with regularization term. If it is necessary to get the solution of the original linear equations we can compensate the error of regularization by iterative refinement as described in \cite{mattingley2012cvxgen}. Let
+\begin{equation*}
+  K l = r
+\end{equation*}
+the original system of linear equations and
+\begin{equation*}
+  \tilde{K}l^{(0)} = r
+\end{equation*}
+the system with regularization we can solve easily. Setting $k=0$ a correction $\delta l^{(k)}$ can be approximated by solving
+\begin{equation*}
+  \tilde{K}\delta l^{(k)} = \left(r-Kl^{(k)} \right),
+\end{equation*}
+which takes less effort because we already calculated the operator $\tilde{K}^{-1}$ before. Then one has to update
+\begin{equation*}
+  l^{(k+1)} = l^{(k)}+\delta l^{(k)}
+\end{equation*}
+and iterate $k$. After repeating both steps until
+\begin{equation*}
+  \left\|r-Kl^{(k)} \right\|
+\end{equation*}
+is sufficiently small, $l^{(k)}$ can be used as good approximation for $l$.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Weitere Mathematische Grundlagen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:MathematischeGrundlagen}
 Was muss man wissen, um spätere Umstellungen und Ableitungen und Berechnungen zu verstehen?

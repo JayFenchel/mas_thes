@@ -5,11 +5,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Primal Barrier Interior-Point Methode}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:PrimalBarrierInteriorPointMethode}
-Das Optimierungsproblem, welches den Kern der Reglung mittles MPC bildet, muss zu jedem Zeitschritt online gelöst werden. Dabei ist es wichtig, dass eine ausreichend genaue Lösung möglichst schnell und zuverlässig gefunden werden kann. In dieser Arbeit wurde dazu eine Interior-Point Methode genutzt, bei der die Ungleichungsnebenbedingung näherungsweise durch Zuhilfenahme von logaritmische Straftermen (im folgenden als log barrier bezeichnet) berücksichtigt werden. Diese Methode wird als Primal Barrier Interior-Point Methode bezeichnet. Im Speziellen wurde hier der Ansatz von \cite{BOY10} verfolgt, bei dem besondere Rücksicht auf die Ausnutzung der spezifischen Struktur, wie sie bei MPC-Problemen auftritt, gelegt wird. 
+Das Optimierungsproblem, welches den Kern der Reglung mittles MPC bildet, muss zu jedem Zeitschritt online gelöst werden. Dabei ist es wichtig, dass eine ausreichend genaue Lösung möglichst schnell und zuverlässig gefunden werden kann. In dieser Arbeit wurde dazu eine Interior-Point Methode genutzt, bei der die Ungleichungsnebenbedingung näherungsweise durch Zuhilfenahme von logaritmische Straftermen (im folgenden als log barrier bezeichnet) berücksichtigt werden. Diese Methode wird als Primal Barrier Interior-Point Methode bezeichnet. Im Speziellen wurde hier der Ansatz von \cite{wang2010fast} verfolgt, bei dem besondere Rücksicht auf die Ausnutzung der spezifischen Struktur, wie sie bei MPC-Problemen auftritt, gelegt wird. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Optimierungsproblem für Fast-MPC Algorithmus}%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:OPforFastMPC}
-Der Primal Barrier Interior-Point Methode nach \cite{BOY10} oder kurz Fast MPC
+Der Primal Barrier Interior-Point Methode nach \cite{wang2010fast} oder kurz Fast MPC
 % TODO ABkürzung
 auf die sich später erklärte Erweitungen beziehen liegt folgende Problembeschreibung zu Grunde.\\
 Beschreibung des allgemeinen Problems das von Boyd gelöst wird.
@@ -24,7 +24,7 @@ mit den Optimierungsvariablen $x(t+1), \dots, x(t+T)$ und $u(t), \dots, u(t+T-1)
  \text{min}
 \end{equation}
 formulieren, worauf sich weitere Erklärungen zur Lösung dieses Optimierungsproblems beziehen.
-\abk{Fast MPC}{Primal Barrier Interior-Point Methode nach \cite{BOY10}}
+\abk{Fast MPC}{Primal Barrier Interior-Point Methode nach \cite{wang2010fast}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Fast-MPC Algorithmus}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:FastMPC}
@@ -44,7 +44,7 @@ erfüllen.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Erweiterung für nichtlineare Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:ErweiterungNonlincon}
-Um mit dem effizienten Algorithmus aus \cite{BOY10} auch kompliziertere/komplexere [TODO] Probleme, in Kapitel \ref{sec:ErweiterungSOCP} Second Order Cone Problems (SOCP\abk{SOCP}{Second Order Cone Problem}), bzw in Kapitel \ref{sec:ErweiterungQCQP} Quadratic Programs/Problems mit Quadratic Constraints (QCQP\abk{QCQP}{Quadratic Constrained Quadratic Program}) zu lösen, wurde der Algorithmus wie gleich folgt erweitert. Dabei wurde speziell darauf geachtet nicht die Struktur der entstehenden Matrizen zu verändern, sodass diese auch weiterhin ausgenutzt werden kann. Allerdings sind für ein SOCP bzw QCQP nun die Matrizen für die Ungleichungsnebenbedingungen nicht mehr konstant sondern hängen von $z(k)$ ab, sodass sie in jedem MPC Schritt angepasst werden müssen, was einen erhöhten Rechenaufwand bedeutet.
+Um mit dem effizienten Algorithmus aus \cite{wang2010fast} auch kompliziertere/komplexere [TODO] Probleme, in Kapitel \ref{sec:ErweiterungSOCP} Second Order Cone Problems (SOCP\abk{SOCP}{Second Order Cone Problem}), bzw in Kapitel \ref{sec:ErweiterungQCQP} Quadratic Programs/Problems mit Quadratic Constraints (QCQP\abk{QCQP}{Quadratic Constrained Quadratic Program}) zu lösen, wurde der Algorithmus wie gleich folgt erweitert. Dabei wurde speziell darauf geachtet nicht die Struktur der entstehenden Matrizen zu verändern, sodass diese auch weiterhin ausgenutzt werden kann. Allerdings sind für ein SOCP bzw QCQP nun die Matrizen für die Ungleichungsnebenbedingungen nicht mehr konstant sondern hängen von $z(k)$ ab, sodass sie in jedem MPC Schritt angepasst werden müssen, was einen erhöhten Rechenaufwand bedeutet.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Erweiterung für Quadratic Problems mit quadratic Constraints}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:ErweiterungQCQP}
@@ -90,7 +90,7 @@ Um $\Phi$ zu bilden wird noch die zweite Ableitung von der barrier function benö
 \begin{equation}
 	\nabla^{2}\phi(z)=\hat{P}(2z)\text{diag}(\hat{d})^{2}\hat{P}(2z)+\sum_{j=1}^{p}\left (\hat{d}_{(lT+l_{f})+j}2\Gamma_{j}  \right )
 \end{equation}
-Die Berechnungen der Ableitungen haben also analog Struktur wie \cite{BOY10} bis auf den zusätzlichen Term, der bei der Hessian hinzukommt. Aber da dieser Term in der Implementierung nicht durch die Multiplikation einer großen Matrix $Gamma$ mit $z$ sonder identischer Teilmatrizen $Gamma_{k}$ mit den $T$ $x_{k}$ ist sicher gestellt das keine größeren Blöcke als $n\times n$ an den richtigen Stellen erzeugt werden. Das bedeutet, dass auch hier die Struktur der Matrix $\Phi$ nicht verändert wird.
+Die Berechnungen der Ableitungen haben also analog Struktur wie \cite{wang2010fast} bis auf den zusätzlichen Term, der bei der Hessian hinzukommt. Aber da dieser Term in der Implementierung nicht durch die Multiplikation einer großen Matrix $Gamma$ mit $z$ sonder identischer Teilmatrizen $Gamma_{k}$ mit den $T$ $x_{k}$ ist sicher gestellt das keine größeren Blöcke als $n\times n$ an den richtigen Stellen erzeugt werden. Das bedeutet, dass auch hier die Struktur der Matrix $\Phi$ nicht verändert wird.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Erweiterung für Second Order Cone Problems}%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:ErweiterungSOCP}
@@ -98,7 +98,7 @@ Bei der Ungleichungsnebenbedingungen für die Second Order Cone Constraints lässt
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{SOCP Formulierung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:SOCPFormulierung}
-Zusäliche Ungleichungsnebenbedingung sieht wie folgt aus [TODO: woher \cite{BOY04}]:
+Zusäliche Ungleichungsnebenbedingung sieht wie folgt aus [TODO: woher \cite{boyd2004convex}]:
 \begin{equation}
  \label{eq:SOCPUNB}
  \left \|Ax+b  \right \|_{2} \leq c^{T}x+d
@@ -180,13 +180,18 @@ Hessian der der Logarithmic barrier function für Berechnung des $\Phi$
 \label{sec:ErwSoftConstraints}
 Was Soft Constraints sind wurde bereits beschrieben. Im benutzten Algorithmus lassen sie sich wie folgt ohne Probleme verwenden.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Selecting Kappa}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:SelectingKappa}
+If $\kappa$ convergeres to zero, the gap between these minimizers does, too. Therefore in \cite{boyd2004convex} it is proposed to decrease $\kappa$ by factor 10 to 20 in every inner optimization step.\\
+Additionally we bound $\kappa$ to a minimum value $\kappa_{min}>0$ to avoid nummerical problems for values of the cost term $z^{T}Mz + g^{T}z \leq 0$. Choosing $\kappa$ with this approach leads to only small changes in its value for every execution of the MPC, so the warm start still works fine. Since $\kappa$ only converges against $\kappa_{min}$ after a few MPC executions, the gap between the minimizers of \eqref{qp_for_ipm} and \eqref{cp_for_ipm} never disappears. Nevertheless with this trade-off we find sufficiently exact solutions in much less inner iterations.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Anpassung für test cases}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:testcases}
 Der implementierte Algorithmus wie in [Paper:, Section:] beschrieben kann auch verwendet werden, um Optimierungsprobleme zu lösen, die ihren Ursprung nicht in der Anwendung von MPC haben. Dazu sind keine wirklichen Anpassungen des Algorithmus notwendig. Da der Algorithmus allerdings die Struktur der bei MPC auftretenden Matrizen ausnutzt, muss der jeweilige test case so ``transformiert'' werden, dass dieser eine ähnliche Struktur aufweist.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Allgemeine Beschreibung der test cases}%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:beschreibungtestcases}
-Nach \cite{MAR97} haben die test cases folgende Form:
+Nach \cite{maros1999repository} haben die test cases folgende Form:
 \begin{equation}\begin{split}
   \label{eq:mar}
   \min \quad &\hat{c}^{T}\hat{x}+\frac{1}{2}\hat{x}^{T}\hat{Q}\hat{x}\\
@@ -250,7 +255,7 @@ reduzieren sich damit auf folgende Form:
   Ax(t)
   \end{bmatrix}\\
 \end{split}\end{equation*}
-Um den Algorithmus nun mit den test cases nach \cite{MAR97} zu testen muss
+Um den Algorithmus nun mit den test cases nach \cite{maros1999repository} zu testen muss
 \begin{equation}
   H=\frac{1}{2}\hat{Q},\quad g=\hat{c}, \text{nicht korrekt, einzelne Untermatrizen setzen}
 \end{equation}
