@@ -4,7 +4,7 @@
 \label{chap:gundlagen}
 \begin{itemize}
  \item generalized inequalities
- \item Originalalgorithmus von Wang und Boyd \cite{BOY10}
+ \item Originalalgorithmus von Wang und Boyd \cite{wang2010fast}
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Modellprädiktive Regelung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,8 +59,36 @@ erweitern.
 \section{Boyds Grundlagen}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:BoydsGrundlagen}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Konvexität}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:Konvexität}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Kontinuierliche Differenzierbarkeit}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:KontinuierlicheDifferenzierbarkeit}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Konvexex Optimierungsproblem}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:KonvexesOptimierungsproblem}
+\begin{equation}
+\label{eq:allgOptmimproblem}
+  \min f_{0}(x)\\
+  \text{s.t.} f_{i}(x)\leq 0, \quad i=1,\dots,m \\
+  Ax=b
+\end{equation}
+ist ein konvexes Optimierungsproblem mit dem sich diese Arbeit beschäfigt, wenn die Funktionen $f_{0},\dots,f_{m}:\mathbb{R}^{n}\rightarrow \mathbb{R}$ konvexe Funktionen und zweimal kontinuierlich differenzierbar sind, vgl. \cite{boyd2004convex}. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Strikte Feasiblität}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:StrikteFeasiblität}
+Es sei ein beschräntes Optimierungsproblem gegeben. Dieses Optimierungsproblem ist strikt feasibl, wenn ein $x \in \mathcal{D}$ existiert, dass alle Gleichungsnebenbedingnung und Ungleichungsnebenbedingungen erfüllt, vgl. \cite{boyd2004convex}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Newton Methode}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:NewtonMethode}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interior-Point Methode}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:InteriorPointMethode}
+Diese Arbeit befasst sich mit mit der Implementierung eines Lösungsalgorithmus für das konvexe Optimierungsproblem \ref{eq:allgOptmimproblem}, bei denen Ungleichungsnebenbedingungen berücksichtigt werden müssen. Dazu wurde eine Interior-Point Methode implementiert, deren Grundlagen in diesem Abschnitt beschrieben werden. Es wird vorausgesetzt, dass das Optimierungsproblem strikt feasibl ist.\\
+Die Interior-Point Methode löst das Optimierungsproblem \ref{eq:allgOptmimproblem} indem die Newton Methode auf ein System von linear gleichungsbeschränkten Optmierungsproblemen angewandt wird.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Primal vs. Dual}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Primal-Dual vs. Primal}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:PrimalDual}
+Es gibt Methoden die das Duale Optimierungsproblem und deren Variablen zur Lösung des ungleichungsnebenbedingten Systems heranziehen. Diese Methoden nennt man primal-dual Methoden. In dieser Arbeit wurde allerdings mit einer primal Methode gearbeitet, der sogenannten barrier Methode.\\
+Es wäre schön, hier ein paar Vor- und Nachteile lesen zu können.
+\subsection{Grundlagen logarithmic barrier Methode}
