@@ -7,6 +7,11 @@
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
+\bibitem[Ada09]{adamy2009nichtlineare}
+\textsc{Adamy}, J{\"u}rgen:
+\newblock \emph{Nichtlineare Regelungen}.
+\newblock Springer-Verlag, 2009
+
 \bibitem[BV04]{boyd2004convex}
 \textsc{Boyd}, Stephen ; \textsc{Vandenberghe}, Lieven:
 \newblock \emph{Convex optimization}.
@@ -54,6 +59,11 @@
 \newblock Fast model predictive control with soft constraints.
 \newblock {In: }\emph{Control Conference (ECC), 2013 European} IEEE, 2013, S.
   1--6
+
+\bibitem[SK11]{schwarz2011numerische}
+\textsc{Schwarz}, Hans~R. ; \textsc{K{\"o}ckler}, Norbert:
+\newblock \emph{Numerische mathematik}.
+\newblock Springer-Verlag, 2011
 
 \bibitem[WB10]{wang2010fast}
 \textsc{Wang}, Yang ; \textsc{Boyd}, Stephen:

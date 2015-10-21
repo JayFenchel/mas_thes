@@ -84,7 +84,11 @@ Es sei ein beschräntes Optimierungsproblem gegeben. Dieses Optimierungsproblem i
 Beides siehe \cite{schwarz2011numerische}\\
 Bedingungen\\
 positiv definit\\
-Algorithmus
+Ist eine Matrix $A$ positiv definit und symmetrisch, so kann sie in der Form $A=LL^T$ zerlegt werden. Wobei $L$ eine untere Dreicksmatrix und deren transponierte $L^T$ dementsprechend eine obere Dreiecksmatrix ist. Die Elemente $l_{11},\dots,l_{nn}$ der Matrix
+\begin{equation*}
+	L = \begin{bmatrix}l_{11} & 0&\dots & 0\\l_{21}&l_{22}&\dots&0\\\vdots&\vdots&&\vdots\\l_{n1}&l_{n2}&\dots&l_{nn}\end{bmatrix}
+\end{equation*}
+lassen sich dazu wir folgt berechnen
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Newton Methode}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:NewtonMethode}
