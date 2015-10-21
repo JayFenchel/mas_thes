@@ -2,13 +2,17 @@
 
  \nomgroup{A}
 
-  \item [{KS}]\begingroup Kreisselmeier-Steinhauser\nomeqref {2.1}
-		\nompageref{7}
+  \item [{Fast MPC}]\begingroup Primal Barrier Interior-Point Methode nach \cite{wang2010fast}\nomeqref {4.2}
+		\nompageref{15}
+  \item [{KS}]\begingroup Kreisselmeier-Steinhauser\nomeqref {3.8}
+		\nompageref{11}
+  \item [{log barrier}]\begingroup logaritmische Straffunktion\nomeqref {4.0}
+		\nompageref{14}
   \item [{MPC}]\begingroup Modellprädiktive Regelung\nomeqref {1.0}
 		\nompageref{2}
-  \item [{QCQP}]\begingroup Quadratic Constrained Quadratic Program\nomeqref {3.3}
-		\nompageref{10}
-  \item [{SOCP}]\begingroup Second Order Cone Problem\nomeqref {3.3}
-		\nompageref{10}
+  \item [{QCQP}]\begingroup Quadratic Constrained Quadratic Program\nomeqref {4.4}
+		\nompageref{16}
+  \item [{SOCP}]\begingroup Second Order Cone Problem\nomeqref {4.4}
+		\nompageref{16}
 
 \end{thenomenclature}

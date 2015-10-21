@@ -1,0 +1,63 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beschreibung des Algorithmus und nötigen Anppassungen %%%%%%%%%%%%%%%%%%%%%%
+\chapter{Algorithmus}
+\label{chap:algorithmus}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Primal Barrier Interior-Point Methode}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:PrimalBarrierInteriorPointMethode}
+Das Optimierungsproblem, welches den Kern der Reglung mittles MPC bildet, muss zu jedem Zeitschritt online gelöst werden. Dabei ist es wichtig, dass eine hinreichend genaue Lösung möglichst schnell und zuverlässig gefunden werden kann. Hinreichend genau soll hier bedeuten, dass die Performance des geschlossenen Regelkreises gegeben sein muss. Sowohl in \cite{wang2010fast} erwähnt als auch durch die Ergebnisse dieser Arbeit bestätigt, wird eine sehr gute closed loop Regelung auch für eine nicht exakte Lösung des Optmierungsproblems erreicht. In dieser Arbeit wurde dazu eine Interior-Point Methode genutzt, bei der die Ungleichungsnebenbedingung näherungsweise durch Zuhilfenahme von logaritmische Straftermen (im folgenden als log barrier bezeichnet) berücksichtigt werden. Diese Methode wird als Primal Barrier Interior-Point Methode bezeichnet. Im Speziellen wurde hier der Ansatz von \cite{wang2010fast} verfolgt, bei dem besondere Rücksicht auf die Ausnutzung der spezifischen Struktur, wie sie bei MPC-Problemen auftritt, gelegt wird.
+\abk{log barrier}{logaritmische Straffunktion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Optimierungsproblem für Fast-MPC Algorithmus}%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:OPforFastMPC}
+Der Primal Barrier Interior-Point Methode nach \cite{wang2010fast} oder kurz Fast MPC
+auf die sich später erklärte Erweitungen beziehen liegt folgende Problembeschreibung zu Grunde.\\
+Die Dynamik des zu regelnden linearen zeitinvarianten Systems liegt in zeitdisreter Formulierung vor und lautet
+\begin{equation}
+ x(k+1) = Ax(k) + Bu(k) + w(k),\quad k=0, 1, \dots, T.
+\end{equation}
+Dabei ist $k$ der jeweilige Zeitschritt bis hin zum Prädikitonshorizont $T$, $x(k) \in \mathbb{R}^n$ der Vektor der Zustände und $u(k) \in \mathbb{R}^m$ der Vektor der Stellgrößen. Die Systemmtrizen $A \in \mathbb{R}^{n\times n}$ und $B \in \mathbb{R}^{n\times m}$ werden zu diesem Zeitpukt erstmal als bekannt vorausgesetzt, bzw. sind die Nominalwerte von $A(\theta)$ und $B(\theta)$. Als Ungleichungsnebenbedingungen werden in \cite{wang2010fast} lineare Ungleichungsnebenbedingungen der Form \ref{eq:linequ} betrachtet. Damit ergibt sich das Optimierungsproblem für die MPC zu
+\begin{equation}
+ \text{min}
+\end{equation}
+\begin{equation}
+ \min
+\end{equation}
+mit den Optimierungsvariablen $x(t+1), \dots, x(t+T)$ und $u(t), \dots, u(t+T-1)$. Wobei
+\begin{equation}
+ l()
+\end{equation}
+und
+\begin{equation}
+ l_{f}()
+\end{equation}
+die kosten convexen Kostenfunktionen für den jeweiligen Zeitschritt $k, \dots, k+T-1$ bzw die finale Kostenfunktion zum Zeitschritt $k+T$ sind. Mit einer abweichenden finalen Kostenfunktion lässt sich für Stabilität sorgen \cite{mayne2000constrained}. Das gleiche gilt für stage constraints und finalen constraints.
+Mit dem Vektor $z = (u(t), x(t+1)), \dots, u(t+T-1), x(t+T)$ für alle Optimierungsvariablen zusammengefasst lässt sich dieses Optimierungsproblem auch kompakt als
+\begin{equation}\label{eq:minwithoutlog}
+ \text{min}
+\end{equation}
+formulieren, worauf sich weitere Erklärungen zur Lösung dieses Optimierungsproblems beziehen.
+\abk{Fast MPC}{Primal Barrier Interior-Point Methode nach \cite{wang2010fast}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Fast-MPC Algorithmus}%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:FastMPC}
+Wie löst Boyd sein QP?\\
+Wie schon oben erwähnt werden die Ungleichungsnebenbedingungen durch Zuhilfenahme von log barriers berücksichtigt. Dadurch ergibt sich das einfacher zu lösendes Optimierungsproblem
+\begin{equation}\label{eq:minwithlog}
+  \text{min}
+\end{equation}
+mit $\kappa$ und $\Phi$, bei dem keine direkten Ungleichungsnebenbedingungen behandeln werden müssen.\\
+$z$ muss immer strikt
+\begin{equation}
+ \label{eq:IEQ}
+ Pz \leq h
+\end{equation}
+erfüllen.
+\begin{align*}
+ H&=\begin{bmatrix}0\end{bmatrix}\\
+ P&=\begin{bmatrix}0\end{bmatrix}\\
+ C&=\begin{bmatrix}0\end{bmatrix}\\
+ g&=\begin{bmatrix}0\end{bmatrix}\\
+ h&=\begin{bmatrix}0\end{bmatrix}\\
+ b&=\begin{bmatrix}0\end{bmatrix}\\
+\end{align*}

@@ -14,18 +14,18 @@ Eine spezielle Form der optimalen Reglung ist die Modellprädiktive Regelung (MPC
 AUS OTTOCAR-BERICHT GEKLAUT\\
 Bei der modellprädiktiven Regelung (MPC) handelt es sich um eine Form der optimalen Regelung, bei der wiederholt eine Berechnung der optimalen Steuerung für ein System ausgehend von dessen aktuellem Zustand stattfindet. In vielen Bereichen finden MPCs immer häufiger Anwendung, da sie eine direkte Berücksichtigung von Beschränkungen erlauben und eine Form des strukturierten Reglerentwurfs ausgehend von der modellierten Systemdynamik darstellen. Dabei kann durch die geeignete Wahl der Kostenfunktion und deren Wichtungsparametern die Güte des Reglers gezielt beeinflusst werden. Allerdings ergeben sich auch Schwierigkeiten bei der Verwendung von MPCs. Zum einen ist die Konvergenz der Optimierung gegen einen optimalen Wert für die Optimierungsvariablen und die Stabilität des geschlossenen Kreises insbesondere bei nichtlinearen Systemmodellen oft nur schwierig nachweisbar und zum anderen stellt das wiederholte Lösen des meist hochdimensionalen Optimierungsproblems während der Laufzeit in genügend schneller Geschwindigkeit eine große Herausforderung dar.\\
 Es ergibt sich ein Optimierungsproblem:\\
-m realen Anwendungsfall des oTToCAR-Projekts eignet sich eine Systemdarstellung in zeitdiskreter Form (\cite{ADA09}), bei der die Lösung des Optimierungsproblems weniger komplex ist und die ebenfalls zeitdiskreten Messwerte vom realen System weniger kompliziert integriert werden können. Demnach sind die diskretisierten Systemgleichungen wie folgt gegeben:
+m realen Anwendungsfall des oTToCAR-Projekts eignet sich eine Systemdarstellung in zeitdiskreter Form (\cite{adamy2009nichtlineare}), bei der die Lösung des Optimierungsproblems weniger komplex ist und die ebenfalls zeitdiskreten Messwerte vom realen System weniger kompliziert integriert werden können. Demnach sind die diskretisierten Systemgleichungen wie folgt gegeben:
 \begin{align*}
   \boldsymbol{x}(k+1)&=\boldsymbol{f}\left ( \boldsymbol{x}(k), \boldsymbol{u}(k) \right )\\
-  \boldsymbol{y}(k)&=\boldsymbol{g}\left ( \boldsymbol{x}(k) \right )\\
+  \boldsymbol{y}(k)&=\boldsymbol{g}\left ( \boldsymbol{x}(k) \right )
 \end{align*}
-mit den nichtlinearen Funktionen $\boldsymbol{f}\left ( \cdot \right )$ und $\boldsymbol{g}\left ( \cdot \right )$, wobei
+mit den nichtlinearen mehr Text Funktionen $\boldsymbol{f}\left ( \cdot \right )$ und $\boldsymbol{g}\left ( \cdot \right )$, wobei
 \begin{align*}
   &\boldsymbol{x}(k) \in \mathcal{X}\subset\mathbb{R}^n\\
   &\boldsymbol{u}(k) \in \mathcal{U}\subset\mathbb{R}^m\\
   &\boldsymbol{y}(k) \in \mathcal{Y}\subset\mathbb{R}^r
 \end{align*}
-Ausgehend vom aktuellen Zustand $\boldsymbol{x}(k)$ des zu regelnden Systems, der wenn nicht messbar geschätzt werden muss, wird anhand des Systemmodells das zukünftige Systemverhalten
+Ausgehend vom aktuell gemessenen Zustand $\boldsymbol{x}(k)$ des zu regelnden Systems, der wenn nicht messbar geschätzt werden muss, wird anhand des bekannten Systemmodells das zukünftige Systemverhalten
 \begin{align*}
   \boldsymbol{x_p}=\left\{ \boldsymbol{x}(k+1),\dots,\boldsymbol{x}(k+n_p)\right\}
 \end{align*}
@@ -33,7 +33,7 @@ bis zum Prädiktionshorizont $n_p$ unter der Optimierung einer Sequenz von Eingän
 \begin{align*}
   \boldsymbol{u}=\left\{ \boldsymbol{u}(k),\dots,\boldsymbol{u}(k+n_c-1)\right\}
 \end{align*}
-bis zum Stellhorizont $n_c$ vorhergesagt. Aus der gefundenen optimalen Eingangssequenz $\boldsymbol{u}^*$ wird der erste Eintrag $\boldsymbol{u}^*(k)$ auf das zu regelnde System angewandt. Im nächsten Zeitschritt kann der neue Zustand gemessen bzw. geschätzt werden und die Optimierung beginnt von neuem. Ziel dabei ist es einer Referenztrajektorie $\boldsymbol{x_r}$ zu folgen.\\ \\
+bis zum Stellhorizont $n_c$ vorhergesagt. Aus der gefundenen optimalen Eingangssequenz $\boldsymbol{u}^*$ wird der erste Eintrag $\boldsymbol{u}^*(k)$ auf das zu regelnde System angewandt. Im nächsten Zeitschritt kann der neue Zustand gemessen bzw. geschätzt werden und die Optimierung beginnt von neuem. Ziel dabei ist es einer Referenztrajektorie $\boldsymbol{x_r}$ zu folgen.\\
 Für das an jedem Zeitschritt $k$ zu lösende Minimierungsproblem wurde die benötigte Kostenfunktion $J$ in quadratische Form mit $\boldsymbol{x_p}$ und $\boldsymbol{u}$ als Optimierungsvariablen aufgestellt:
 \begin{align*}
 	\underset{\boldsymbol{x_p, u}}{\text{min}}\;&J:=\sum_{i=k+1}^{k+n_p} \left [\boldsymbol{x}_{p}(i)-\boldsymbol{x}_{r}(i)\right ]^T\boldsymbol{Q}_i\left [\boldsymbol{x}_{p}(i)-\boldsymbol{x}_{r}(i)\right ] +\sum_{j=k}^{k+n_c-1} \boldsymbol{u}^T(j)\boldsymbol{R}_j\boldsymbol{u}(j)\\
@@ -79,6 +79,13 @@ ist ein konvexes Optimierungsproblem mit dem sich diese Arbeit beschäfigt, wenn 
 \label{sec:StrikteFeasiblität}
 Es sei ein beschräntes Optimierungsproblem gegeben. Dieses Optimierungsproblem ist strikt feasibl, wenn ein $x \in \mathcal{D}$ existiert, dass alle Gleichungsnebenbedingnung und Ungleichungsnebenbedingungen erfüllt, vgl. \cite{boyd2004convex}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Cholesky Zerlegung}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:CholeskyZerlegung}
+Beides siehe \cite{schwarz2011numerische}\\
+Bedingungen\\
+positiv definit\\
+Algorithmus
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Newton Methode}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:NewtonMethode}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -92,3 +99,18 @@ Die Interior-Point Methode löst das Optimierungsproblem \ref{eq:allgOptmimproble
 Es gibt Methoden die das Duale Optimierungsproblem und deren Variablen zur Lösung des ungleichungsnebenbedingten Systems heranziehen. Diese Methoden nennt man primal-dual Methoden. In dieser Arbeit wurde allerdings mit einer primal Methode gearbeitet, der sogenannten barrier Methode.\\
 Es wäre schön, hier ein paar Vor- und Nachteile lesen zu können.
 \subsection{Grundlagen logarithmic barrier Methode}
+\begin{figure}
+ \centering
+ \includegraphics[width=9.0cm]{Abbildungen/logbarrier.png}
+ % logbarrier.png: 567x455 pixel, 96dpi, 15.00x12.04 cm, bb=0 0 425 341
+ \caption{Verschiende Funktionen für verschiedene $\kappa$ \cite{boyd2004convex}}
+ \label{fig:lagbarrier}
+\end{figure}
+\begin{figure}
+ \centering
+ \includegraphics[width=8.0cm]{Abbildungen/centralpath.png}
+ % logbarrier.png: 567x455 pixel, 96dpi, 15.00x12.04 cm, bb=0 0 425 341
+ \caption{Central 0 path für verschiedene $\kappa$ \cite{boyd2004convex}}
+ \label{fig:centralpath}
+\end{figure}
+
