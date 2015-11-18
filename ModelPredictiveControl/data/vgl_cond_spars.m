@@ -1,9 +1,9 @@
-N = [5, 10, 20, 30];
+N = [5, 10, 20, 30, 40];
 % durchschnittliche Rechenzeiten
 % cond = [89.5, 500, 3586.65, 11193];
 % sparse = [457, 1620 5273, 11358];
-cond = [131.56, 775.63, 4416.65, 13248.93];
-sparse = [532.61, 1673.2 5506.23, 11439.0];
+cond = [152, 668, 4313, 12946, 25132];
+sparse = [531, 1633 5584, 11437, 19797];
 
 % plot
 figure(1)
@@ -11,11 +11,13 @@ subplot(2, 1, 1)
 hold on;
 plot(N, cond);
 plot(N, sparse, 'r');
-ylabel('Rechenzeit [ms]')
+grid on
+ylabel('Rechenzeit t [ms]')
 subplot(2, 1, 2)
 plot(N, sparse./cond)
-ylabel('sparse/cond []')
-xlabel('Praediktionshorizont []')
+ylabel('t_{sparse}/t_{cond} [ms/ms]')
+xlabel('Praediktionshorizont T_p []')
+grid on
 
 N = [5, 10, 20, 30];
 % vorher
